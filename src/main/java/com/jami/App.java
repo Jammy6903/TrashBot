@@ -28,9 +28,11 @@ public class App {
       mongoClient = MongoClients.create(Config.getProperty("DATABASE_URI"));
       if (args.length == 1) {
         new App().start(args[0]);
+      } else {
+        new App().start(Config.getProperty("TOKEN"));
       }
     } catch (Exception e) {
-      System.out.println("Login Failed.");
+      System.out.println("Bot startup failed: ");
     }
   }
 
@@ -52,15 +54,21 @@ public class App {
             GatewayIntent.MESSAGE_CONTENT,
             GatewayIntent.AUTO_MODERATION_EXECUTION,
             GatewayIntent.GUILD_MESSAGE_POLLS)
-        .addEventListeners(eventWaiter)
+        .addEventListeners(eventWaiter, new eventListeners())
         .build();
 
     if (Config.getProperty("STATUS") != null) {
       jda.getPresence().setActivity(Activity.customStatus(Config.getProperty("STATUS")));
     }
+
+    getCommands();
   }
 
   public static EventWaiter getWaiter() {
     return eventWaiter;
+  }
+
+  private static void getCommands() {
+
   }
 }
