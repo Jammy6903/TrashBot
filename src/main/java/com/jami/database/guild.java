@@ -4,11 +4,9 @@ import org.bson.Document;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.UpdateOptions;
 
 import static com.mongodb.client.model.Filters.*;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static com.jami.App.mongoClient;
 
@@ -19,16 +17,14 @@ public class guild {
   private long guildId;
   private settings guildSettings;
   private Document guildUsers;
-  private List<Document> guildUsersUpdates;
 
   private guild(long id) {
     this.guildId = id;
     this.guildSettings = new settings();
     this.guildUsers = new Document();
-    this.guildUsersUpdates = new ArrayList<Document>();
   }
 
-  public static class user {
+  public class user {
     private long userId;
     private long userExp;
     private int userLevel;
@@ -39,8 +35,9 @@ public class guild {
       this.userLevel = 0;
     }
 
-    public void setUser(Document user) {
-      this.userId = user.getLong("_id");
+    public void setUser(Document user, long id) {
+      System.out.println(user);
+      this.userId = id;
       this.userExp = user.getLong("exp");
       this.userLevel = user.getInteger("level");
     }
@@ -70,36 +67,41 @@ public class guild {
     }
 
     public void commit() {
-      Document u = new Document()
+      Document u = new Document("$set", new Document("users." + userId, new Document()
           .append("_id", userId)
           .append("exp", userExp)
-          .append("level", userLevel);
-      setUser(u);
+          .append("level", userLevel)));
+      try {
+        UpdateOptions opts = new UpdateOptions().upsert(true);
+        guilds.updateOne(eq("_id", guildId), u, opts);
+      } catch (Exception e) {
+        System.out.println("[ERROR] MongoDB Write Error - " + e);
+      }
     }
   }
 
   public class settings {
-    boolean exampleSetting;
+    int expIncrement;
 
     public settings() {
-      this.exampleSetting = true;
+      this.expIncrement = 3;
     }
 
     public void setSettings(Document settings) {
-      this.exampleSetting = settings.getBoolean("example");
+      this.expIncrement = settings.getInteger("expIncrement");
     }
 
-    public void setExample(boolean ex) {
-      this.exampleSetting = ex;
+    public void setExpIncrement(int exp) {
+      this.expIncrement = exp;
     }
 
-    public boolean getExample() {
-      return exampleSetting;
+    public int getExpIncrement() {
+      return expIncrement;
     }
 
     public Document commit() {
       Document s = new Document()
-          .append("example", exampleSetting);
+          .append("expIncrement", expIncrement);
       return s;
     }
   }
@@ -121,19 +123,25 @@ public class guild {
 
   public user getUser(long id) {
     user u = new user(id);
-    Document entry = guildUsers.get(eq("_id", id), Document.class);
+    Document entry = guildUsers.get(exists(String.valueOf(id)), Document.class);
+    System.out.println(guildUsers);
+    System.out.println(entry);
     if (entry != null) {
-      u.setUser(entry);
+      u.setUser(entry, id);
     }
     return u;
   }
 
-  public void setUser(Document u) {
-    guildUsersUpdates.add(u);
-  }
-
   public void commit() {
-
+    Document g = new Document("$set", new Document()
+        .append("_id", guildId)
+        .append("settings", guildSettings.commit()));
+    try {
+      UpdateOptions opts = new UpdateOptions().upsert(true);
+      guilds.updateOne(eq("_id", guildId), g, opts);
+    } catch (Exception e) {
+      System.out.println("[ERROR] MongoDB Write Error - " + e);
+    }
   }
 
 }
