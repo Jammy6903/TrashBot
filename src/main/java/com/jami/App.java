@@ -1,6 +1,7 @@
 package com.jami;
 
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
+import com.jami.fun.commands.wordCountCommands;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 
@@ -8,6 +9,10 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 
 import java.io.File;
@@ -61,14 +66,26 @@ public class App {
       jda.getPresence().setActivity(Activity.customStatus(Config.getProperty("STATUS")));
     }
 
-    getCommands();
+    getCommands(jda);
   }
 
   public static EventWaiter getWaiter() {
     return eventWaiter;
   }
 
-  private static void getCommands() {
+  private static void getCommands(JDA jda) {
+    OptionData wordCountChoices = new OptionData(OptionType.STRING, "where", "Which database to look in", false)
+        .addChoice("global", "Every server")
+        .addChoice("guild", "Just this guild")
+        .addChoice("user", "just you");
 
+    SubcommandData wordCountLeaderboard = new SubcommandData("leaderboard", "See the leaderboard of words used")
+        .addOption(OptionType.INTEGER, "index", "where to start the leaderboard", false)
+        .addOptions(wordCountChoices);
+
+    jda.updateCommands().addCommands(
+        Commands.slash("wordcount", "Commands relating to word counts")
+            .addSubcommands(wordCountLeaderboard))
+        .queue();
   }
 }
