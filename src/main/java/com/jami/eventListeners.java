@@ -2,7 +2,6 @@ package com.jami;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.jami.fun.commands;
 import com.jami.fun.levelling.globalLevelling;
 import com.jami.fun.levelling.guildLevelling;
 import com.jami.fun.wordCount.globalWordCount;
@@ -18,9 +17,6 @@ public class eventListeners extends ListenerAdapter {
   public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
     event.deferReply().queue();
     switch (event.getName()) {
-      case "wordcount":
-        commands.wordCountCommands.leaderboard(event);
-        break;
     }
   }
 

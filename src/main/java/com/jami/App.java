@@ -1,7 +1,6 @@
 package com.jami;
 
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
-import com.jami.fun.commands.wordCountCommands;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 
