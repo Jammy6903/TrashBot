@@ -4,9 +4,10 @@ import org.bson.Document;
 
 import static com.jami.App.mongoClient;
 import static com.mongodb.client.model.Filters.eq;
-import static com.mongodb.client.model.Sorts.descending;
 
-import java.util.ArrayList;
+import java.util.List;
+
+import static com.mongodb.client.model.Filters.*;
 
 import org.bson.types.ObjectId;
 
@@ -22,14 +23,15 @@ public class word {
   private String word;
   private long count;
 
-  private word(String word) {
+  public word(String word) {
+    Document wordEntry = words.find(eq("word", word)).first();
     this.id = new ObjectId();
     this.word = word;
     this.count = 0;
-  }
-
-  private void setId(ObjectId id) {
-    this.id = id;
+    if (wordEntry != null) {
+      this.id = wordEntry.getObjectId("_id");
+      this.count = wordEntry.getLong("count");
+    }
   }
 
   public String getId() {
@@ -52,27 +54,11 @@ public class word {
     return count;
   }
 
-  public static word getWord(String wordd) {
-    Document entry = words.find(eq("word", wordd)).first();
-    word w = new word(wordd);
-    if (entry != null) {
-      w.setId(entry.getObjectId("_id"));
-      w.setCount(entry.getLong("count"));
+  public static List<word> getWords(long amount, int index, String order, boolean reverseOrder) {
+    if (amount > words.countDocuments()) {
+      amount = words.countDocuments();
     }
-    return w;
-  }
-
-  public static ArrayList<Document> getTopWords(int index) {
-    ArrayList<Document> results = new ArrayList<>();
-    words.find().sort(descending("count")).into(results);
-
-    ArrayList<Document> wos = new ArrayList<>();
-    int x = 0;
-    for (int i = index; i < index + 10; i++) {
-      wos.set(x, results.get(i));
-    }
-
-    return wos;
+    return null;
   }
 
   public void commit() {
