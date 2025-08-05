@@ -1,12 +1,17 @@
 package com.jami.database.guild;
 
 import org.bson.Document;
+import org.bson.conversions.Bson;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.UpdateOptions;
 
 import static com.mongodb.client.model.Filters.*;
+import static com.mongodb.client.model.Updates.addToSet;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.jami.App.mongoClient;
 
@@ -16,18 +21,17 @@ public class guild {
 
   private long guildId;
   private guildSettings guildSettings;
-  private Document guildUsers;
+  private ArrayList<guildUser> userList;
 
   public guild(long id) {
     Document entry = guilds.find(eq("_id", id)).first();
     this.guildId = id;
     if (entry != null) {
       this.guildSettings = new guildSettings(entry.get("settings", Document.class));
-      this.guildUsers = entry.get("users", Document.class);
     } else {
       this.guildSettings = new guildSettings(null);
-      this.guildUsers = new Document();
     }
+    this.userList = new ArrayList<>();
   }
 
   public long getGuildId() {
@@ -42,31 +46,34 @@ public class guild {
     return guildSettings;
   }
 
-  public void setUsers(Document u) {
-    this.guildUsers = u;
-  }
-
-  public Document getUsers() {
-    return guildUsers;
-  }
-
   public guildUser getUser(long id) {
-    Document us = guildUsers.get(String.valueOf(id), Document.class);
-    return new guildUser(us, id);
+    List<Document> users = (List<Document>) guilds.find(eq("_id", guildId)).first().get("users");
+    System.out.println(users);
+
+    guildUser gu = new guildUser(users, id);
+    return gu;
   }
 
-  public void ammendUser(long id, Document u) {
-    guildUsers.append(String.valueOf(id), u);
-  }
+  // public guildUser getUser(long id) {
+  // Document us = guildUsers.get(String.valueOf(id), Document.class);
+  // return new guildUser(us, id);
+  // }
+
+  // public void ammendUser(long id, Document u) {
+  // ammendedUsers.append(String.valueOf(id), u);
+  // }
 
   public void commit() {
-    Document g = new Document("$set", new Document()
+    Document guild = new Document("$set", new Document()
         .append("_id", guildId)
-        .append("settings", guildSettings.toDocument())
-        .append("users", guildUsers));
+        .append("settings", guildSettings.toDocument()));
     try {
       UpdateOptions opts = new UpdateOptions().upsert(true);
-      guilds.updateOne(eq("_id", guildId), g, opts);
+      guilds.updateOne(eq("_id", guildId), guild, opts);
+      for (guildUser gu : userList) {
+        Bson update = addToSet("users", gu.toDocument());
+        guilds.updateOne(eq("_id", guildId), update, opts);
+      }
     } catch (Exception e) {
       System.out.println("[ERROR] MongoDB Write Error - " + e);
     }

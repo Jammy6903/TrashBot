@@ -73,6 +73,9 @@ public class App {
   }
 
   private static void getCommands(JDA jda) {
+
+    // WordCount Commands
+
     OptionData wordCountChoices = new OptionData(OptionType.STRING, "where", "Which database to look in", false)
         .addChoice("global", "Every server")
         .addChoice("guild", "Just this guild")
@@ -82,9 +85,22 @@ public class App {
         .addOption(OptionType.INTEGER, "index", "where to start the leaderboard", false)
         .addOptions(wordCountChoices);
 
+    // Levelling Commands
+
+    OptionData globalOrGuild = new OptionData(OptionType.STRING, "where",
+        "Global level info or guild level info (defaults to guild)", false)
+        .addChoice("global", "Across all guilds")
+        .addChoice("guild", "Only in this guild");
+
+    SubcommandData levelScore = new SubcommandData("score", "See your current level and experience")
+        .addOption(OptionType.USER, "user", "Pick a user to see their level and experience", false)
+        .addOptions(globalOrGuild);
+
     jda.updateCommands().addCommands(
         Commands.slash("wordcount", "Commands relating to word counts")
-            .addSubcommands(wordCountLeaderboard))
+            .addSubcommands(wordCountLeaderboard),
+        Commands.slash("level", "Commands relating to levelling")
+            .addSubcommands(levelScore))
         .queue();
   }
 }

@@ -11,16 +11,15 @@ public class guildUser {
 
   public guildUser(Document u, long id) {
     if (u != null) {
-      this.userId = id;
       this.userExp = u.getLong("userExp");
       this.userLevel = u.getInteger("userLevel");
       this.userLastMessage = u.getLong("userLastMessage");
     } else {
-      this.userId = id;
       this.userExp = 0;
       this.userLevel = 0;
       this.userLastMessage = 0;
     }
+    this.userId = id;
   }
 
   public long getId() {

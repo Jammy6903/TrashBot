@@ -11,14 +11,14 @@ public class guildLevelling {
     guildUser user = g.getUser(userId);
 
     // Check if cooldown time has elapsed since users last message
-    if (System.currentTimeMillis() - user.getUserLastMessage() <= settings.getExpCooldown() * 1000) {
-      return;
-    }
+    // if (System.currentTimeMillis() - user.getUserLastMessage() <=
+    // settings.getExpCooldown() * 1000) {
+    // return;
+    // }
 
     user.setExp(user.getExp() + settings.getExpIncrement());
     user.setUserLastMessage(System.currentTimeMillis());
 
-    g.ammendUser(userId, user.toDocument());
     g.commit();
   }
 }

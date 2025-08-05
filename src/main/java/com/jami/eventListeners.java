@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import com.jami.fun.levelling.globalLevelling;
 import com.jami.fun.levelling.guildLevelling;
 import com.jami.fun.wordCount.globalWordCount;
+import com.jami.fun.levelling.commandsLevelling;
 
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
@@ -17,6 +18,10 @@ public class eventListeners extends ListenerAdapter {
   public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
     event.deferReply().queue();
     switch (event.getName()) {
+      case "level":
+        commandsLevelling c = new commandsLevelling(event);
+        c.go();
+        break;
     }
   }
 

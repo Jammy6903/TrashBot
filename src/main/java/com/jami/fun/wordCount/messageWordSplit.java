@@ -8,7 +8,7 @@ import java.util.Arrays;
 public class messageWordSplit {
   public static ArrayList<String> getWords(String message) {
     message = message.toLowerCase();
-    message = message.replaceAll("[^a-zA-Z ]", "");
+    message = message.replaceAll("\\p{Punct}", "");
     ArrayList<String> words = new ArrayList<>(Arrays.asList(message.split(" ")));
     return words;
   }

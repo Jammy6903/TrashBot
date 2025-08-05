@@ -6,6 +6,7 @@
   <groupId>com.jami</groupId>
   <artifactId>Trash-Bot</artifactId>
   <version>0.1-alpha</version>
+  <packaging>jar</packaging>
 
   <name>Trash-Bot</name>
 
@@ -147,6 +148,30 @@
         <plugin>
           <artifactId>maven-project-info-reports-plugin</artifactId>
           <version>3.6.1</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-assembly-plugin</artifactId>
+          <executions>
+            <execution>
+              <phase>package</phase>
+              <goals>
+                <goal>single</goal>
+              </goals>
+              <configuration>
+                <archive>
+                  <manifest>
+                    <mainClass>
+                      com.jami.App
+                    </mainClass>
+                  </manifest>
+                </archive>
+                <descriptorRefs>
+                  <descriptorRef>jar-with-dependencies</descriptorRef>
+                </descriptorRefs>
+              </configuration>
+            </execution>
+          </executions>
         </plugin>
       </plugins>
     </pluginManagement>
