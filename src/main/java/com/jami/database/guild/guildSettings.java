@@ -4,19 +4,20 @@ import org.bson.Document;
 
 public class guildSettings {
 
-  int expIncrement;
-  int expVariation;
-  long expCooldown;
+  private int expIncrement;
+  private int expVariation;
+  private long expCooldown;
 
   public guildSettings(Document s) {
-    if (s != null) {
-      this.expIncrement = s.getInteger("expIncrement");
-      this.expVariation = s.getInteger("expVariation");
-      this.expCooldown = s.getLong("expCooldown");
-    } else {
+    if (s == null) {
+      s = new Document();
       this.expIncrement = 3;
       this.expVariation = 1;
       this.expCooldown = 60;
+    } else {
+      this.expIncrement = s.getInteger("expIncrement");
+      this.expVariation = s.getInteger("expVariation");
+      this.expCooldown = s.getLong("expCooldown");
     }
   }
 
@@ -28,16 +29,16 @@ public class guildSettings {
     return expIncrement;
   }
 
-  public void setExpVariation(int var) {
-    this.expVariation = var;
+  public void setExpVariation(int variation) {
+    this.expVariation = variation;
   }
 
   public int getExpVariation() {
     return expVariation;
   }
 
-  public void setExpCooldown(long cool) {
-    this.expCooldown = cool;
+  public void setExpCooldown(int cooldown) {
+    this.expCooldown = cooldown;
   }
 
   public long getExpCooldown() {

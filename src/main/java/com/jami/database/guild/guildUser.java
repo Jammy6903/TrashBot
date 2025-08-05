@@ -3,23 +3,21 @@ package com.jami.database.guild;
 import org.bson.Document;
 
 public class guildUser {
-
   private long userId;
   private long userExp;
   private int userLevel;
   private long userLastMessage;
 
-  public guildUser(Document u, long id) {
-    if (u != null) {
-      this.userExp = u.getLong("userExp");
-      this.userLevel = u.getInteger("userLevel");
-      this.userLastMessage = u.getLong("userLastMessage");
-    } else {
-      this.userExp = 0;
-      this.userLevel = 0;
-      this.userLastMessage = 0;
-    }
+  public guildUser(Document user, long id) {
     this.userId = id;
+    this.userExp = 0;
+    this.userLevel = 0;
+    this.userLastMessage = 0;
+    if (user != null) {
+      this.userExp = user.getLong("userExp");
+      this.userLevel = user.getInteger("userLevel");
+      this.userLastMessage = user.getLong("userLastMessage");
+    }
   }
 
   public long getId() {
@@ -55,10 +53,10 @@ public class guildUser {
   }
 
   public Document toDocument() {
-    return new Document()
+    return new Document("$set", new Document()
         .append("_id", userId)
         .append("userExp", userExp)
         .append("userLevel", userLevel)
-        .append("userLastMessage", userLastMessage);
+        .append("userLastMessage", userLastMessage));
   }
 }
