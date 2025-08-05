@@ -6,11 +6,9 @@ import com.jami.database.word;
 
 public class globalWordCount {
 
-  public static void incrementWordCount(String message) {
-    ArrayList<String> words = messageWordSplit.getWords(message);
-
+  public static void incrementWordCount(ArrayList<String> words) {
     for (String w : words) {
-      word ww = word.getWord(w);
+      word ww = new word(w);
       ww.setCount(ww.getCount() + 1);
       ww.commit();
     }

@@ -1,12 +1,18 @@
 package com.jami;
 
+import java.util.List;
+
 import org.jetbrains.annotations.NotNull;
 
 import com.jami.fun.levelling.globalLevelling;
 import com.jami.fun.levelling.guildLevelling;
-import com.jami.fun.wordCount.globalWordCount;
+import com.jami.fun.wordCount.wordCount;
+import com.jami.database.user.user;
 import com.jami.fun.levelling.commandsLevelling;
 
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.Channel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -27,16 +33,26 @@ public class eventListeners extends ListenerAdapter {
 
   @Override
   public void onMessageReceived(@NotNull MessageReceivedEvent event) {
-    if (event.getAuthor().isBot()) {
+    User u = event.getAuthor();
+    Guild g = event.getGuild();
+    Channel c = event.getChannel();
+
+    if (u.isBot()) {
       return;
     }
 
+    List<String> userEnabledFeatures = new user(u.getIdLong()).getSettings().getEnabledFeatures();
+
     // Levelling
-    globalLevelling.incrementExp(event.getAuthor().getIdLong());
-    guildLevelling.incrementExp(event.getGuild().getIdLong(), event.getAuthor().getIdLong());
+    if (userEnabledFeatures.contains("levelling")) {
+      globalLevelling.incrementExp(event.getAuthor().getIdLong());
+      guildLevelling.incrementExp(event.getGuild().getIdLong(), u.getIdLong());
+    }
 
     // WordCount
-    globalWordCount.incrementWordCount(event.getMessage().getContentRaw());
+    if (userEnabledFeatures.contains("words")) {
+      wordCount.incrementWords(event.getMessage().getContentRaw(), g.getIdLong(), c.getIdLong());
+    }
   }
 
   @Override

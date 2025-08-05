@@ -21,11 +21,14 @@ public class guild {
   private static final MongoDatabase db = mongoClient.getDatabase("TRASHBOT");
   private static final MongoCollection<Document> guilds = db.getCollection("guilds");
   private static final MongoDatabase guildUsersDb = mongoClient.getDatabase("TRASHBOT_GUILD_USERS");
+  private static final MongoDatabase guildWordsDb = mongoClient.getDatabase("TRASHBOT_GUILD_WORDS");
 
   private long guildId;
   private guildSettings guildSettings;
   private ArrayList<guildUser> userList;
+  private ArrayList<guildWord> wordList;
   private MongoCollection<Document> guildUsers;
+  private MongoCollection<Document> guildWords;
 
   public guild(long id) {
     Document entry = guilds.find(eq("_id", id)).first();
@@ -36,8 +39,12 @@ public class guild {
       this.guildSettings = new guildSettings(null);
     }
     this.userList = new ArrayList<>();
-    guildUsersDb.createCollection(String.valueOf(db));
+    this.wordList = new ArrayList<>();
+
+    guildUsersDb.createCollection(String.valueOf(id));
     this.guildUsers = guildUsersDb.getCollection(String.valueOf(id));
+    guildWordsDb.createCollection(String.valueOf(id));
+    this.guildWords = guildWordsDb.getCollection(String.valueOf(id));
   }
 
   public long getGuildId() {
@@ -82,6 +89,16 @@ public class guild {
     return userList;
   }
 
+  public guildWord getWord(String w) {
+    Document word = guildWords.find(eq("word", w)).first();
+    guildWord gw = new guildWord(null, w);
+    if (word != null) {
+      gw = new guildWord(word, w);
+    }
+    this.wordList.add(gw);
+    return gw;
+  }
+
   public void commit() {
     Document guild = new Document("$set", new Document()
         .append("_id", guildId)
@@ -91,6 +108,9 @@ public class guild {
       guilds.updateOne(eq("_id", guildId), guild, opts);
       for (guildUser gu : userList) {
         guildUsers.updateOne(eq("_id", gu.getId()), gu.toDocument(), opts);
+      }
+      for (guildWord gw : wordList) {
+        guildWords.updateOne(eq("_id", gw.getId()), gw.toDocument(), opts);
       }
     } catch (Exception e) {
       System.out.println("[ERROR] MongoDB Write Error - " + e);

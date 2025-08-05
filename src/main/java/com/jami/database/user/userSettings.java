@@ -1,26 +1,31 @@
 package com.jami.database.user;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.bson.Document;
 
 public class userSettings {
   private List<String> enabledFeatures;
+  private static List<String> defaultEnabledFeatures = Arrays.asList("levelling", "words");
 
   public userSettings(Document s) {
+    this.enabledFeatures = new ArrayList<>();
+    this.enabledFeatures.addAll(defaultEnabledFeatures);
     if (s != null) {
-      this.enabledFeatures = s.getList("enabledFeatures", String.class);
-    } else {
-      this.enabledFeatures = null;
+      if (s.getList("enabledFeatures", String.class) != null) {
+        this.enabledFeatures = s.getList("enabledFeatures", String.class);
+      }
     }
   }
 
   public List<String> getEnabledFeatures() {
-    return this.enabledFeatures;
+    return enabledFeatures;
   }
 
-  public void setEnabledFeatures(List<String> ef) {
-    this.enabledFeatures = ef;
+  public void setEnabledFeatures(List<String> features) {
+    this.enabledFeatures = features;
   }
 
   public Document toDocument() {
