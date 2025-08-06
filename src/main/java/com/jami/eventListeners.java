@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import com.jami.fun.levelling.globalLevelling;
 import com.jami.fun.levelling.guildLevelling;
 import com.jami.fun.wordCount.wordCount;
+import com.jami.utilities.featureRequests.commandsFeatureRequests;
 import com.jami.database.user.user;
 import com.jami.fun.levelling.commandsLevelling;
 
@@ -22,8 +23,10 @@ public class eventListeners extends ListenerAdapter {
 
   @Override
   public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
-    event.deferReply().queue();
     switch (event.getName()) {
+      case "featurerequest":
+        commandsFeatureRequests.newFeatureRequest(event);
+        break;
       case "level":
         commandsLevelling c = new commandsLevelling(event);
         c.go();
