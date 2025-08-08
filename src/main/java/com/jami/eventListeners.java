@@ -15,7 +15,6 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.Channel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
@@ -56,11 +55,6 @@ public class eventListeners extends ListenerAdapter {
     if (userEnabledFeatures.contains("words")) {
       wordCount.incrementWords(event.getMessage().getContentRaw(), g.getIdLong(), c.getIdLong());
     }
-  }
-
-  @Override
-  public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
-
   }
 
 }

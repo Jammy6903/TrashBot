@@ -1,19 +1,14 @@
 package com.jami.database.guild;
 
 import org.bson.Document;
-import org.bson.conversions.Bson;
 
-import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.UpdateOptions;
 
 import static com.mongodb.client.model.Filters.*;
-import static com.mongodb.client.model.Sorts.*;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import static com.jami.App.mongoClient;
 
@@ -22,13 +17,16 @@ public class guild {
   private static final MongoCollection<Document> guilds = db.getCollection("guilds");
   private static final MongoDatabase guildUsersDb = mongoClient.getDatabase("TRASHBOT_GUILD_USERS");
   private static final MongoDatabase guildWordsDb = mongoClient.getDatabase("TRASHBOT_GUILD_WORDS");
+  private static final MongoDatabase guildPunishmentsDb = mongoClient.getDatabase("TRASHBOT_GUILD_PUNISHMENTS");
 
   private long guildId;
   private guildSettings guildSettings;
   private ArrayList<guildUser> userList;
   private ArrayList<guildWord> wordList;
+  private ArrayList<guildPunishment> punishmentList;
   private MongoCollection<Document> guildUsers;
   private MongoCollection<Document> guildWords;
+  private MongoCollection<Document> guildPunishments;
 
   public guild(long id) {
     Document entry = guilds.find(eq("_id", id)).first();
@@ -45,6 +43,8 @@ public class guild {
     this.guildUsers = guildUsersDb.getCollection(String.valueOf(id));
     guildWordsDb.createCollection(String.valueOf(id));
     this.guildWords = guildWordsDb.getCollection(String.valueOf(id));
+    guildPunishmentsDb.createCollection(String.valueOf(id));
+    this.guildPunishments = guildWordsDb.getCollection(String.valueOf(id));
   }
 
   public long getGuildId() {
@@ -69,26 +69,6 @@ public class guild {
     return gu;
   }
 
-  public List<Document> getUsers(long amount, int index, String order, boolean reverseOrder) {
-    if (amount > guildUsers.countDocuments()) {
-      amount = guildUsers.countDocuments();
-    }
-    Bson o = ascending(order);
-    if (reverseOrder == true) {
-      o = descending(order);
-    }
-    FindIterable<Document> users = guildUsers.find().sort(o);
-    MongoCursor<Document> cursor = users.cursor();
-    int i = 0;
-    List<Document> userList = new ArrayList<>();
-    userList.add(users.first());
-    while (i > amount) {
-      userList.add(cursor.next());
-      i++;
-    }
-    return userList;
-  }
-
   public guildWord getWord(String w) {
     Document word = guildWords.find(eq("word", w)).first();
     guildWord gw = new guildWord(null, w);
@@ -97,6 +77,16 @@ public class guild {
     }
     this.wordList.add(gw);
     return gw;
+  }
+
+  public guildPunishment getPunishment(String punishmentId) {
+    Document punishment = guildPunishments.find(eq("_id", punishmentId)).first();
+    if (punishment == null) {
+      return null;
+    }
+    guildPunishment gp = new guildPunishment(punishment);
+    this.punishmentList.add(gp);
+    return gp;
   }
 
   public void commit() {

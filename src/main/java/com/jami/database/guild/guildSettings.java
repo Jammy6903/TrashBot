@@ -7,7 +7,6 @@ import java.util.List;
 import org.bson.Document;
 
 public class guildSettings {
-
   private int expIncrement;
   private int expVariation;
   private long expCooldown;

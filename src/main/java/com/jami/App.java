@@ -1,6 +1,10 @@
 package com.jami;
 
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
+import com.jami.utilities.guildLogging.guildChange;
+import com.jami.utilities.guildLogging.memberChange;
+import com.jami.utilities.guildLogging.messages;
+import com.jami.utilities.guildLogging.voiceEvents;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 
@@ -8,10 +12,8 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
-import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.hooks.AnnotatedEventManager;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
-import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 
 import java.io.File;
@@ -58,7 +60,9 @@ public class App {
                         GatewayIntent.MESSAGE_CONTENT,
                         GatewayIntent.AUTO_MODERATION_EXECUTION,
                         GatewayIntent.GUILD_MESSAGE_POLLS)
-                .addEventListeners(eventWaiter, new eventListeners())
+                .setEventManager(new AnnotatedEventManager())
+                .addEventListeners(eventWaiter, new eventListeners(), new guildChange(), new memberChange(),
+                        new messages(), new voiceEvents())
                 .build();
 
         if (Config.getProperty("STATUS") != null) {
