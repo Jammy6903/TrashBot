@@ -1,4 +1,4 @@
-package com.jami.database;
+package com.jami.database.fun;
 
 import org.bson.Document;
 
@@ -11,6 +11,7 @@ import static com.mongodb.client.model.Filters.*;
 
 import org.bson.types.ObjectId;
 
+import com.jami.database.getOrDefault;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.UpdateOptions;

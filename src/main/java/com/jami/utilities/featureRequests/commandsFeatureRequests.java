@@ -3,7 +3,7 @@ package com.jami.utilities.featureRequests;
 import java.util.concurrent.TimeUnit;
 
 import com.jami.App;
-import com.jami.database.featureRequest;
+import com.jami.database.utilities.featureRequest;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;

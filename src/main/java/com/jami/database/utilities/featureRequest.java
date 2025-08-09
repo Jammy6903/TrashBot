@@ -1,4 +1,4 @@
-package com.jami.database;
+package com.jami.database.utilities;
 
 import static com.jami.App.mongoClient;
 import static com.mongodb.client.model.Filters.eq;

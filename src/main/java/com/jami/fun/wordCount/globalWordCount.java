@@ -2,7 +2,7 @@ package com.jami.fun.wordCount;
 
 import java.util.ArrayList;
 
-import com.jami.database.word;
+import com.jami.database.fun.word;
 
 public class globalWordCount {
 
