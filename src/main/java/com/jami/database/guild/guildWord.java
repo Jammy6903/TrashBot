@@ -3,12 +3,17 @@ package com.jami.database.guild;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 
+import com.jami.database.getOrDefault;
+
 public class guildWord {
   private ObjectId id;
   private String word;
   private long count;
 
   public guildWord(Document entry, String word) {
+    this.id = getOrDefault.ObjectId(entry, "_id");
+    this.word = word;
+    this.count = getOrDefault.Long(entry, "count", 0L);
   }
 
   public ObjectId getId() {

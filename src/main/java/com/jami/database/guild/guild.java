@@ -71,10 +71,7 @@ public class guild {
 
   public guildWord getWord(String w) {
     Document word = guildWords.find(eq("word", w)).first();
-    guildWord gw = new guildWord(null, w);
-    if (word != null) {
-      gw = new guildWord(word, w);
-    }
+    guildWord gw = new guildWord(word, w);
     this.wordList.add(gw);
     return gw;
   }

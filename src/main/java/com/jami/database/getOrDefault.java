@@ -4,6 +4,7 @@ import org.bson.Document;
 import org.bson.types.ObjectId;
 
 import com.jami.database.guild.guildSettings;
+import com.jami.database.user.userSettings;
 
 public class getOrDefault {
   public static Long Long(Document doc, String key, Long defaultValue) {
@@ -25,5 +26,12 @@ public class getOrDefault {
       return new guildSettings(doc.get(key, Document.class));
     }
     return new guildSettings(null);
+  }
+
+  public static userSettings userSettings(Document doc, String key) {
+    if (doc != null) {
+      return new userSettings(doc.get(key, Document.class));
+    }
+    return new userSettings(null);
   }
 }

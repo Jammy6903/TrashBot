@@ -9,6 +9,8 @@ import static com.mongodb.client.model.Filters.eq;
 
 import org.bson.Document;
 
+import com.jami.database.getOrDefault;
+
 /**
  * user
  */
@@ -22,21 +24,17 @@ public class user {
   private long userLastMessage;
   private userSettings userSettings;
 
+  private static long defaultUserExp = 0;
+  private static int defaultUserLevel = 0;
+  private static long defaultUserLastMessage = 0;
+
   public user(long id) {
     Document u = users.find(eq("_id", id)).first();
-    if (u != null) {
-      this.userId = id;
-      this.userExp = u.getLong("userExp");
-      this.userLevel = u.getInteger("userLevel");
-      this.userLastMessage = u.getLong("userLastMessage");
-      this.userSettings = new userSettings(u.get("settings", Document.class));
-    } else {
-      this.userId = id;
-      this.userExp = 0;
-      this.userLevel = 0;
-      this.userLastMessage = 0;
-      this.userSettings = new userSettings(null);
-    }
+    this.userId = id;
+    this.userExp = getOrDefault.Long(u, "userExp", defaultUserExp);
+    this.userLevel = u.getInteger("userLevel", defaultUserLevel);
+    this.userLastMessage = getOrDefault.Long(u, "userLastMessage", defaultUserLastMessage);
+    this.userSettings = getOrDefault.userSettings(u, "settings");
   }
 
   public void setExp(long exp) {
