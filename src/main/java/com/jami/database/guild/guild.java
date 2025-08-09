@@ -2,6 +2,7 @@ package com.jami.database.guild;
 
 import org.bson.Document;
 
+import com.jami.database.getOrDefault;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.UpdateOptions;
@@ -31,20 +32,19 @@ public class guild {
   public guild(long id) {
     Document entry = guilds.find(eq("_id", id)).first();
     this.guildId = id;
-    if (entry != null) {
-      this.guildSettings = new guildSettings(entry.get("settings", Document.class));
-    } else {
-      this.guildSettings = new guildSettings(null);
-    }
+    this.guildSettings = getOrDefault.guildSettings(entry, "settings");
     this.userList = new ArrayList<>();
     this.wordList = new ArrayList<>();
 
-    guildUsersDb.createCollection(String.valueOf(id));
-    this.guildUsers = guildUsersDb.getCollection(String.valueOf(id));
-    guildWordsDb.createCollection(String.valueOf(id));
-    this.guildWords = guildWordsDb.getCollection(String.valueOf(id));
-    guildPunishmentsDb.createCollection(String.valueOf(id));
-    this.guildPunishments = guildWordsDb.getCollection(String.valueOf(id));
+    this.guildUsers = getCollection(guildUsersDb, id);
+    this.guildWords = getCollection(guildWordsDb, id);
+    this.guildPunishments = getCollection(guildPunishmentsDb, id);
+  }
+
+  private MongoCollection<Document> getCollection(MongoDatabase db, long id) {
+    String collectionName = String.valueOf(id);
+    db.createCollection(collectionName);
+    return db.getCollection(collectionName);
   }
 
   public long getGuildId() {

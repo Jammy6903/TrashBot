@@ -2,6 +2,8 @@ package com.jami.database.guild;
 
 import org.bson.Document;
 
+import com.jami.database.getOrDefault;
+
 public class guildUser {
   private long userId;
   private long userExp;
@@ -10,14 +12,9 @@ public class guildUser {
 
   public guildUser(Document user, long id) {
     this.userId = id;
-    this.userExp = 0;
-    this.userLevel = 0;
-    this.userLastMessage = 0;
-    if (user != null) {
-      this.userExp = user.getLong("userExp");
-      this.userLevel = user.getInteger("userLevel");
-      this.userLastMessage = user.getLong("userLastMessage");
-    }
+    this.userExp = getOrDefault.Long(user, "userExp", 0L);
+    this.userLevel = user.getInteger("userLevel", 0);
+    this.userLastMessage = getOrDefault.Long(user, "userLastMessage", 0L);
   }
 
   public long getId() {

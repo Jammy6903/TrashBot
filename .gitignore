@@ -1,0 +1,10 @@
+*.properties
+
+.settings/
+.mvn/
+.git/
+target/
+src/test
+
+.project
+.classpath

@@ -6,30 +6,27 @@ import java.util.List;
 
 import org.bson.Document;
 
+import com.jami.database.getOrDefault;
+
 public class guildSettings {
   private int expIncrement;
   private int expVariation;
   private long expCooldown;
   private List<String> enabledFeatures;
-  private static List<String> defaultEnabledFeatures = Arrays.asList("levelling", "words");
   private List<Long> wordsDisabledChannels;
 
+  private static int defaultExpIncrement = 3;
+  private static int defaultExpVariation = 1;
+  private static long defaultExpCooldown = 60;
+  private static List<String> defaultEnabledFeatures = Arrays.asList("levelling", "words");
+  private static List<Long> defaultWordsDisabledChannels = new ArrayList<>();
+
   public guildSettings(Document s) {
-    this.expIncrement = 3;
-    this.expVariation = 1;
-    this.expCooldown = 60;
-    this.enabledFeatures = new ArrayList<>();
-    this.enabledFeatures.addAll(defaultEnabledFeatures);
-    this.wordsDisabledChannels = new ArrayList<>();
-    if (s != null) {
-      this.expIncrement = s.getInteger("expIncrement");
-      this.expVariation = s.getInteger("expVariation");
-      this.expCooldown = s.getLong("expCooldown");
-      if (s.getList("enabledFeatures", String.class) != null) {
-        this.enabledFeatures = s.getList("enabledFeatures", String.class);
-      }
-      this.wordsDisabledChannels = s.getList("wordsDisabledChannels", Long.class);
-    }
+    this.expIncrement = s.getInteger("expIncrement", defaultExpIncrement);
+    this.expVariation = s.getInteger("expVariation", defaultExpVariation);
+    this.expCooldown = getOrDefault.Long(s, "expCooldown", defaultExpCooldown);
+    this.enabledFeatures = s.getList("enabledFeatures", String.class, defaultEnabledFeatures);
+    this.wordsDisabledChannels = s.getList("wordsDisabledChannels", Long.class, defaultWordsDisabledChannels);
   }
 
   public void setExpIncrement(int exp) {
