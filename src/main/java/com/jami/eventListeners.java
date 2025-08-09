@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import com.jami.fun.levelling.globalLevelling;
 import com.jami.fun.levelling.guildLevelling;
 import com.jami.fun.wordCount.wordCount;
+import com.jami.utilities.featureRequests.commandsFeatureRequests;
 import com.jami.database.user.user;
 import com.jami.fun.levelling.commandsLevelling;
 
@@ -14,7 +15,6 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.Channel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
@@ -22,8 +22,10 @@ public class eventListeners extends ListenerAdapter {
 
   @Override
   public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
-    event.deferReply().queue();
     switch (event.getName()) {
+      case "featurerequest":
+        commandsFeatureRequests.newFeatureRequest(event);
+        break;
       case "level":
         commandsLevelling c = new commandsLevelling(event);
         c.go();
@@ -53,11 +55,6 @@ public class eventListeners extends ListenerAdapter {
     if (userEnabledFeatures.contains("words")) {
       wordCount.incrementWords(event.getMessage().getContentRaw(), g.getIdLong(), c.getIdLong());
     }
-  }
-
-  @Override
-  public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
-
   }
 
 }
