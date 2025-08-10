@@ -1,4 +1,4 @@
-package com.jami.database.guild;
+package com.jami.database.guild.bracket;
 
 import org.bson.Document;
 

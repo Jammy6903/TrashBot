@@ -5,7 +5,7 @@ import java.util.Random;
 import com.jami.database.guild.guild;
 import com.jami.database.guild.guildUser;
 import com.jami.database.user.user;
-import com.jami.database.guild.guildSettings;
+import com.jami.database.guild.guildSettings.*;
 
 public class guildLevelling {
   public static void incrementExp(long guildId, long userId) {

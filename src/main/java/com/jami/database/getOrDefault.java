@@ -3,7 +3,7 @@ package com.jami.database;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 
-import com.jami.database.guild.guildSettings;
+import com.jami.database.guild.guildSettings.*;
 import com.jami.database.user.userSettings;
 
 public class getOrDefault {

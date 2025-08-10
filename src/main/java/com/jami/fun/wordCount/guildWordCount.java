@@ -3,7 +3,7 @@ package com.jami.fun.wordCount;
 import java.util.ArrayList;
 
 import com.jami.database.guild.guild;
-import com.jami.database.guild.guildSettings;
+import com.jami.database.guild.guildSettings.*;
 import com.jami.database.guild.guildWord;
 
 public class guildWordCount {

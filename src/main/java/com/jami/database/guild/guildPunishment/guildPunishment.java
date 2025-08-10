@@ -1,4 +1,4 @@
-package com.jami.database.guild;
+package com.jami.database.guild.guildPunishment;
 
 import org.bson.Document;
 import org.bson.types.ObjectId;

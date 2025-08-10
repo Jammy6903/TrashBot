@@ -1,4 +1,4 @@
-package com.jami.database.guild;
+package com.jami.database.guild.guildSettings;
 
 import java.util.ArrayList;
 import java.util.Arrays;
