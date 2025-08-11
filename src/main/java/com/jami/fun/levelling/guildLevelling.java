@@ -24,12 +24,25 @@ public class guildLevelling {
       return;
     }
 
-    long expIncrement = new Random()
-        .nextLong((s.getExpIncrement() + s.getExpVariation()) - (s.getExpIncrement() - s.getExpVariation()) + 1)
-        + (s.getExpIncrement() - s.getExpVariation());
-    gu.setExp(gu.getExp() + expIncrement);
+    // Increment exp by guild values, check for level up and increment level
+    int einc = s.getExpIncrement();
+    int evar = s.getExpVariation();
+
+    long expIncrement = new Random().nextLong((einc + evar) - (einc - evar) + 1) + (einc - evar);
+    long setExp = gu.getExp() + expIncrement;
+
+    gu.setExp(setExp);
+    if (isLevelUp(setExp)) {
+      gu.incrementLevel();
+    }
+
+    // Set last message to current millis
     gu.setUserLastMessage(System.currentTimeMillis());
 
     g.commit();
+  }
+
+  private static boolean isLevelUp(long exp) {
+    return false;
   }
 }

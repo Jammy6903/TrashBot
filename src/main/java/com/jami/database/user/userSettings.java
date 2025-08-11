@@ -11,6 +11,9 @@ public class userSettings {
   private static List<String> defaultEnabledFeatures = Arrays.asList("levelling", "words");
 
   public userSettings(Document s) {
+    if (s == null) {
+      s = new Document();
+    }
     this.enabledFeatures = s.getList("enabledFeatures", String.class, defaultEnabledFeatures);
   }
 

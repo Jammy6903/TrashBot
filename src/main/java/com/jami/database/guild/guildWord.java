@@ -11,6 +11,9 @@ public class guildWord {
   private long count;
 
   public guildWord(Document entry, String word) {
+    if (entry == null) {
+      entry = new Document();
+    }
     this.id = getOrDefault.ObjectId(entry, "_id");
     this.word = word;
     this.count = getOrDefault.Long(entry, "count", 0L);

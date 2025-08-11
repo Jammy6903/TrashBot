@@ -14,14 +14,19 @@ public class guildSettings {
   private long expCooldown;
   private List<String> enabledFeatures;
   private List<Long> wordsDisabledChannels;
+  private List<Document> levellingRoles;
 
   private static int defaultExpIncrement = 3;
   private static int defaultExpVariation = 1;
   private static long defaultExpCooldown = 60;
   private static List<String> defaultEnabledFeatures = Arrays.asList("levelling", "words");
   private static List<Long> defaultWordsDisabledChannels = new ArrayList<>();
+  private static List<Document> defaultLevellingRoles = new ArrayList<>();
 
   public guildSettings(Document s) {
+    if (s == null) {
+      s = new Document();
+    }
     this.expIncrement = s.getInteger("expIncrement", defaultExpIncrement);
     this.expVariation = s.getInteger("expVariation", defaultExpVariation);
     this.expCooldown = getOrDefault.Long(s, "expCooldown", defaultExpCooldown);

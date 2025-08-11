@@ -30,6 +30,9 @@ public class user {
 
   public user(long id) {
     Document u = users.find(eq("_id", id)).first();
+    if (u == null) {
+      u = new Document();
+    }
     this.userId = id;
     this.userExp = getOrDefault.Long(u, "userExp", defaultUserExp);
     this.userLevel = u.getInteger("userLevel", defaultUserLevel);
@@ -67,6 +70,10 @@ public class user {
 
   public void setSettings(userSettings s) {
     this.userSettings = s;
+  }
+
+  public void incrementLevel() {
+    this.userLevel++;
   }
 
   /**

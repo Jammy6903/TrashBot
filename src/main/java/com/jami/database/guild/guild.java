@@ -4,7 +4,6 @@ import org.bson.Document;
 
 import com.jami.database.getOrDefault;
 import com.jami.database.guild.bracket.*;
-import com.jami.database.guild.guildPunishment.*;
 import com.jami.database.guild.guildSettings.*;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -34,6 +33,9 @@ public class guild {
 
   public guild(long id) {
     Document entry = guilds.find(eq("_id", id)).first();
+    if (entry == null) {
+      entry = new Document();
+    }
     this.guildId = id;
     this.guildSettings = getOrDefault.guildSettings(entry, "settings");
     this.userList = new ArrayList<>();
@@ -64,10 +66,7 @@ public class guild {
 
   public guildUser getUser(long id) {
     Document user = guildUsers.find(eq("_id", id)).first();
-    guildUser gu = new guildUser(null, id);
-    if (user != null) {
-      gu = new guildUser(user, id);
-    }
+    guildUser gu = new guildUser(user, id);
     this.userList.add(gu);
     return gu;
   }

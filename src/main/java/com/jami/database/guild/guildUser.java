@@ -11,6 +11,9 @@ public class guildUser {
   private long userLastMessage;
 
   public guildUser(Document user, long id) {
+    if (user == null) {
+      user = new Document();
+    }
     this.userId = id;
     this.userExp = getOrDefault.Long(user, "userExp", 0L);
     this.userLevel = user.getInteger("userLevel", 0);
@@ -47,6 +50,10 @@ public class guildUser {
 
   public void setUserLastMessage(long time) {
     this.userLastMessage = time;
+  }
+
+  public void incrementLevel() {
+    this.userLevel++;
   }
 
   public Document toDocument() {

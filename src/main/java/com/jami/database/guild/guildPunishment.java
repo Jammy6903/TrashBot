@@ -1,4 +1,4 @@
-package com.jami.database.guild.guildPunishment;
+package com.jami.database.guild;
 
 import org.bson.Document;
 import org.bson.types.ObjectId;
@@ -23,6 +23,9 @@ public class guildPunishment {
   }
 
   public guildPunishment(Document p) {
+    if (p == null) {
+      p = new Document();
+    }
     this.punishmentId = p.getObjectId("_id");
     this.userId = p.getLong("userId");
     this.punishmentType = p.getString("punishmentType");
