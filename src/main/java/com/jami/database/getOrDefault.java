@@ -14,6 +14,13 @@ public class getOrDefault {
     return defaultValue;
   }
 
+  public static Double Double(Document doc, String key, Double defaultValue) {
+    if (doc.getDouble(key) != null) {
+      return doc.getDouble(key);
+    }
+    return defaultValue;
+  }
+
   public static ObjectId ObjectId(Document doc, String key) {
     if (doc.getObjectId(key) != null) {
       return doc.getObjectId(key);

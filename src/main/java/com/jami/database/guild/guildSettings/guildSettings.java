@@ -12,6 +12,8 @@ public class guildSettings {
   private int expIncrement;
   private int expVariation;
   private long expCooldown;
+  private long levelBase;
+  private double levelGrowth;
   private List<String> enabledFeatures;
   private List<Long> wordsDisabledChannels;
   private List<Document> levellingRoles;
@@ -19,6 +21,8 @@ public class guildSettings {
   private static int defaultExpIncrement = 3;
   private static int defaultExpVariation = 1;
   private static long defaultExpCooldown = 60;
+  private static long defaultLevelBase = 200;
+  private static double defaultLevelGrowth = 1.5;
   private static List<String> defaultEnabledFeatures = Arrays.asList("levelling", "words");
   private static List<Long> defaultWordsDisabledChannels = new ArrayList<>();
   private static List<Document> defaultLevellingRoles = new ArrayList<>();
@@ -30,6 +34,8 @@ public class guildSettings {
     this.expIncrement = s.getInteger("expIncrement", defaultExpIncrement);
     this.expVariation = s.getInteger("expVariation", defaultExpVariation);
     this.expCooldown = getOrDefault.Long(s, "expCooldown", defaultExpCooldown);
+    this.levelBase = getOrDefault.Long(s, "levelBase", defaultLevelBase);
+    this.levelGrowth = getOrDefault.Double(s, "levelGrowth", defaultLevelGrowth);
     this.enabledFeatures = s.getList("enabledFeatures", String.class, defaultEnabledFeatures);
     this.wordsDisabledChannels = s.getList("wordsDisabledChannels", Long.class, defaultWordsDisabledChannels);
   }
@@ -58,6 +64,22 @@ public class guildSettings {
     return expCooldown;
   }
 
+  public void setLevelBase(long base) {
+    this.levelBase = base;
+  }
+
+  public long getLevelBase() {
+    return levelBase;
+  }
+
+  public void setLevelGrowth(double growth) {
+    this.levelGrowth = growth;
+  }
+
+  public double getLevelGrowth() {
+    return levelGrowth;
+  }
+
   public void setEnabledFeatures(List<String> features) {
     this.enabledFeatures = features;
   }
@@ -79,6 +101,8 @@ public class guildSettings {
         .append("expIncrement", expIncrement)
         .append("expVariation", expVariation)
         .append("expCooldown", expCooldown)
+        .append("levelBase", levelBase)
+        .append("levelGrowth", levelGrowth)
         .append("enabledFeatures", enabledFeatures)
         .append("wordsDisabledChannels", wordsDisabledChannels);
   }

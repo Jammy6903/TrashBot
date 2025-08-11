@@ -9,13 +9,11 @@ public class globalLevelling {
   private static int var = 1;
   private static long cool = 60;
 
+  private static long levelBase = 200;
+  private static double levelGrowth = 1.5;
+
   public static void incrementExp(long userId) {
     user u = new user(userId);
-
-    // Check if user has levelling feature enabled
-    if (!u.getSettings().getEnabledFeatures().contains("levelling")) {
-      return;
-    }
 
     // Check if cooldown time has elapsed since users last message
     if (System.currentTimeMillis() - u.getLastMessage() <= cool * 1000) {
@@ -27,7 +25,7 @@ public class globalLevelling {
     long setExp = u.getExp() + expIncrement;
 
     u.setExp(setExp);
-    if (isLevelUp(setExp)) {
+    if (isLevelUp(setExp, u.getLevel())) {
       u.incrementLevel();
     }
 
@@ -37,7 +35,10 @@ public class globalLevelling {
     u.commit();
   }
 
-  private static boolean isLevelUp(long exp) {
+  private static boolean isLevelUp(long exp, int level) {
+    if (exp >= Math.floor(levelBase * Math.pow(level + 1, levelGrowth))) {
+      return true;
+    }
     return false;
   }
 }

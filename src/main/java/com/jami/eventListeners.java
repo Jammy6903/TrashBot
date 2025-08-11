@@ -2,8 +2,6 @@ package com.jami;
 
 import java.util.List;
 
-import org.jetbrains.annotations.NotNull;
-
 import com.jami.fun.levelling.globalLevelling;
 import com.jami.fun.levelling.guildLevelling;
 import com.jami.fun.wordCount.wordCount;
@@ -16,12 +14,12 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.Channel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.hooks.SubscribeEvent;
 
-public class eventListeners extends ListenerAdapter {
+public class eventListeners {
 
-  @Override
-  public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
+  @SubscribeEvent
+  public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
     switch (event.getName()) {
       case "featurerequest":
         commandsFeatureRequests.newFeatureRequest(event);
@@ -33,8 +31,8 @@ public class eventListeners extends ListenerAdapter {
     }
   }
 
-  @Override
-  public void onMessageReceived(@NotNull MessageReceivedEvent event) {
+  @SubscribeEvent
+  public void onMessageReceived(MessageReceivedEvent event) {
     User u = event.getAuthor();
     Guild g = event.getGuild();
     Channel c = event.getChannel();
@@ -48,7 +46,12 @@ public class eventListeners extends ListenerAdapter {
     // Levelling
     if (userEnabledFeatures.contains("levelling")) {
       globalLevelling.incrementExp(event.getAuthor().getIdLong());
-      guildLevelling.incrementExp(event.getGuild().getIdLong(), u.getIdLong());
+
+      guildLevelling gl = new guildLevelling(event);
+      if (gl.incrementExp()) {
+        gl.announceLevelUp();
+      }
+      gl.commit();
     }
 
     // WordCount

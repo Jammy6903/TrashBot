@@ -26,6 +26,9 @@ public class word {
 
   public word(String word) {
     Document wordEntry = words.find(eq("word", word)).first();
+    if (wordEntry == null) {
+      wordEntry = new Document();
+    }
     this.id = getOrDefault.ObjectId(wordEntry, "_id");
     this.word = word;
     this.count = getOrDefault.Long(wordEntry, "count", 0L);

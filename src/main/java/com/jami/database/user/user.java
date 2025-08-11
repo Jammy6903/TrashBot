@@ -11,9 +11,6 @@ import org.bson.Document;
 
 import com.jami.database.getOrDefault;
 
-/**
- * user
- */
 public class user {
   private static final MongoDatabase db = mongoClient.getDatabase("TRASHBOT");
   private static final MongoCollection<Document> users = db.getCollection("users");

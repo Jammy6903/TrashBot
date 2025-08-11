@@ -52,10 +52,6 @@ public class guildUser {
     this.userLastMessage = time;
   }
 
-  public void incrementLevel() {
-    this.userLevel++;
-  }
-
   public Document toDocument() {
     return new Document("$set", new Document()
         .append("_id", userId)
