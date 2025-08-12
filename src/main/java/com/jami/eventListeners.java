@@ -2,12 +2,13 @@ package com.jami;
 
 import java.util.List;
 
+import com.jami.fun.levelling.commandsLevelling;
 import com.jami.fun.levelling.globalLevelling;
 import com.jami.fun.levelling.guildLevelling;
 import com.jami.fun.wordCount.wordCount;
 import com.jami.utilities.featureRequests.commandsFeatureRequests;
+import com.jami.utilities.guildAdmin.commandsSettings;
 import com.jami.database.user.user;
-import com.jami.fun.levelling.commandsLevelling;
 
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
@@ -24,9 +25,11 @@ public class eventListeners {
       case "featurerequest":
         commandsFeatureRequests.newFeatureRequest(event);
         break;
+      case "guild-settings":
+        commandsSettings.guildSettingsCommand(event);
+        break;
       case "level":
-        commandsLevelling c = new commandsLevelling(event);
-        c.go();
+        commandsLevelling.levellingCommands(event);
         break;
     }
   }
@@ -45,13 +48,14 @@ public class eventListeners {
 
     // Levelling
     if (userEnabledFeatures.contains("levelling")) {
-      globalLevelling.incrementExp(event.getAuthor().getIdLong());
+      globalLevelling globall = new globalLevelling(event.getAuthor().getIdLong());
+      globall.incrementExp();
 
-      guildLevelling gl = new guildLevelling(event);
-      if (gl.incrementExp()) {
-        gl.announceLevelUp();
+      guildLevelling guildl = new guildLevelling(event);
+      if (guildl.incrementExp()) {
+        guildl.announceLevelUp();
       }
-      gl.commit();
+      guildl.commit();
     }
 
     // WordCount

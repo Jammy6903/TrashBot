@@ -2,6 +2,7 @@ package com.jami.database.guild.guildSettings;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.bson.Document;
@@ -14,18 +15,20 @@ public class guildSettings {
   private long expCooldown;
   private long levelBase;
   private double levelGrowth;
+  private List<Integer> roleLevels;
+  private List<Document> levellingRoles;
   private List<String> enabledFeatures;
   private List<Long> wordsDisabledChannels;
-  private List<Document> levellingRoles;
 
   private static int defaultExpIncrement = 3;
   private static int defaultExpVariation = 1;
   private static long defaultExpCooldown = 60;
   private static long defaultLevelBase = 200;
   private static double defaultLevelGrowth = 1.5;
+  private static List<Integer> defaultRoleLevels = new ArrayList<>();
+  private static List<Document> defaultLevellingRoles = new ArrayList<>();
   private static List<String> defaultEnabledFeatures = Arrays.asList("levelling", "words");
   private static List<Long> defaultWordsDisabledChannels = new ArrayList<>();
-  private static List<Document> defaultLevellingRoles = new ArrayList<>();
 
   public guildSettings(Document s) {
     if (s == null) {
@@ -36,6 +39,8 @@ public class guildSettings {
     this.expCooldown = getOrDefault.Long(s, "expCooldown", defaultExpCooldown);
     this.levelBase = getOrDefault.Long(s, "levelBase", defaultLevelBase);
     this.levelGrowth = getOrDefault.Double(s, "levelGrowth", defaultLevelGrowth);
+    this.roleLevels = s.getList("roleLevels", Integer.class, defaultRoleLevels);
+    this.levellingRoles = s.getList("levellingRoles", Document.class, defaultLevellingRoles);
     this.enabledFeatures = s.getList("enabledFeatures", String.class, defaultEnabledFeatures);
     this.wordsDisabledChannels = s.getList("wordsDisabledChannels", Long.class, defaultWordsDisabledChannels);
   }
@@ -56,7 +61,7 @@ public class guildSettings {
     return expVariation;
   }
 
-  public void setExpCooldown(int cooldown) {
+  public void setExpCooldown(long cooldown) {
     this.expCooldown = cooldown;
   }
 
@@ -78,6 +83,30 @@ public class guildSettings {
 
   public double getLevelGrowth() {
     return levelGrowth;
+  }
+
+  public void setRoleLevels(List<Integer> levels) {
+    this.roleLevels = levels;
+  }
+
+  public List<Integer> getRoleLevels() {
+    return roleLevels;
+  }
+
+  public void addRoleLevel(int level) {
+    this.roleLevels.add(level);
+  }
+
+  public void setLevellingRoles(List<Document> docs) {
+    this.levellingRoles = docs;
+  }
+
+  public void addLevellingRole(Document doc) {
+    this.levellingRoles.add(doc);
+  }
+
+  public List<Document> getLevellingRoles() {
+    return levellingRoles;
   }
 
   public void setEnabledFeatures(List<String> features) {
@@ -103,6 +132,8 @@ public class guildSettings {
         .append("expCooldown", expCooldown)
         .append("levelBase", levelBase)
         .append("levelGrowth", levelGrowth)
+        .append("roleLevels", roleLevels)
+        .append("levellingRoles", levellingRoles)
         .append("enabledFeatures", enabledFeatures)
         .append("wordsDisabledChannels", wordsDisabledChannels);
   }

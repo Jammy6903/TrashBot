@@ -1,11 +1,13 @@
 package com.jami.fun.levelling;
 
+import java.awt.Color;
 import java.util.Random;
 
 import com.jami.database.guild.guild;
 import com.jami.database.guild.guildUser;
 import com.jami.database.guild.guildSettings.*;
 
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class guildLevelling {
@@ -49,21 +51,17 @@ public class guildLevelling {
 
   public boolean incrementExp() {
 
-    // Check if cooldown time has elapsed since users last message
     if (System.currentTimeMillis() - userLastMessage <= expCooldown * 1000) {
       return false;
     }
-
-    // Increment exp by guild values, check for level up and increment level
 
     userExp = userExp + new Random().nextLong((expInc + expVar) - (expInc - expVar) + 1) + (expInc - expVar);
 
     gu.setExp(userExp);
 
-    // Set last message to current millis
     gu.setUserLastMessage(System.currentTimeMillis());
 
-    if (userExp >= levelRequirement()) {
+    if (userExp >= gu.getRequiredExp(levelBase, levelGrowth)) {
       userLevel++;
       gu.setLevel(userLevel);
       return true;
@@ -71,14 +69,14 @@ public class guildLevelling {
     return false;
   }
 
-  private double levelRequirement() {
-    return Math.floor(levelBase * Math.pow(userLevel + 1, levelGrowth));
-  }
-
   public void announceLevelUp() {
-    String message = String.format("**LEVEL UP!**\nYou've reached Level %d, you need %d more exp to reach level %d",
-        userLevel, (long) levelRequirement() - userExp, userLevel + 1);
-    event.getChannel().sendMessage(message).queue();
+    String message = String.format("You've reached Level %d!\nYou need %d more exp to reach level %d.",
+        userLevel, gu.getRequiredExp(levelBase, levelGrowth) - userExp, userLevel + 1);
+    EmbedBuilder embed = new EmbedBuilder()
+        .setTitle("**LEVEL UP!**")
+        .setDescription(message)
+        .setColor(Color.CYAN);
+    event.getMessage().replyEmbeds(embed.build());
   }
 
   public void commit() {

@@ -52,6 +52,10 @@ public class guildUser {
     this.userLastMessage = time;
   }
 
+  public long getRequiredExp(long levelBase, double levelGrowth) {
+    return (long) Math.floor(levelBase * Math.pow(userLevel + 1, levelGrowth));
+  }
+
   public Document toDocument() {
     return new Document("$set", new Document()
         .append("_id", userId)

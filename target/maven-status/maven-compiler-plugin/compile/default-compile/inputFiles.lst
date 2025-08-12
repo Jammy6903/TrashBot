@@ -5,7 +5,7 @@
 /home/jami/Documents/Development/Java/ManchesterDiscordBot/Trash-Bot/src/main/java/com/jami/database/guild/guild.java
 /home/jami/Documents/Development/Java/ManchesterDiscordBot/Trash-Bot/src/main/java/com/jami/database/guild/guildPunishment.java
 /home/jami/Documents/Development/Java/ManchesterDiscordBot/Trash-Bot/src/main/java/com/jami/database/guild/guildSettings/guildSettings.java
-/home/jami/Documents/Development/Java/ManchesterDiscordBot/Trash-Bot/src/main/java/com/jami/database/guild/guildSettings/levellingRoles/levellingRoles.java
+/home/jami/Documents/Development/Java/ManchesterDiscordBot/Trash-Bot/src/main/java/com/jami/database/guild/guildSettings/levellingRoles/levellingRole.java
 /home/jami/Documents/Development/Java/ManchesterDiscordBot/Trash-Bot/src/main/java/com/jami/database/guild/guildUser.java
 /home/jami/Documents/Development/Java/ManchesterDiscordBot/Trash-Bot/src/main/java/com/jami/database/guild/guildWord.java
 /home/jami/Documents/Development/Java/ManchesterDiscordBot/Trash-Bot/src/main/java/com/jami/database/user/user.java
@@ -21,7 +21,8 @@
 /home/jami/Documents/Development/Java/ManchesterDiscordBot/Trash-Bot/src/main/java/com/jami/fun/wordCount/wordCount.java
 /home/jami/Documents/Development/Java/ManchesterDiscordBot/Trash-Bot/src/main/java/com/jami/utilities/bracketing/commandsBracketing.java
 /home/jami/Documents/Development/Java/ManchesterDiscordBot/Trash-Bot/src/main/java/com/jami/utilities/featureRequests/commandsFeatureRequests.java
-/home/jami/Documents/Development/Java/ManchesterDiscordBot/Trash-Bot/src/main/java/com/jami/utilities/guildAdmin/guildSettings.java
+/home/jami/Documents/Development/Java/ManchesterDiscordBot/Trash-Bot/src/main/java/com/jami/utilities/guildAdmin/commandsSettings.java
+/home/jami/Documents/Development/Java/ManchesterDiscordBot/Trash-Bot/src/main/java/com/jami/utilities/guildAdmin/settings.java
 /home/jami/Documents/Development/Java/ManchesterDiscordBot/Trash-Bot/src/main/java/com/jami/utilities/guildLogging/guildChange.java
 /home/jami/Documents/Development/Java/ManchesterDiscordBot/Trash-Bot/src/main/java/com/jami/utilities/guildLogging/memberChange.java
 /home/jami/Documents/Development/Java/ManchesterDiscordBot/Trash-Bot/src/main/java/com/jami/utilities/guildLogging/messages.java

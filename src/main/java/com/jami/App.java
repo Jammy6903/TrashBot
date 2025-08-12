@@ -11,9 +11,14 @@ import com.mongodb.client.MongoClients;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.hooks.AnnotatedEventManager;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
+import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 
 import java.io.File;
@@ -82,9 +87,34 @@ public class App {
 
     private static void getCommands(JDA jda) {
 
+        // guild-settings sub commands
+
+        SubcommandData addLevellingRole = new SubcommandData("add-levelling-role",
+                "add a levelling role as a reward for members reaching certain levelling milestones")
+                .addOption(OptionType.INTEGER, "level", "level for member to reach to receive the role", true)
+                .addOption(OptionType.ROLE, "role", "role to give to the member", true);
+
+        SubcommandData removeLevellingRole = new SubcommandData("remove-levelling-role", "delete a levelling role.")
+                .addOption(OptionType.STRING, "id",
+                        "ID of the entry you want to remove, find it with /guild-settings list-levelling-roles", true);
+
+        SubcommandData listLevellingRoles = new SubcommandData("list-levelling-roles", "List all levelling roles");
+
+        // level sub commands
+
+        SubcommandData card = new SubcommandData("card", "See your or another users levelling card")
+                .addOption(OptionType.USER, "user", "who's level do you want to see?");
+
         jda.updateCommands().addCommands(
                 Commands.slash("featurerequest",
-                        "Submit a feature request for something you think this bot is missing."))
+                        "Submit a feature request for something you think this bot is missing."),
+                Commands.slash("guild-settings", "change settings for your guild")
+                        .addSubcommands(addLevellingRole, removeLevellingRole, listLevellingRoles)
+                        .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR))
+                        .setContexts(InteractionContextType.GUILD),
+                Commands.slash("level", "check out your level progression")
+                        .addSubcommands(card)
+                        .setContexts(InteractionContextType.GUILD))
                 .queue();
     }
 }

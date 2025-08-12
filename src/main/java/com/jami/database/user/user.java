@@ -69,8 +69,8 @@ public class user {
     this.userSettings = s;
   }
 
-  public void incrementLevel() {
-    this.userLevel++;
+  public long getRequiredExp(long levelBase, double levelGrowth) {
+    return (long) Math.floor(levelBase * Math.pow(userLevel + 1, levelGrowth));
   }
 
   /**

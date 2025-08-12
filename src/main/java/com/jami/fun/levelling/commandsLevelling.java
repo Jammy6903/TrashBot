@@ -2,55 +2,35 @@ package com.jami.fun.levelling;
 
 import com.jami.database.guild.guild;
 import com.jami.database.guild.guildUser;
-import com.jami.database.user.user;
+import com.jami.database.guild.guildSettings.guildSettings;
 
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 public class commandsLevelling {
-
-  private SlashCommandInteractionEvent event;
-  private String subCommand;
-  private User userOption;
-  private String whereOption;
-
-  public commandsLevelling(SlashCommandInteractionEvent e) {
-    this.event = e;
-    this.subCommand = e.getSubcommandName();
-    if (e.getOption("user") != null) {
-      userOption = e.getOption("user").getAsUser();
-    } else {
-      userOption = e.getUser();
-    }
-    if (e.getOption("where") != null) {
-      whereOption = e.getOption("where").getAsString();
-    }
-  }
-
-  public void go() {
-    switch (subCommand) {
-      case "score":
-        if (whereOption == "global") {
-          scoreGlobal();
+  public static void levellingCommands(SlashCommandInteractionEvent event) {
+    guild g = new guild(event.getGuild().getIdLong());
+    guildSettings gs = g.getSettings();
+    switch (event.getSubcommandName()) {
+      case "card":
+        long userId = event.getUser().getIdLong();
+        if (event.getOption("user") != null) {
+          userId = event.getOption("user").getAsUser().getIdLong();
         }
-        scoreCommand();
+        guildUser gu = g.getUser(userId);
+        event.replyEmbeds(generateLevelCard(event.getGuild().getMemberById(userId).getUser(),
+            gu.getLevel(), gu.getExp(), gu.getRequiredExp(gs.getLevelBase(), gs.getLevelGrowth())).build()).queue();
+        break;
+      case "leaderboard":
         break;
     }
   }
 
-  public void scoreCommand() {
-    guild g = new guild(event.getGuild().getIdLong());
-    guildUser u = g.getUser(userOption.getIdLong());
-    long exp = u.getExp();
-    long level = u.getLevel();
-    event.reply("Level: " + level + " | Exp: " + exp);
+  private static EmbedBuilder generateLevelCard(User u, int level, long exp, long requiredExp) {
+    EmbedBuilder embed = new EmbedBuilder();
+    embed.setTitle(u.getAsMention() + "'s Levelling Card");
+    embed.setDescription("Level: " + level + " | Exp: " + exp + "/" + requiredExp);
+    return embed;
   }
-
-  private void scoreGlobal() {
-    user u = new user(userOption.getIdLong());
-    long exp = u.getExp();
-    long level = u.getLevel();
-    event.reply("Level: " + level + " | Exp: " + exp);
-  }
-
 }
