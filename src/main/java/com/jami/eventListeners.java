@@ -8,6 +8,7 @@ import com.jami.fun.levelling.guildLevelling;
 import com.jami.fun.wordCount.wordCount;
 import com.jami.utilities.featureRequests.commandsFeatureRequests;
 import com.jami.utilities.guildAdmin.commandsSettings;
+import com.jami.utilities.info.commandsInfo;
 import com.jami.database.user.user;
 
 import net.dv8tion.jda.api.entities.Guild;
@@ -30,6 +31,12 @@ public class eventListeners {
         break;
       case "level":
         commandsLevelling.levellingCommands(event);
+        break;
+      case "info":
+        commandsInfo.infoCommands(event);
+        break;
+      default:
+        event.reply("Unknown command, how the fuck did you even manage that.");
         break;
     }
   }

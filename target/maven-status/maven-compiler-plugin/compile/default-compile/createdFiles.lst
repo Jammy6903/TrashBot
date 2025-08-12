@@ -3,8 +3,8 @@ com/jami/database/utilities/featureRequest.class
 com/jami/utilities/guildLogging/voiceEvents.class
 com/jami/database/user/userSettings.class
 com/jami/eventListeners.class
-com/jami/fun/wordCount/globalWordCount.class
 com/jami/database/getOrDefault.class
+com/jami/fun/wordCount/globalWordCount.class
 com/jami/database/guild/bracket/bracket$team.class
 com/jami/database/guild/guild.class
 com/jami/database/guild/bracket/bracket.class
@@ -15,9 +15,9 @@ com/jami/utilities/guildLogging/memberChange.class
 com/jami/fun/wordCount/guildWordCount.class
 com/jami/database/fun/word.class
 com/jami/utilities/guildLogging/messages.class
-com/jami/fun/wordCount/wordCount.class
-com/jami/database/guild/guildSettings/guildSettings.class
 com/jami/database/user/user.class
+com/jami/database/guild/guildSettings/guildSettings.class
+com/jami/fun/wordCount/wordCount.class
 com/jami/fun/levelling/globalLevelling.class
 com/jami/utilities/guildModeration/ban.class
 com/jami/database/guild/guildPunishment.class

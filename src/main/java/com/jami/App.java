@@ -27,114 +27,152 @@ import java.util.Properties;
 
 public class App {
 
-    private static JDA jda;
-    private static final EventWaiter eventWaiter = new EventWaiter();
-    private static final File config = new File("config.properties");
-    private static Properties Config = new Properties();
-    public static MongoClient mongoClient;
+        private static JDA jda;
+        private static final EventWaiter eventWaiter = new EventWaiter();
+        private static final File config = new File("config.properties");
+        private static Properties Config = new Properties();
+        public static MongoClient mongoClient;
 
-    public static void main(String[] args) {
-        try {
-            Config.load(new FileInputStream(config));
-            mongoClient = MongoClients.create(Config.getProperty("DATABASE_URI"));
-            if (args.length == 1) {
-                new App().start(args[0]);
-            } else {
-                new App().start(Config.getProperty("TOKEN"));
-            }
-        } catch (Exception e) {
-            System.out.println("Bot startup failed: " + e);
-        }
-    }
-
-    private void start(String Token) throws Exception {
-        jda = JDABuilder.createDefault(Token)
-                .setStatus(OnlineStatus.ONLINE)
-                .enableIntents(
-                        GatewayIntent.GUILD_MEMBERS,
-                        GatewayIntent.GUILD_MODERATION,
-                        GatewayIntent.GUILD_WEBHOOKS,
-                        GatewayIntent.GUILD_INVITES,
-                        GatewayIntent.GUILD_VOICE_STATES,
-                        GatewayIntent.GUILD_MESSAGES,
-                        GatewayIntent.GUILD_MESSAGE_REACTIONS,
-                        GatewayIntent.GUILD_MESSAGE_TYPING,
-                        GatewayIntent.DIRECT_MESSAGES,
-                        GatewayIntent.DIRECT_MESSAGE_REACTIONS,
-                        GatewayIntent.DIRECT_MESSAGE_TYPING,
-                        GatewayIntent.MESSAGE_CONTENT,
-                        GatewayIntent.AUTO_MODERATION_EXECUTION,
-                        GatewayIntent.GUILD_MESSAGE_POLLS)
-                .setEventManager(new AnnotatedEventManager())
-                .addEventListeners(eventWaiter, new eventListeners(), new guildChange(), new memberChange(),
-                        new messages(), new voiceEvents())
-                .build();
-
-        if (Config.getProperty("STATUS") != null) {
-            jda.getPresence().setActivity(Activity.customStatus(Config.getProperty("STATUS")));
+        public static void main(String[] args) {
+                try {
+                        Config.load(new FileInputStream(config));
+                        mongoClient = MongoClients.create(Config.getProperty("DATABASE_URI"));
+                        if (args.length == 1) {
+                                new App().start(args[0]);
+                        } else {
+                                new App().start(Config.getProperty("TOKEN"));
+                        }
+                } catch (Exception e) {
+                        System.out.println("Bot startup failed: " + e);
+                }
         }
 
-        getCommands(jda);
-    }
+        private void start(String Token) throws Exception {
+                jda = JDABuilder.createDefault(Token)
+                                .setStatus(OnlineStatus.ONLINE)
+                                .enableIntents(
+                                                GatewayIntent.GUILD_MEMBERS,
+                                                GatewayIntent.GUILD_MODERATION,
+                                                GatewayIntent.GUILD_WEBHOOKS,
+                                                GatewayIntent.GUILD_INVITES,
+                                                GatewayIntent.GUILD_VOICE_STATES,
+                                                GatewayIntent.GUILD_MESSAGES,
+                                                GatewayIntent.GUILD_MESSAGE_REACTIONS,
+                                                GatewayIntent.GUILD_MESSAGE_TYPING,
+                                                GatewayIntent.DIRECT_MESSAGES,
+                                                GatewayIntent.DIRECT_MESSAGE_REACTIONS,
+                                                GatewayIntent.DIRECT_MESSAGE_TYPING,
+                                                GatewayIntent.MESSAGE_CONTENT,
+                                                GatewayIntent.AUTO_MODERATION_EXECUTION,
+                                                GatewayIntent.GUILD_MESSAGE_POLLS)
+                                .setEventManager(new AnnotatedEventManager())
+                                .addEventListeners(eventWaiter, new eventListeners(), new guildChange(),
+                                                new memberChange(),
+                                                new messages(), new voiceEvents())
+                                .build();
 
-    public static EventWaiter getEventWaiter() {
-        return eventWaiter;
-    }
+                if (Config.getProperty("STATUS") != null) {
+                        jda.getPresence().setActivity(Activity.customStatus(Config.getProperty("STATUS")));
+                }
 
-    public static Properties getConfig() {
-        return Config;
-    }
+                getCommands(jda);
+        }
 
-    private static void getCommands(JDA jda) {
+        public static EventWaiter getEventWaiter() {
+                return eventWaiter;
+        }
 
-        /*
-         * / guild-settings sub commnads
-         */
+        public static Properties getConfig() {
+                return Config;
+        }
 
-        // Levelling Roles
+        public static JDA getJDA() {
+                return jda;
+        }
 
-        SubcommandData addLevellingRole = new SubcommandData("add-levelling-role",
-                "add a levelling role as a reward for members reaching certain levelling milestones")
-                .addOption(OptionType.INTEGER, "level", "level for member to reach to receive the role", true)
-                .addOption(OptionType.ROLE, "role", "role to give to the member", true);
+        private static void getCommands(JDA jda) {
 
-        SubcommandData removeLevellingRole = new SubcommandData("remove-levelling-role", "delete a levelling role.")
-                .addOption(OptionType.STRING, "id",
-                        "ID of the entry you want to remove, find it with /guild-settings list-levelling-roles", true);
+                /*
+                 * / guild-settings sub commnads
+                 */
 
-        SubcommandData listLevellingRoles = new SubcommandData("list-levelling-roles", "List all levelling roles");
+                // Levelling Roles
 
-        // Levelling
+                SubcommandData addLevellingRole = new SubcommandData("add-levelling-role",
+                                "add a levelling role as a reward for members reaching certain levelling milestones")
+                                .addOption(OptionType.INTEGER, "level", "level for member to reach to receive the role",
+                                                true)
+                                .addOption(OptionType.ROLE, "role", "role to give to the member", true);
 
-        SubcommandData setExpSettings = new SubcommandData("set-exp-settings", "set values for gaining exp")
-                .addOption(OptionType.INTEGER, "exp-increment", "how much exp to give per valid message")
-                .addOption(OptionType.INTEGER, "exp-variation", "how much to vary exp per valid message")
-                .addOption(OptionType.INTEGER, "exp-cooldown", "how long between messages to be able to gain exp");
+                SubcommandData removeLevellingRole = new SubcommandData("remove-levelling-role",
+                                "delete a levelling role.")
+                                .addOption(OptionType.STRING, "id",
+                                                "ID of the entry you want to remove, find it with /guild-settings list-levelling-roles",
+                                                true);
 
-        SubcommandData setLevelSettings = new SubcommandData("set-level-settings", "set values for level progression")
-                .addOption(OptionType.INTEGER, "base-exp",
-                        "where levels start, e.g. if set to 200, level 1 is gained at 200 exp")
-                .addOption(OptionType.INTEGER, "growth",
-                        "how much to increase exp requirements per level, e.g. if set to 1, exp requirement would be linear");
+                SubcommandData listLevellingRoles = new SubcommandData("list-levelling-roles",
+                                "List all levelling roles");
 
-        /*
-         * / level sub commands
-         */
+                // Levelling
 
-        SubcommandData card = new SubcommandData("card", "See your or another users levelling card")
-                .addOption(OptionType.USER, "user", "who's level do you want to see?");
+                SubcommandData setExpSettings = new SubcommandData("set-exp-settings", "set values for gaining exp")
+                                .addOption(OptionType.INTEGER, "exp-increment",
+                                                "how much exp to give per valid message")
+                                .addOption(OptionType.INTEGER, "exp-variation",
+                                                "how much to vary exp per valid message")
+                                .addOption(OptionType.INTEGER, "exp-cooldown",
+                                                "how long between messages to be able to gain exp");
 
-        jda.updateCommands().addCommands(
-                Commands.slash("featurerequest",
-                        "Submit a feature request for something you think this bot is missing."),
-                Commands.slash("guild-settings", "change settings for your guild")
-                        .addSubcommands(addLevellingRole, removeLevellingRole, listLevellingRoles, setExpSettings,
-                                setLevelSettings)
-                        .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR))
-                        .setContexts(InteractionContextType.GUILD),
-                Commands.slash("level", "check out your level progression")
-                        .addSubcommands(card)
-                        .setContexts(InteractionContextType.GUILD))
-                .queue();
-    }
+                SubcommandData setLevelSettings = new SubcommandData("set-level-settings",
+                                "set values for level progression")
+                                .addOption(OptionType.INTEGER, "base-exp",
+                                                "where levels start, e.g. if set to 200, level 1 is gained at 200 exp")
+                                .addOption(OptionType.INTEGER, "growth",
+                                                "how much to increase exp requirements per level, e.g. if set to 1, exp requirement would be linear");
+
+                /*
+                 * level sub commands
+                 */
+
+                SubcommandData card = new SubcommandData("card", "See your or another users levelling card")
+                                .addOption(OptionType.USER, "user", "who's level do you want to see?");
+
+                /*
+                 * info sub commands
+                 */
+
+                SubcommandData bot = new SubcommandData("bot", "shows info about the bot");
+
+                SubcommandData guild = new SubcommandData("guild", "shows info about the guild");
+
+                SubcommandData member = new SubcommandData("member", "shows info about a member in the guild")
+                                .addOption(OptionType.USER, "member", "which member?");
+
+                SubcommandData user = new SubcommandData("user", "shows known info about a discord user")
+                                .addOption(OptionType.INTEGER, "user-id", "user's discord ID");
+
+                SubcommandData role = new SubcommandData("role", "shows info about a guild role")
+                                .addOption(OptionType.ROLE, "role", "which role?");
+
+                SubcommandData channel = new SubcommandData("channel", "shows info about a channel")
+                                .addOption(OptionType.CHANNEL, "channel", "which channel?");
+
+                jda.updateCommands().addCommands(
+                                Commands.slash("featurerequest",
+                                                "Submit a feature request for something you think this bot is missing."),
+                                Commands.slash("guild-settings", "change settings for your guild")
+                                                .addSubcommands(addLevellingRole, removeLevellingRole,
+                                                                listLevellingRoles, setExpSettings,
+                                                                setLevelSettings)
+                                                .setDefaultPermissions(DefaultMemberPermissions
+                                                                .enabledFor(Permission.ADMINISTRATOR))
+                                                .setContexts(InteractionContextType.GUILD),
+                                Commands.slash("level", "check out your level progression")
+                                                .addSubcommands(card)
+                                                .setContexts(InteractionContextType.GUILD),
+                                Commands.slash("info", "shows info about various objects")
+                                                .addSubcommands(bot, guild, member, user, role, channel)
+                                                .setContexts(InteractionContextType.GUILD))
+                                .queue();
+        }
 }
