@@ -10,7 +10,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 
 public class commandsSettings {
   public static void guildSettingsCommand(SlashCommandInteractionEvent event) {
-    settings s = new settings(event.getIdLong());
+    settings s = new settings(event.getGuild().getIdLong());
     switch (event.getSubcommandName()) {
       case "add-levelling-role":
         s.addLevellingRole(event.getOption("role").getAsRole().getIdLong(), event.getOption("level").getAsInt());

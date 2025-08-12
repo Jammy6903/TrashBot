@@ -43,7 +43,7 @@ public class App {
                 new App().start(Config.getProperty("TOKEN"));
             }
         } catch (Exception e) {
-            System.out.println("Bot startup failed: ");
+            System.out.println("Bot startup failed: " + e);
         }
     }
 
@@ -87,7 +87,11 @@ public class App {
 
     private static void getCommands(JDA jda) {
 
-        // guild-settings sub commands
+        /*
+         * / guild-settings sub commnads
+         */
+
+        // Levelling Roles
 
         SubcommandData addLevellingRole = new SubcommandData("add-levelling-role",
                 "add a levelling role as a reward for members reaching certain levelling milestones")
@@ -100,7 +104,22 @@ public class App {
 
         SubcommandData listLevellingRoles = new SubcommandData("list-levelling-roles", "List all levelling roles");
 
-        // level sub commands
+        // Levelling
+
+        SubcommandData setExpSettings = new SubcommandData("set-exp-settings", "set values for gaining exp")
+                .addOption(OptionType.INTEGER, "exp-increment", "how much exp to give per valid message")
+                .addOption(OptionType.INTEGER, "exp-variation", "how much to vary exp per valid message")
+                .addOption(OptionType.INTEGER, "exp-cooldown", "how long between messages to be able to gain exp");
+
+        SubcommandData setLevelSettings = new SubcommandData("set-level-settings", "set values for level progression")
+                .addOption(OptionType.INTEGER, "base-exp",
+                        "where levels start, e.g. if set to 200, level 1 is gained at 200 exp")
+                .addOption(OptionType.INTEGER, "growth",
+                        "how much to increase exp requirements per level, e.g. if set to 1, exp requirement would be linear");
+
+        /*
+         * / level sub commands
+         */
 
         SubcommandData card = new SubcommandData("card", "See your or another users levelling card")
                 .addOption(OptionType.USER, "user", "who's level do you want to see?");
@@ -109,7 +128,8 @@ public class App {
                 Commands.slash("featurerequest",
                         "Submit a feature request for something you think this bot is missing."),
                 Commands.slash("guild-settings", "change settings for your guild")
-                        .addSubcommands(addLevellingRole, removeLevellingRole, listLevellingRoles)
+                        .addSubcommands(addLevellingRole, removeLevellingRole, listLevellingRoles, setExpSettings,
+                                setLevelSettings)
                         .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR))
                         .setContexts(InteractionContextType.GUILD),
                 Commands.slash("level", "check out your level progression")

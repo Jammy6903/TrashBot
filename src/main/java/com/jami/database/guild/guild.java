@@ -3,7 +3,6 @@ package com.jami.database.guild;
 import org.bson.Document;
 
 import com.jami.database.getOrDefault;
-import com.jami.database.guild.bracket.*;
 import com.jami.database.guild.guildSettings.*;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
