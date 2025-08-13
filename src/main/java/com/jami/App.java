@@ -1,6 +1,7 @@
 package com.jami;
 
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
+import com.jami.database.config.config;
 import com.jami.utilities.guildLogging.guildChange;
 import com.jami.utilities.guildLogging.memberChange;
 import com.jami.utilities.guildLogging.messages;
@@ -29,25 +30,37 @@ public class App {
 
         private static JDA jda;
         private static final EventWaiter eventWaiter = new EventWaiter();
-        private static final File config = new File("config.properties");
-        private static Properties Config = new Properties();
+        private static final File propFile = new File("config.properties");
+        private static Properties props = new Properties();
         public static MongoClient mongoClient;
 
-        public static String currentConfig;
+        private static String currentConfig;
+
+        public static config CONFIG;
 
         public static void main(String[] args) {
                 try {
-                        Config.load(new FileInputStream(config));
-                        currentConfig = Config.getProperty("CURRENT_CONFIG");
-                        mongoClient = MongoClients.create(Config.getProperty("DATABASE_URI"));
+                        props.load(new FileInputStream(propFile));
+                        currentConfig = props.getProperty("CURRENT_CONFIG");
+                        mongoClient = MongoClients.create(props.getProperty("DATABASE_URI"));
                         if (args.length == 1) {
                                 new App().start(args[0]);
                         } else {
-                                new App().start(Config.getProperty("TOKEN"));
+                                new App().start(props.getProperty("TOKEN"));
                         }
                 } catch (Exception e) {
                         System.out.println("Bot startup failed: " + e);
                 }
+
+                CONFIG = new config(currentConfig);
+                String status = CONFIG.getBotStatus();
+                if (status == "") {
+                        return;
+                }
+                if (status == null) {
+                        return;
+                }
+                jda.getPresence().setActivity(Activity.customStatus(status));
         }
 
         private void start(String Token) throws Exception {
@@ -74,8 +87,6 @@ public class App {
                                                 new messages(), new voiceEvents())
                                 .build();
 
-                jda.getPresence().setActivity(Activity.customStatus("Seizing"));
-
                 getCommands(jda);
         }
 
@@ -83,8 +94,8 @@ public class App {
                 return eventWaiter;
         }
 
-        public static Properties getConfig() {
-                return Config;
+        public static Properties getProps() {
+                return props;
         }
 
         private static void getCommands(JDA jda) {

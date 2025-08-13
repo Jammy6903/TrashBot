@@ -11,6 +11,7 @@ import org.bson.Document;
 import com.jami.database.getOrDefault;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.UpdateOptions;
 
 public class config {
   private static MongoDatabase db = mongoClient.getDatabase("BOT");
@@ -37,7 +38,7 @@ public class config {
       entry = new Document();
     }
 
-    this.configName = configName;
+    this.configName = getOrDefault.String(entry, "_id", "NewConfig");
     this.botStatus = getOrDefault.String(entry, "botStatus", "");
     this.expIncrement = getOrDefault.Long(entry, "expIncrement", 0L);
     this.expVariation = getOrDefault.Long(entry, "expVariation", 0L);
@@ -47,6 +48,114 @@ public class config {
     this.disabledFeatures = entry.getList("disabledFeatures", String.class, new ArrayList<>());
     this.disabledCommands = entry.getList("disabledCommands", String.class, new ArrayList<>());
     this.adminIds = entry.getList("adminIds", Long.class, new ArrayList<>());
+  }
+
+  public void setConfigName(String name) {
+    this.configName = name;
+  }
+
+  public String getConfigName() {
+    return configName;
+  }
+
+  public void setBotStatus(String status) {
+    this.botStatus = status;
+  }
+
+  public String getBotStatus() {
+    return botStatus;
+  }
+
+  public void setExpIncrement(long increment) {
+    this.expIncrement = increment;
+  }
+
+  public long getExpIncrement() {
+    return expIncrement;
+  }
+
+  public void setExpVariation(long variation) {
+    this.expVariation = variation;
+  }
+
+  public long getExpVariation() {
+    return expVariation;
+  }
+
+  public void setExpCooldown(long cooldown) {
+    this.expCooldown = cooldown;
+  }
+
+  public long getExpCooldown() {
+    return expCooldown;
+  }
+
+  public void setLevelBase(long levelBase) {
+    this.levelBase = levelBase;
+  }
+
+  public long getLevelBase() {
+    return levelBase;
+  }
+
+  public void setLevelGrowth(double growth) {
+    this.levelGrowth = growth;
+  }
+
+  public double getLevelGrowth() {
+    return levelGrowth;
+  }
+
+  public void addDisabledFeature(String feature) {
+    this.disabledFeatures.add(feature);
+  }
+
+  public void removeDisabledFeature(String feature) {
+    this.disabledFeatures.remove(feature);
+  }
+
+  public List<String> getDisabledFeatures() {
+    return disabledFeatures;
+  }
+
+  public void addDisabledCommand(String feature) {
+    this.disabledCommands.add(feature);
+  }
+
+  public void removeDisabledCommand(String feature) {
+    this.disabledCommands.add(feature);
+  }
+
+  public List<String> getDisabledCommands() {
+    return disabledCommands;
+  }
+
+  public void addAdminId(long id) {
+    this.adminIds.add(id);
+  }
+
+  public void removeAdminId(long id) {
+    this.adminIds.remove(id);
+  }
+
+  public List<Long> getAdminIds() {
+    return adminIds;
+  }
+
+  public void saveConfig() {
+    Document config = new Document("$set", new Document()
+        .append("_id", configName)
+        .append("botStatus", botStatus)
+        .append("expIncrement", expIncrement)
+        .append("expVariation", expVariation)
+        .append("expCooldown", expCooldown)
+        .append("levelBase", levelBase)
+        .append("levelGrowth", levelGrowth)
+        .append("disabledFeatures", disabledFeatures)
+        .append("disabledCommands", disabledCommands)
+        .append("adminIds", adminIds));
+    UpdateOptions opts = new UpdateOptions().upsert(true);
+    configs.updateOne(eq("_id", configName), config, opts);
   }
 
 }

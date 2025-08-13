@@ -9,6 +9,7 @@ import com.jami.fun.wordCount.wordCount;
 import com.jami.utilities.featureRequests.commandsFeatureRequests;
 import com.jami.utilities.guildAdmin.commandsSettings;
 import com.jami.utilities.info.commandsInfo;
+import com.jami.botAdmin.commandsAdmin;
 import com.jami.database.user.user;
 
 import net.dv8tion.jda.api.entities.Guild;
@@ -46,8 +47,14 @@ public class eventListeners {
     User u = event.getAuthor();
     Guild g = event.getGuild();
     Channel c = event.getChannel();
+    String m = event.getMessage().getContentRaw();
 
     if (u.isBot()) {
+      return;
+    }
+
+    if (m.startsWith("a!")) {
+      commandsAdmin.adminCommands(event);
       return;
     }
 
