@@ -154,6 +154,22 @@ public class App {
                                 .addOption(OptionType.USER, "user", "who's level do you want to see?");
 
                 /*
+                 * words sub commands
+                 */
+
+                SubcommandData info = new SubcommandData("info", "See how much a word is used")
+                                .addOption(OptionType.STRING, "word", "What word to see info for", true)
+                                .addOption(OptionType.STRING, "location",
+                                                "Wether to see word usage info for global or guild", true);
+
+                SubcommandData leaderboard = new SubcommandData("leaderboard", "See top word usage")
+                                .addOption(OptionType.INTEGER, "page", "Leaderboard page")
+                                .addOption(OptionType.STRING, "order", "Order to see words")
+                                .addOption(OptionType.BOOLEAN, "reverse", "Whether to reverse the order")
+                                .addOption(OptionType.STRING, "location",
+                                                "whether to see word usage leaderboard for global or guild", true);
+
+                /*
                  * info sub commands
                  */
 
@@ -185,6 +201,9 @@ public class App {
                                                 .setContexts(InteractionContextType.GUILD),
                                 Commands.slash("level", "check out your level progression")
                                                 .addSubcommands(card)
+                                                .setContexts(InteractionContextType.GUILD),
+                                Commands.slash("words", "Check out word usage")
+                                                .addSubcommands(info, leaderboard)
                                                 .setContexts(InteractionContextType.GUILD),
                                 Commands.slash("info", "shows info about various objects")
                                                 .addSubcommands(bot, guild, member, user, role, channel)

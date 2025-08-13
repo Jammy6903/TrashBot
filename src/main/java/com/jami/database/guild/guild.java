@@ -11,6 +11,7 @@ import com.mongodb.client.model.UpdateOptions;
 import static com.mongodb.client.model.Filters.*;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static com.jami.App.mongoClient;
 
@@ -75,6 +76,10 @@ public class guild {
     guildWord gw = new guildWord(word, w);
     this.wordList.add(gw);
     return gw;
+  }
+
+  public List<guildWord> getWords() {
+    return null;
   }
 
   public guildPunishment getPunishment(String punishmentId) {

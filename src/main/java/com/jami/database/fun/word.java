@@ -5,6 +5,7 @@ import org.bson.Document;
 import static com.jami.App.mongoClient;
 import static com.mongodb.client.model.Filters.eq;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.mongodb.client.model.Filters.*;
@@ -13,6 +14,7 @@ import org.bson.types.ObjectId;
 
 import com.jami.database.getOrDefault;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.UpdateOptions;
 
@@ -32,6 +34,12 @@ public class word {
     this.id = getOrDefault.ObjectId(wordEntry, "_id");
     this.word = word;
     this.count = getOrDefault.Long(wordEntry, "count", 0L);
+  }
+
+  private word(ObjectId id, String word, long count) {
+    this.id = id;
+    this.word = word;
+    this.count = count;
   }
 
   public String getId() {
@@ -54,11 +62,23 @@ public class word {
     return count;
   }
 
-  public static List<word> getWords(long amount, int index, String order, boolean reverseOrder) {
-    if (amount > words.countDocuments()) {
-      amount = words.countDocuments();
+  public static List<word> getWords(int amount, int page, String order, boolean reverseOrder) {
+    int sortDirection = reverseOrder ? 1 : -1;
+    int skip = page * amount;
+
+    try (MongoCursor<Document> cursor = words.find()
+        .sort(new Document(order, sortDirection))
+        .skip(skip)
+        .limit(amount)
+        .iterator()) {
+
+      List<word> results = new ArrayList<>();
+      while (cursor.hasNext()) {
+        Document doc = cursor.next();
+        results.add(new word(doc.getObjectId("_id"), doc.getString("word"), doc.getLong("count")));
+      }
+      return results;
     }
-    return null;
   }
 
   public void commit() {

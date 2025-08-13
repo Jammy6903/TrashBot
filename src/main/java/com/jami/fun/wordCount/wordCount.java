@@ -2,6 +2,7 @@ package com.jami.fun.wordCount;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 
 // To-Do maybe, check dictionary for word validity.
 
@@ -16,6 +17,7 @@ public class wordCount {
     message = message.toLowerCase();
     message = message.replaceAll("\\p{Punct}", "");
     ArrayList<String> words = new ArrayList<>(Arrays.asList(message.split(" ")));
+    words.removeAll(Collections.singleton(""));
     return words;
   }
 }

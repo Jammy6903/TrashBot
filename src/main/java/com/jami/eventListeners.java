@@ -5,6 +5,7 @@ import java.util.List;
 import com.jami.fun.levelling.commandsLevelling;
 import com.jami.fun.levelling.globalLevelling;
 import com.jami.fun.levelling.guildLevelling;
+import com.jami.fun.wordCount.commandsWordCount;
 import com.jami.fun.wordCount.wordCount;
 import com.jami.utilities.featureRequests.commandsFeatureRequests;
 import com.jami.utilities.guildAdmin.commandsSettings;
@@ -38,6 +39,9 @@ public class eventListeners {
         break;
       case "level":
         commandsLevelling.levellingCommands(event);
+        break;
+      case "words":
+        commandsWordCount.wordCommands(event);
         break;
       case "info":
         commandsInfo.infoCommands(event);
