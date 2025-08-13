@@ -51,7 +51,7 @@ public class commandsAdmin {
         }
         String adminIds = "";
         for (long id : App.CONFIG.getAdminIds()) {
-          adminIds += "  - " + String.valueOf(id) + "\n";
+          adminIds += "- " + String.valueOf(id) + "\n";
         }
         EmbedBuilder embed = new EmbedBuilder()
             .setTitle(App.CONFIG.getConfigName())

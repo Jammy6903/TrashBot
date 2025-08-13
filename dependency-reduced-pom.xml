@@ -4,7 +4,7 @@
   <groupId>com.jami</groupId>
   <artifactId>Trash-Bot</artifactId>
   <name>Trash-Bot</name>
-  <version>0.2-alpha</version>
+  <version>0.2.1-alpha</version>
   <build>
     <pluginManagement>
       <plugins>

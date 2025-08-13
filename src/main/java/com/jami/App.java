@@ -163,11 +163,11 @@ public class App {
                                                 "Wether to see word usage info for global or guild", true);
 
                 SubcommandData leaderboard = new SubcommandData("leaderboard", "See top word usage")
+                                .addOption(OptionType.STRING, "location",
+                                                "whether to see word usage leaderboard for global or guild", true)
                                 .addOption(OptionType.INTEGER, "page", "Leaderboard page")
                                 .addOption(OptionType.STRING, "order", "Order to see words")
-                                .addOption(OptionType.BOOLEAN, "reverse", "Whether to reverse the order")
-                                .addOption(OptionType.STRING, "location",
-                                                "whether to see word usage leaderboard for global or guild", true);
+                                .addOption(OptionType.BOOLEAN, "reverse", "Whether to reverse the order");
 
                 /*
                  * info sub commands
