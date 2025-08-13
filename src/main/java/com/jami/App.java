@@ -33,9 +33,12 @@ public class App {
         private static Properties Config = new Properties();
         public static MongoClient mongoClient;
 
+        public static String currentConfig;
+
         public static void main(String[] args) {
                 try {
                         Config.load(new FileInputStream(config));
+                        currentConfig = Config.getProperty("CURRENT_CONFIG");
                         mongoClient = MongoClients.create(Config.getProperty("DATABASE_URI"));
                         if (args.length == 1) {
                                 new App().start(args[0]);
@@ -71,9 +74,7 @@ public class App {
                                                 new messages(), new voiceEvents())
                                 .build();
 
-                if (Config.getProperty("STATUS") != null) {
-                        jda.getPresence().setActivity(Activity.customStatus(Config.getProperty("STATUS")));
-                }
+                jda.getPresence().setActivity(Activity.customStatus("Seizing"));
 
                 getCommands(jda);
         }
@@ -86,14 +87,10 @@ public class App {
                 return Config;
         }
 
-        public static JDA getJDA() {
-                return jda;
-        }
-
         private static void getCommands(JDA jda) {
 
                 /*
-                 * / guild-settings sub commnads
+                 * guild-settings sub commnads
                  */
 
                 // Levelling Roles

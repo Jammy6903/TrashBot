@@ -7,6 +7,13 @@ import com.jami.database.guild.guildSettings.*;
 import com.jami.database.user.userSettings;
 
 public class getOrDefault {
+  public static String String(Document doc, String key, String defaultValue) {
+    if (doc.getString(key) != null) {
+      return doc.getString(key);
+    }
+    return defaultValue;
+  }
+
   public static Long Long(Document doc, String key, Long defaultValue) {
     if (doc.getLong(key) != null) {
       return doc.getLong(key);
