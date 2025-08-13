@@ -24,6 +24,7 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.util.Properties;
 
 public class App {
@@ -52,13 +53,12 @@ public class App {
                         System.out.println("Bot startup failed: " + e);
                 }
 
+                new config("defaultConfig").saveConfig(); // Makes sure theres always a default config available
+
                 CONFIG = new config(currentConfig);
                 String status = CONFIG.getBotStatus();
-                if (status == "") {
-                        return;
-                }
-                if (status == null) {
-                        return;
+                if (!(status == "" || status == " " || status == null)) {
+                        status = "-";
                 }
                 jda.getPresence().setActivity(Activity.customStatus(status));
         }
@@ -96,6 +96,14 @@ public class App {
 
         public static Properties getProps() {
                 return props;
+        }
+
+        public static void saveProps() {
+                try {
+                        props.store(new FileOutputStream(propFile), null);
+                } catch (Exception e) {
+                        System.out.println("[ERROR] Unable to save to properties file - " + e);
+                }
         }
 
         private static void getCommands(JDA jda) {

@@ -14,7 +14,7 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.UpdateOptions;
 
 public class config {
-  private static MongoDatabase db = mongoClient.getDatabase("BOT");
+  private static MongoDatabase db = mongoClient.getDatabase("TRASHBOT");
   private static MongoCollection<Document> configs = db.getCollection("configs");
 
   private String configName;
@@ -38,7 +38,7 @@ public class config {
       entry = new Document();
     }
 
-    this.configName = getOrDefault.String(entry, "_id", "NewConfig");
+    this.configName = getOrDefault.String(entry, "_id", configName);
     this.botStatus = getOrDefault.String(entry, "botStatus", "");
     this.expIncrement = getOrDefault.Long(entry, "expIncrement", 0L);
     this.expVariation = getOrDefault.Long(entry, "expVariation", 0L);
