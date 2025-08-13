@@ -93,7 +93,7 @@ public class commandsAdmin {
           return;
         }
         try {
-          App.CONFIG.setExpIncrement(Long.valueOf(args.get(1)));
+          App.CONFIG.setExpIncrement(Integer.valueOf(args.get(1)));
           event.getMessage().reply("Exp Increment set to " + args.get(1)).queue();
         } catch (Exception e) {
           event.getMessage().reply("**Command Usage:** a!set-exp-increment <exp>").queue();
@@ -106,7 +106,7 @@ public class commandsAdmin {
           return;
         }
         try {
-          App.CONFIG.setExpVariation(Long.valueOf(args.get(1)));
+          App.CONFIG.setExpVariation(Integer.valueOf(args.get(1)));
           event.getMessage().reply("Exp Variation set to " + args.get(1)).queue();
         } catch (Exception e) {
           event.getMessage().reply("**Command Usage:** a!set-exp-variation <variation>").queue();

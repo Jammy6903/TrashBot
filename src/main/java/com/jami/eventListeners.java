@@ -23,6 +23,12 @@ public class eventListeners {
 
   @SubscribeEvent
   public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
+
+    if (App.CONFIG.getDisabledCommands().contains(event.getName())) {
+      event.reply("Sorry! That command is disabled at the moment.").queue();
+      return;
+    }
+
     switch (event.getName()) {
       case "featurerequest":
         commandsFeatureRequests.newFeatureRequest(event);
@@ -58,10 +64,10 @@ public class eventListeners {
       return;
     }
 
-    List<String> userEnabledFeatures = new user(u.getIdLong()).getSettings().getEnabledFeatures();
+    List<String> userDisabledFetures = new user(u.getIdLong()).getSettings().getDisabledFeatures();
 
     // Levelling
-    if (userEnabledFeatures.contains("levelling")) {
+    if (!userDisabledFetures.contains("levelling") && !App.CONFIG.getDisabledFeatures().contains("levelling")) {
       globalLevelling globall = new globalLevelling(event.getAuthor().getIdLong());
       globall.incrementExp();
 
@@ -73,7 +79,7 @@ public class eventListeners {
     }
 
     // WordCount
-    if (userEnabledFeatures.contains("words")) {
+    if (!userDisabledFetures.contains("words") && !App.CONFIG.getDisabledFeatures().contains("words")) {
       wordCount.incrementWords(event.getMessage().getContentRaw(), g.getIdLong(), c.getIdLong());
     }
   }

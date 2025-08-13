@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.bson.Document;
 
+import com.jami.App;
 import com.jami.database.getOrDefault;
 
 public class guildSettings {
@@ -16,31 +17,26 @@ public class guildSettings {
   private double levelGrowth;
   private List<Integer> roleLevels;
   private List<Document> levellingRoles;
-  private List<String> enabledFeatures;
+  private List<String> disabledFeatures;
   private List<Long> wordsDisabledChannels;
 
-  private static int defaultExpIncrement = 3;
-  private static int defaultExpVariation = 1;
-  private static long defaultExpCooldown = 60;
-  private static long defaultLevelBase = 200;
-  private static double defaultLevelGrowth = 1.5;
   private static List<Integer> defaultRoleLevels = new ArrayList<>();
   private static List<Document> defaultLevellingRoles = new ArrayList<>();
-  private static List<String> defaultEnabledFeatures = Arrays.asList("levelling", "words");
+  private static List<String> defaultEnabledFeatures = new ArrayList<>();
   private static List<Long> defaultWordsDisabledChannels = new ArrayList<>();
 
   public guildSettings(Document s) {
     if (s == null) {
       s = new Document();
     }
-    this.expIncrement = s.getInteger("expIncrement", defaultExpIncrement);
-    this.expVariation = s.getInteger("expVariation", defaultExpVariation);
-    this.expCooldown = getOrDefault.Long(s, "expCooldown", defaultExpCooldown);
-    this.levelBase = getOrDefault.Long(s, "levelBase", defaultLevelBase);
-    this.levelGrowth = getOrDefault.Double(s, "levelGrowth", defaultLevelGrowth);
+    this.expIncrement = s.getInteger("expIncrement", App.CONFIG.getExpIncrement());
+    this.expVariation = s.getInteger("expVariation", App.CONFIG.getExpVariation());
+    this.expCooldown = getOrDefault.Long(s, "expCooldown", App.CONFIG.getExpCooldown());
+    this.levelBase = getOrDefault.Long(s, "levelBase", App.CONFIG.getLevelBase());
+    this.levelGrowth = getOrDefault.Double(s, "levelGrowth", App.CONFIG.getLevelGrowth());
     this.roleLevels = s.getList("roleLevels", Integer.class, defaultRoleLevels);
     this.levellingRoles = s.getList("levellingRoles", Document.class, defaultLevellingRoles);
-    this.enabledFeatures = s.getList("enabledFeatures", String.class, defaultEnabledFeatures);
+    this.disabledFeatures = s.getList("disabledFeatures", String.class, defaultEnabledFeatures);
     this.wordsDisabledChannels = s.getList("wordsDisabledChannels", Long.class, defaultWordsDisabledChannels);
   }
 
@@ -108,12 +104,20 @@ public class guildSettings {
     return levellingRoles;
   }
 
-  public void setEnabledFeatures(List<String> features) {
-    this.enabledFeatures = features;
+  public void setDisabledFeatures(List<String> features) {
+    this.disabledFeatures = features;
   }
 
-  public List<String> getEnabledFeatures() {
-    return enabledFeatures;
+  public List<String> getDisabledFeatures() {
+    return disabledFeatures;
+  }
+
+  public void addDisabledFeature(String feature) {
+    this.disabledFeatures.add(feature);
+  }
+
+  public void removeDisabledFeature(String feature) {
+    this.disabledFeatures.remove(feature);
   }
 
   public void setWordsDisabledChannels(List<Long> channels) {
@@ -133,7 +137,7 @@ public class guildSettings {
         .append("levelGrowth", levelGrowth)
         .append("roleLevels", roleLevels)
         .append("levellingRoles", levellingRoles)
-        .append("enabledFeatures", enabledFeatures)
+        .append("disabledFeatures", disabledFeatures)
         .append("wordsDisabledChannels", wordsDisabledChannels);
   }
 }

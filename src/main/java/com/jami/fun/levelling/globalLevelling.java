@@ -2,6 +2,7 @@ package com.jami.fun.levelling;
 
 import java.util.Random;
 
+import com.jami.App;
 import com.jami.database.user.user;
 
 public class globalLevelling {
@@ -9,15 +10,6 @@ public class globalLevelling {
   private long userExp;
   private int userLevel;
   private long userLastMessage;
-
-  // To-do, set these variables somewhere else
-
-  private static int inc = 3;
-  private static int var = 1;
-  private static long cooldown = 60;
-
-  private static long levelBase = 200;
-  private static double levelGrowth = 1.5;
 
   public globalLevelling(long userId) {
     this.u = new user(userId);
@@ -28,7 +20,14 @@ public class globalLevelling {
 
   public void incrementExp() {
 
-    if (System.currentTimeMillis() - userLastMessage <= cooldown * 1000) {
+    int inc = App.CONFIG.getExpIncrement();
+    int var = App.CONFIG.getExpVariation();
+    long cool = App.CONFIG.getExpCooldown();
+
+    long base = App.CONFIG.getLevelBase();
+    double growth = App.CONFIG.getLevelGrowth();
+
+    if (System.currentTimeMillis() - userLastMessage <= cool * 1000) {
       return;
     }
 
@@ -38,7 +37,7 @@ public class globalLevelling {
 
     u.setLastMessage(System.currentTimeMillis());
 
-    if (u.getRequiredExp(levelBase, levelGrowth) >= userExp) {
+    if (u.getRequiredExp(base, growth) >= userExp) {
       userLevel++;
       u.setLevel(userLevel);
     }

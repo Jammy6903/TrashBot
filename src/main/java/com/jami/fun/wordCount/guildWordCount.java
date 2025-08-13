@@ -11,7 +11,7 @@ public class guildWordCount {
     guild g = new guild(guildId);
     guildSettings s = g.getSettings();
 
-    if (!s.getEnabledFeatures().contains("words")) {
+    if (s.getDisabledFeatures().contains("words")) {
       return;
     }
 

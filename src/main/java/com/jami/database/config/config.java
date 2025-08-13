@@ -21,8 +21,8 @@ public class config {
 
   private String botStatus;
 
-  private long expIncrement;
-  private long expVariation;
+  private int expIncrement;
+  private int expVariation;
   private long expCooldown;
   private long levelBase;
   private double levelGrowth;
@@ -40,8 +40,8 @@ public class config {
 
     this.configName = getOrDefault.String(entry, "_id", configName);
     this.botStatus = getOrDefault.String(entry, "botStatus", "");
-    this.expIncrement = getOrDefault.Long(entry, "expIncrement", 0L);
-    this.expVariation = getOrDefault.Long(entry, "expVariation", 0L);
+    this.expIncrement = entry.getInteger("expIncrement", 0);
+    this.expVariation = entry.getInteger("expVariation", 0);
     this.expCooldown = getOrDefault.Long(entry, "expCooldown", 0L);
     this.levelBase = getOrDefault.Long(entry, "levelBase", 0L);
     this.levelGrowth = getOrDefault.Double(entry, "levelGrowth", 0.0);
@@ -66,19 +66,19 @@ public class config {
     return botStatus;
   }
 
-  public void setExpIncrement(long increment) {
+  public void setExpIncrement(int increment) {
     this.expIncrement = increment;
   }
 
-  public long getExpIncrement() {
+  public int getExpIncrement() {
     return expIncrement;
   }
 
-  public void setExpVariation(long variation) {
+  public void setExpVariation(int variation) {
     this.expVariation = variation;
   }
 
-  public long getExpVariation() {
+  public int getExpVariation() {
     return expVariation;
   }
 
