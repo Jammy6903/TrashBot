@@ -40,7 +40,7 @@ public class eventListeners {
       case "level":
         commandsLevelling.levellingCommands(event);
         break;
-      case "words":
+      case "word":
         commandsWordCount.wordCommands(event);
         break;
       case "info":

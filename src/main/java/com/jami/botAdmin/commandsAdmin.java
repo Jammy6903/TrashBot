@@ -43,11 +43,11 @@ public class commandsAdmin {
       case "show-config":
         String disabledFeatures = "";
         for (String feature : App.CONFIG.getDisabledFeatures()) {
-          disabledFeatures += "  - " + feature + "\n";
+          disabledFeatures += "- " + feature + "\n";
         }
         String disabledCommands = "";
         for (String command : App.CONFIG.getDisabledCommands()) {
-          disabledCommands += "  - " + command + "\n";
+          disabledCommands += "- " + command + "\n";
         }
         String adminIds = "";
         for (long id : App.CONFIG.getAdminIds()) {
@@ -56,6 +56,7 @@ public class commandsAdmin {
         EmbedBuilder embed = new EmbedBuilder()
             .setTitle(App.CONFIG.getConfigName())
             .setDescription("Status: " + App.CONFIG.getBotStatus() + "\n" +
+                "Color: " + App.CONFIG.getBotColor() + "\n" +
                 "Exp Increment: " + App.CONFIG.getExpIncrement() + "\n" +
                 "Exp Variation: " + App.CONFIG.getExpVariation() + "\n" +
                 "Exp Cooldown: " + App.CONFIG.getExpCooldown() + "\n" +
@@ -86,6 +87,15 @@ public class commandsAdmin {
         App.CONFIG.setBotStatus(status);
         event.getJDA().getPresence().setActivity(Activity.customStatus(status));
         event.getMessage().reply("Status set to " + status).queue();
+        break;
+      case "set-bot-color":
+        if (args.size() == 1) {
+          event.getMessage().reply("**Command Usage:** a!set-bot-color <#color>").queue();
+          return;
+        }
+        String color = args.get(1).replaceFirst("#", "");
+        App.CONFIG.setBotColor(color);
+        event.getMessage().reply("Color set to" + color).queue();
         break;
       case "set-exp-increment":
         if (args.size() == 1) {

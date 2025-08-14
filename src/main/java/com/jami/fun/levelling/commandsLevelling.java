@@ -1,5 +1,8 @@
 package com.jami.fun.levelling;
 
+import java.awt.Color;
+
+import com.jami.App;
 import com.jami.database.guild.guild;
 import com.jami.database.guild.guildUser;
 import com.jami.database.guild.guildSettings.guildSettings;
@@ -28,9 +31,9 @@ public class commandsLevelling {
   }
 
   private static EmbedBuilder generateLevelCard(User u, int level, long exp, long requiredExp) {
-    EmbedBuilder embed = new EmbedBuilder();
-    embed.setTitle(u.getAsMention() + "'s Levelling Card");
-    embed.setDescription("Level: " + level + " | Exp: " + exp + "/" + requiredExp);
-    return embed;
+    return new EmbedBuilder()
+        .setColor(Color.decode("#" + App.CONFIG.getBotColor()))
+        .setTitle(u.getName() + "'s Levelling Card")
+        .setDescription("Level: " + level + " | Exp: " + exp + "/" + requiredExp);
   }
 }

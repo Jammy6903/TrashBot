@@ -9,6 +9,7 @@ import com.jami.utilities.guildLogging.voiceEvents;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 
+import de.tudarmstadt.ukp.jwktl.JWKTL;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
@@ -26,24 +27,35 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.Properties;
+import java.util.Scanner;
 
 public class App {
 
         private static JDA jda;
         private static final EventWaiter eventWaiter = new EventWaiter();
+
         private static final File propFile = new File("config.properties");
         private static Properties props = new Properties();
+
         public static MongoClient mongoClient;
 
         private static String currentConfig;
-
         public static config CONFIG;
 
+        private static File dumpFile = new File("assets/dictionary/wiktionary.xml");
+        private static File outputDirectory = new File("assets/dictionary/output");
+
         public static void main(String[] args) {
+                System.setProperty("jdk.xml.maxGeneralEntitySizeLimit", "0");
+                System.setProperty("jdk.xml.totalEntitySizeLimit", "0");
+
                 try {
                         props.load(new FileInputStream(propFile));
+
                         currentConfig = props.getProperty("CURRENT_CONFIG");
+
                         mongoClient = MongoClients.create(props.getProperty("DATABASE_URI"));
+
                         if (args.length == 1) {
                                 new App().start(args[0]);
                         } else {
@@ -57,10 +69,27 @@ public class App {
 
                 CONFIG = new config(currentConfig);
                 String status = CONFIG.getBotStatus();
-                if (!(status == "" || status == " " || status == null)) {
+                if (status == "" || status == " " || status == null) {
                         status = "-";
                 }
                 jda.getPresence().setActivity(Activity.customStatus(status));
+
+                Scanner s = new Scanner(System.in);
+
+                while (s.hasNext()) {
+                        String command = s.nextLine();
+                        switch (command) {
+                                case "parse-wiktionary":
+                                        parseWiktionary();
+                                        break;
+                                case "close":
+                                        s.close();
+                                        break;
+                                default:
+                                        System.out.println("[ERROR] Unkown Command");
+                                        break;
+                        }
+                }
         }
 
         private void start(String Token) throws Exception {
@@ -90,6 +119,10 @@ public class App {
                 getCommands(jda);
         }
 
+        private static void parseWiktionary() {
+                new Thread(() -> JWKTL.parseWiktionaryDump(dumpFile, outputDirectory, true)).start();
+        }
+
         public static EventWaiter getEventWaiter() {
                 return eventWaiter;
         }
@@ -104,6 +137,10 @@ public class App {
                 } catch (Exception e) {
                         System.out.println("[ERROR] Unable to save to properties file - " + e);
                 }
+        }
+
+        public static File getWiktionary() {
+                return outputDirectory;
         }
 
         private static void getCommands(JDA jda) {
@@ -150,24 +187,29 @@ public class App {
                  * level sub commands
                  */
 
-                SubcommandData card = new SubcommandData("card", "See your or another users levelling card")
-                                .addOption(OptionType.USER, "user", "who's level do you want to see?");
+                SubcommandData levelCard = new SubcommandData("card", "See your or another users levelling card")
+                                .addOption(OptionType.USER, "user", "who's level do you want to see?")
+                                .addOption(OptionType.BOOLEAN, "global", "whether to look at global levelling");
+
+                SubcommandData levelLeaderboard = new SubcommandData("leaderboard", "See top users")
+                                .addOption(OptionType.INTEGER, "page", "leaderboard page")
+                                .addOption(OptionType.STRING, "order", "what to order by")
+                                .addOption(OptionType.BOOLEAN, "reverse", "whether to reverse the order")
+                                .addOption(OptionType.BOOLEAN, "global", "whether to look at global levelling");
 
                 /*
                  * words sub commands
                  */
 
-                SubcommandData info = new SubcommandData("info", "See how much a word is used")
+                SubcommandData wordInfo = new SubcommandData("info", "See how much a word is used")
                                 .addOption(OptionType.STRING, "word", "What word to see info for", true)
-                                .addOption(OptionType.STRING, "location",
-                                                "Wether to see word usage info for global or guild", true);
+                                .addOption(OptionType.BOOLEAN, "global", "whether to look at global word stats");
 
-                SubcommandData leaderboard = new SubcommandData("leaderboard", "See top word usage")
-                                .addOption(OptionType.STRING, "location",
-                                                "whether to see word usage leaderboard for global or guild", true)
-                                .addOption(OptionType.INTEGER, "page", "Leaderboard page")
-                                .addOption(OptionType.STRING, "order", "Order to see words")
-                                .addOption(OptionType.BOOLEAN, "reverse", "Whether to reverse the order");
+                SubcommandData wordLeaderboard = new SubcommandData("leaderboard", "See top word usage")
+                                .addOption(OptionType.INTEGER, "page", "leaderboard page")
+                                .addOption(OptionType.STRING, "order", "what to order by")
+                                .addOption(OptionType.BOOLEAN, "reverse", "whether to reverse the order")
+                                .addOption(OptionType.BOOLEAN, "global", "whether to look at global word stats");
 
                 /*
                  * info sub commands
@@ -181,7 +223,7 @@ public class App {
                                 .addOption(OptionType.USER, "member", "which member?");
 
                 SubcommandData user = new SubcommandData("user", "shows known info about a discord user")
-                                .addOption(OptionType.INTEGER, "user-id", "user's discord ID");
+                                .addOption(OptionType.NUMBER, "user-id", "user's discord ID");
 
                 SubcommandData role = new SubcommandData("role", "shows info about a guild role")
                                 .addOption(OptionType.ROLE, "role", "which role?");
@@ -191,7 +233,7 @@ public class App {
 
                 jda.updateCommands().addCommands(
                                 Commands.slash("featurerequest",
-                                                "Submit a feature request for something you think this bot is missing."),
+                                                "submit a feature request for something you think this bot is missing."),
                                 Commands.slash("guild-settings", "change settings for your guild")
                                                 .addSubcommands(addLevellingRole, removeLevellingRole,
                                                                 listLevellingRoles, setExpSettings,
@@ -200,10 +242,10 @@ public class App {
                                                                 .enabledFor(Permission.ADMINISTRATOR))
                                                 .setContexts(InteractionContextType.GUILD),
                                 Commands.slash("level", "check out your level progression")
-                                                .addSubcommands(card)
+                                                .addSubcommands(levelCard, levelLeaderboard)
                                                 .setContexts(InteractionContextType.GUILD),
-                                Commands.slash("words", "Check out word usage")
-                                                .addSubcommands(info, leaderboard)
+                                Commands.slash("word", "check out word usage")
+                                                .addSubcommands(wordInfo, wordLeaderboard)
                                                 .setContexts(InteractionContextType.GUILD),
                                 Commands.slash("info", "shows info about various objects")
                                                 .addSubcommands(bot, guild, member, user, role, channel)

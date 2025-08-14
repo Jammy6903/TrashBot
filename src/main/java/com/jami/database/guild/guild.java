@@ -5,6 +5,7 @@ import org.bson.Document;
 import com.jami.database.getOrDefault;
 import com.jami.database.guild.guildSettings.*;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.UpdateOptions;
 
@@ -24,6 +25,8 @@ public class guild {
 
   private long guildId;
   private guildSettings guildSettings;
+  private long firstJoined;
+
   private ArrayList<guildUser> userList;
   private ArrayList<guildWord> wordList;
   private ArrayList<guildPunishment> punishmentList;
@@ -36,8 +39,10 @@ public class guild {
     if (entry == null) {
       entry = new Document();
     }
-    this.guildId = id;
+    this.guildId = getOrDefault.Long(entry, "_id", id);
     this.guildSettings = getOrDefault.guildSettings(entry, "settings");
+    this.firstJoined = getOrDefault.Long(entry, "firstJoined", System.currentTimeMillis());
+
     this.userList = new ArrayList<>();
     this.wordList = new ArrayList<>();
 
@@ -64,6 +69,10 @@ public class guild {
     return guildSettings;
   }
 
+  public long getFirstJoined() {
+    return firstJoined;
+  }
+
   public guildUser getUser(long id) {
     Document user = guildUsers.find(eq("_id", id)).first();
     guildUser gu = new guildUser(user, id);
@@ -78,8 +87,26 @@ public class guild {
     return gw;
   }
 
-  public List<guildWord> getWords() {
-    return null;
+  public List<guildWord> getWords(int amount, int page, String order, boolean reverseOrder) {
+    int sortDirection = reverseOrder ? 1 : -1;
+    int skip = page * amount;
+
+    try (MongoCursor<Document> cursor = guildWords.find()
+        .sort(new Document(order, sortDirection))
+        .skip(skip)
+        .limit(amount)
+        .iterator()) {
+
+      List<guildWord> results = new ArrayList<>();
+      while (cursor.hasNext()) {
+        Document doc = cursor.next();
+        long firstUse = getOrDefault.Long(doc, "firstUse", 0L);
+        results.add(
+            new guildWord(doc.getObjectId("_id"), doc.getString("word"), doc.getLong("count"),
+                firstUse));
+      }
+      return results;
+    }
   }
 
   public guildPunishment getPunishment(String punishmentId) {

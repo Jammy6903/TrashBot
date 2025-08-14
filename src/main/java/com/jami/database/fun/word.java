@@ -25,6 +25,7 @@ public class word {
   private ObjectId id;
   private String word;
   private long count;
+  private long firstUse;
 
   public word(String word) {
     Document wordEntry = words.find(eq("word", word)).first();
@@ -34,12 +35,14 @@ public class word {
     this.id = getOrDefault.ObjectId(wordEntry, "_id");
     this.word = word;
     this.count = getOrDefault.Long(wordEntry, "count", 0L);
+    this.firstUse = getOrDefault.Long(wordEntry, "firstUse", System.currentTimeMillis());
   }
 
-  private word(ObjectId id, String word, long count) {
+  private word(ObjectId id, String word, long count, long firstUse) {
     this.id = id;
     this.word = word;
     this.count = count;
+    this.firstUse = firstUse;
   }
 
   public String getId() {
@@ -62,6 +65,10 @@ public class word {
     return count;
   }
 
+  public long getFirstUse() {
+    return firstUse;
+  }
+
   public static List<word> getWords(int amount, int page, String order, boolean reverseOrder) {
     int sortDirection = reverseOrder ? 1 : -1;
     int skip = page * amount;
@@ -75,7 +82,9 @@ public class word {
       List<word> results = new ArrayList<>();
       while (cursor.hasNext()) {
         Document doc = cursor.next();
-        results.add(new word(doc.getObjectId("_id"), doc.getString("word"), doc.getLong("count")));
+        long firstUse = getOrDefault.Long(doc, "firstUse", 0L);
+        results.add(
+            new word(doc.getObjectId("_id"), doc.getString("word"), doc.getLong("count"), firstUse));
       }
       return results;
     }
@@ -85,7 +94,8 @@ public class word {
     Document w = new Document("$set", new Document()
         .append("_id", id)
         .append("word", word)
-        .append("count", count));
+        .append("count", count)
+        .append("firstUse", firstUse));
     try {
       UpdateOptions opts = new UpdateOptions().upsert(true);
       words.updateOne(eq("_id", id), w, opts);

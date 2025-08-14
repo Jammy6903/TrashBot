@@ -20,6 +20,7 @@ public class config {
   private String configName;
 
   private String botStatus;
+  private String botColor;
 
   private int expIncrement;
   private int expVariation;
@@ -40,6 +41,7 @@ public class config {
 
     this.configName = getOrDefault.String(entry, "_id", configName);
     this.botStatus = getOrDefault.String(entry, "botStatus", "");
+    this.botColor = getOrDefault.String(entry, "botColor", "000000");
     this.expIncrement = entry.getInteger("expIncrement", 0);
     this.expVariation = entry.getInteger("expVariation", 0);
     this.expCooldown = getOrDefault.Long(entry, "expCooldown", 0L);
@@ -64,6 +66,14 @@ public class config {
 
   public String getBotStatus() {
     return botStatus;
+  }
+
+  public void setBotColor(String color) {
+    this.botColor = color;
+  }
+
+  public String getBotColor() {
+    return botColor;
   }
 
   public void setExpIncrement(int increment) {
@@ -146,6 +156,7 @@ public class config {
     Document config = new Document("$set", new Document()
         .append("_id", configName)
         .append("botStatus", botStatus)
+        .append("botColor", botColor)
         .append("expIncrement", expIncrement)
         .append("expVariation", expVariation)
         .append("expCooldown", expCooldown)
