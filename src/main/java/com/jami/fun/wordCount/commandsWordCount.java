@@ -1,5 +1,6 @@
 package com.jami.fun.wordCount;
 
+import java.awt.Color;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
@@ -120,11 +121,12 @@ public class commandsWordCount {
     SimpleDateFormat df = new SimpleDateFormat("dd/MM/yy");
 
     return new EmbedBuilder()
+        .setColor(Color.getColor(App.CONFIG.getBotColor()))
         .setTitle("**\"" + word.getWord() + "\" Stats**")
         .setDescription(definition)
         .addField("Uses", String.valueOf(word.getCount()), true)
         .addField("First Used", df.format(firstUse), true)
-        .setFooter("Data gathered from Aug 2025");
+        .setFooter("Data gathered from Aug 2025 - " + word.getId());
   }
 
   private static EmbedBuilder guildWordInfo(guild g, String guildName, guildWord word, String definition) {
@@ -135,11 +137,12 @@ public class commandsWordCount {
     SimpleDateFormat df2 = new SimpleDateFormat("MMM yyyy");
 
     return new EmbedBuilder()
+        .setColor(Color.getColor(App.CONFIG.getBotColor()))
         .setTitle("**\"" + word.getWord() + "\" Stats in " + guildName + "**")
         .setDescription(definition)
         .addField("Uses", String.valueOf(word.getCount()), true)
         .addField("First Used", df.format(firstUse), true)
-        .setFooter("Data gathered from " + df2.format(firstJoined));
+        .setFooter("Data gathered from " + df2.format(firstJoined) + " - " + word.getId());
   }
 
   private static EmbedBuilder generateGlobalLeaderboard(List<word> words) {
@@ -154,6 +157,7 @@ public class commandsWordCount {
     }
 
     return new EmbedBuilder()
+        .setColor(Color.getColor(App.CONFIG.getBotColor()))
         .setTitle("**Global Word Leaderboard**")
         .setDescription(content)
         .setFooter("Data gathered from Aug 2025");
@@ -174,6 +178,7 @@ public class commandsWordCount {
     SimpleDateFormat df = new SimpleDateFormat("MMM yyyy");
 
     return new EmbedBuilder()
+        .setColor(Color.getColor(App.CONFIG.getBotColor()))
         .setTitle("**" + guildName + " Word Leaderboard**")
         .setDescription(content)
         .setFooter("Data gathered from " + df.format(firstJoined));
