@@ -14,11 +14,14 @@ public class guildSettings {
   private long expCooldown;
   private long levelBase;
   private double levelGrowth;
+
+  private List<Document> loggingChannels;
   private List<Integer> roleLevels;
   private List<Document> levellingRoles;
   private List<String> disabledFeatures;
   private List<Long> wordsDisabledChannels;
 
+  private static List<Document> defaultLoggingChannels = new ArrayList<>();
   private static List<Integer> defaultRoleLevels = new ArrayList<>();
   private static List<Document> defaultLevellingRoles = new ArrayList<>();
   private static List<String> defaultEnabledFeatures = new ArrayList<>();
@@ -33,6 +36,7 @@ public class guildSettings {
     this.expCooldown = getOrDefault.Long(s, "expCooldown", App.CONFIG.getExpCooldown());
     this.levelBase = getOrDefault.Long(s, "levelBase", App.CONFIG.getLevelBase());
     this.levelGrowth = getOrDefault.Double(s, "levelGrowth", App.CONFIG.getLevelGrowth());
+    this.loggingChannels = s.getList("loggingChannels", Document.class, defaultLoggingChannels);
     this.roleLevels = s.getList("roleLevels", Integer.class, defaultRoleLevels);
     this.levellingRoles = s.getList("levellingRoles", Document.class, defaultLevellingRoles);
     this.disabledFeatures = s.getList("disabledFeatures", String.class, defaultEnabledFeatures);
@@ -77,6 +81,22 @@ public class guildSettings {
 
   public double getLevelGrowth() {
     return levelGrowth;
+  }
+
+  public void setLoggingChannels(List<Document> channels) {
+    this.loggingChannels = channels;
+  }
+
+  public List<Document> getLoggingChannels() {
+    return loggingChannels;
+  }
+
+  public void addLoggingChannel(Document channel) {
+    this.loggingChannels.add(channel);
+  }
+
+  public void removeLoggingChannel(Document channel) {
+    this.loggingChannels.remove(channel);
   }
 
   public void setRoleLevels(List<Integer> levels) {

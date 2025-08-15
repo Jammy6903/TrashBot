@@ -7,7 +7,7 @@ import com.jami.fun.levelling.levelling;
 import com.jami.fun.wordCount.commandsWordCount;
 import com.jami.fun.wordCount.wordCount;
 import com.jami.utilities.featureRequests.commandsFeatureRequests;
-import com.jami.utilities.guildAdmin.commandsSettings;
+import com.jami.utilities.guildOptions.commandsSettings;
 import com.jami.utilities.info.commandsInfo;
 import com.jami.botAdmin.commandsAdmin;
 import com.jami.database.guild.guild;
@@ -36,7 +36,7 @@ public class eventListeners {
         commandsFeatureRequests.newFeatureRequest(event);
         break;
       case "guild-settings":
-        commandsSettings.guildSettingsCommand(event);
+        new commandsSettings(event).start();
         break;
       case "level":
         commandsLevelling.levellingCommands(event);

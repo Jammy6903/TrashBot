@@ -156,44 +156,6 @@ public class App {
         private static void getCommands() {
 
                 /*
-                 * guild-settings sub commnads
-                 */
-
-                // Levelling Roles
-
-                SubcommandData addLevellingRole = new SubcommandData("add-levelling-role",
-                                "add a levelling role as a reward for members reaching certain levelling milestones")
-                                .addOption(OptionType.INTEGER, "level", "level for member to reach to receive the role",
-                                                true)
-                                .addOption(OptionType.ROLE, "role", "role to give to the member", true);
-
-                SubcommandData removeLevellingRole = new SubcommandData("remove-levelling-role",
-                                "delete a levelling role.")
-                                .addOption(OptionType.STRING, "id",
-                                                "ID of the entry you want to remove, find it with /guild-settings list-levelling-roles",
-                                                true);
-
-                SubcommandData listLevellingRoles = new SubcommandData("list-levelling-roles",
-                                "List all levelling roles");
-
-                // Levelling
-
-                SubcommandData setExpSettings = new SubcommandData("set-exp-settings", "set values for gaining exp")
-                                .addOption(OptionType.INTEGER, "exp-increment",
-                                                "how much exp to give per valid message")
-                                .addOption(OptionType.INTEGER, "exp-variation",
-                                                "how much to vary exp per valid message")
-                                .addOption(OptionType.INTEGER, "exp-cooldown",
-                                                "how long between messages to be able to gain exp");
-
-                SubcommandData setLevelSettings = new SubcommandData("set-level-settings",
-                                "set values for level progression")
-                                .addOption(OptionType.INTEGER, "base-exp",
-                                                "where levels start, e.g. if set to 200, level 1 is gained at 200 exp")
-                                .addOption(OptionType.INTEGER, "growth",
-                                                "how much to increase exp requirements per level, e.g. if set to 1, exp requirement would be linear");
-
-                /*
                  * level sub commands
                  */
 
@@ -245,9 +207,6 @@ public class App {
                                 Commands.slash("featurerequest",
                                                 "submit a feature request for something you think this bot is missing."),
                                 Commands.slash("guild-settings", "change settings for your guild")
-                                                .addSubcommands(addLevellingRole, removeLevellingRole,
-                                                                listLevellingRoles, setExpSettings,
-                                                                setLevelSettings)
                                                 .setDefaultPermissions(DefaultMemberPermissions
                                                                 .enabledFor(Permission.ADMINISTRATOR))
                                                 .setContexts(InteractionContextType.GUILD),
