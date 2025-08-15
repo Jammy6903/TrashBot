@@ -65,7 +65,7 @@ public class eventListeners {
     }
 
     if (m.startsWith("a!") && App.CONFIG.getAdminIds().contains(u.getIdLong())) {
-      commandsAdmin.adminCommands(event);
+      commandsAdmin.adminCommands(event, null);
       return;
     }
 

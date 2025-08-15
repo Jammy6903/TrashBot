@@ -1,6 +1,7 @@
 package com.jami;
 
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
+import com.jami.botAdmin.commandsAdmin;
 import com.jami.database.config.config;
 import com.jami.utilities.guildLogging.guildChange;
 import com.jami.utilities.guildLogging.memberChange;
@@ -78,17 +79,7 @@ public class App {
 
                 while (s.hasNext()) {
                         String command = s.nextLine();
-                        switch (command) {
-                                case "parse-wiktionary":
-                                        parseWiktionary();
-                                        break;
-                                case "close":
-                                        s.close();
-                                        break;
-                                default:
-                                        System.out.println("[ERROR] Unkown Command");
-                                        break;
-                        }
+                        commandsAdmin.adminCommands(null, command);
                 }
         }
 
@@ -119,8 +110,12 @@ public class App {
                 getCommands(jda);
         }
 
-        private static void parseWiktionary() {
+        public static void parseWiktionary() {
                 new Thread(() -> JWKTL.parseWiktionaryDump(dumpFile, outputDirectory, true)).start();
+        }
+
+        public static File getWiktionary() {
+                return outputDirectory;
         }
 
         public static EventWaiter getEventWaiter() {
@@ -139,8 +134,8 @@ public class App {
                 }
         }
 
-        public static File getWiktionary() {
-                return outputDirectory;
+        public static JDA getJDA() {
+                return jda;
         }
 
         private static void getCommands(JDA jda) {
