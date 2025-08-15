@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
-// To-Do maybe, check dictionary for word validity.
+import com.jami.database.guild.guild;
 
 public class wordCount {
-  public static void incrementWords(String message, long guildId, long channelId) {
+  public static void incrementWords(String message, guild g) {
     ArrayList<String> words = getWords(message);
     globalWordCount.incrementWordCount(words);
-    guildWordCount.incrementWordCount(words, guildId, channelId);
+    guildWordCount.incrementWordCount(words, g);
   }
 
   public static ArrayList<String> getWords(String message) {

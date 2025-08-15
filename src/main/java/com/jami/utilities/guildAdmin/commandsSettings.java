@@ -6,6 +6,7 @@ import org.bson.Document;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 public class commandsSettings {
@@ -36,6 +37,25 @@ public class commandsSettings {
         }
         embed.setDescription(message);
         event.replyEmbeds(embed.build()).queue();
+        break;
+      case "list-words-disabled-channels":
+        EmbedBuilder embed2 = new EmbedBuilder();
+        embed2.setTitle("Words Disabled Channels:");
+        String message2 = "";
+        for (long id : s.getWordsDisabledChannels()) {
+          message2 += event.getJDA().getChannelById(TextChannel.class, id).getName() + " (" + String.valueOf(id)
+              + ")\n";
+        }
+        embed2.setDescription(message2);
+        event.replyEmbeds(embed2.build()).queue();
+        break;
+      case "add-words-disabled-channel":
+        s.addWordsDisabledChannel(event.getOption("channel").getAsChannel().getIdLong());
+        event.reply("Channel added to disabled list");
+        break;
+      case "remove-words-disabled-channel":
+        s.removeWordsDisabledChannel(event.getOption("channel").getAsChannel().getIdLong());
+        event.reply("Channel removed from disabled list");
         break;
     }
   }

@@ -57,4 +57,16 @@ public class settings {
   public List<Document> listLevellingRoles() {
     return gs.getLevellingRoles();
   }
+
+  public void addWordsDisabledChannel(long id) {
+    gs.addWordsDisabledChannel(id);
+  }
+
+  public void removeWordsDisabledChannel(long id) {
+    gs.removeWordsDisabledChannel(id);
+  }
+
+  public List<Long> getWordsDisabledChannels() {
+    return gs.getWordsDisabledChannels();
+  }
 }

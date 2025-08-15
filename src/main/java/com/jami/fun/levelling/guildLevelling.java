@@ -12,7 +12,6 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class guildLevelling {
 
-  private guild g;
   private guildUser gu;
 
   private long userExp;
@@ -28,11 +27,9 @@ public class guildLevelling {
 
   private MessageReceivedEvent event;
 
-  public guildLevelling(MessageReceivedEvent event) {
-    long guildId = event.getGuild().getIdLong();
+  public guildLevelling(MessageReceivedEvent event, guild g) {
     long userId = event.getAuthor().getIdLong();
 
-    this.g = new guild(guildId);
     guildSettings gs = g.getSettings();
     this.gu = g.getUser(userId);
 
@@ -77,9 +74,5 @@ public class guildLevelling {
         .setDescription(message)
         .setColor(Color.CYAN);
     event.getMessage().replyEmbeds(embed.build());
-  }
-
-  public void commit() {
-    g.commit();
   }
 }

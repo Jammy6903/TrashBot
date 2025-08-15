@@ -1,7 +1,6 @@
 package com.jami.database.guild.guildSettings;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.bson.Document;
@@ -126,6 +125,14 @@ public class guildSettings {
 
   public List<Long> getWordsDisabledChannels() {
     return wordsDisabledChannels;
+  }
+
+  public void addWordsDisabledChannel(long channelId) {
+    this.wordsDisabledChannels.add(channelId);
+  }
+
+  public void removeWordsDisabledChannel(long channelId) {
+    this.wordsDisabledChannels.remove(channelId);
   }
 
   public Document toDocument() {

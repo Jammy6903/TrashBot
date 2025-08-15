@@ -3,14 +3,15 @@ package com.jami;
 import java.util.List;
 
 import com.jami.fun.levelling.commandsLevelling;
-import com.jami.fun.levelling.globalLevelling;
-import com.jami.fun.levelling.guildLevelling;
+import com.jami.fun.levelling.levelling;
 import com.jami.fun.wordCount.commandsWordCount;
 import com.jami.fun.wordCount.wordCount;
 import com.jami.utilities.featureRequests.commandsFeatureRequests;
 import com.jami.utilities.guildAdmin.commandsSettings;
 import com.jami.utilities.info.commandsInfo;
 import com.jami.botAdmin.commandsAdmin;
+import com.jami.database.guild.guild;
+import com.jami.database.guild.guildSettings.guildSettings;
 import com.jami.database.user.user;
 
 import net.dv8tion.jda.api.entities.Guild;
@@ -68,24 +69,24 @@ public class eventListeners {
       return;
     }
 
+    guild gg = new guild(g.getIdLong());
+    guildSettings gs = gg.getSettings();
+
     List<String> userDisabledFetures = new user(u.getIdLong()).getSettings().getDisabledFeatures();
 
     // Levelling
-    if (!userDisabledFetures.contains("levelling") && !App.CONFIG.getDisabledFeatures().contains("levelling")) {
-      globalLevelling globall = new globalLevelling(event.getAuthor().getIdLong());
-      globall.incrementExp();
-
-      guildLevelling guildl = new guildLevelling(event);
-      if (guildl.incrementExp()) {
-        guildl.announceLevelUp();
-      }
-      guildl.commit();
+    if (!App.CONFIG.getDisabledFeatures().contains("levelling") && !userDisabledFetures.contains("levelling")
+        && !gs.getDisabledFeatures().contains("levelling")) {
+      levelling.incrementExps(event, gg, u.getIdLong());
     }
 
     // WordCount
-    if (!userDisabledFetures.contains("words") && !App.CONFIG.getDisabledFeatures().contains("words")) {
-      wordCount.incrementWords(event.getMessage().getContentRaw(), g.getIdLong(), c.getIdLong());
+    if (!App.CONFIG.getDisabledFeatures().contains("words") && !userDisabledFetures.contains("words")
+        && !gs.getDisabledFeatures().contains("words") && !gs.getWordsDisabledChannels().contains(c.getIdLong())) {
+      wordCount.incrementWords(event.getMessage().getContentRaw(), gg);
     }
+
+    gg.commit();
   }
 
 }

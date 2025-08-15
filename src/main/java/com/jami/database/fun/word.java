@@ -8,8 +8,6 @@ import static com.mongodb.client.model.Filters.eq;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.mongodb.client.model.Filters.*;
-
 import org.bson.types.ObjectId;
 
 import com.jami.database.getOrDefault;
