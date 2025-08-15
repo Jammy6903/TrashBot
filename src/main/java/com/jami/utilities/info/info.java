@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import com.jami.App;
 import com.jami.database.guild.guild;
 
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -31,11 +32,13 @@ public class info {
                 .setTitle("**TRASH BOT**")
                 .setDescription(
                         "Trash bot is a multi-purpose Discord bot designed for the twenty one pilots Manchester Discord server\n\n/featurerequest to request new features!\n/help for help!\n\n[Support Discord](https://discord.gg/ZUcg6ArVzp)")
-                .addField("Member since", df.format(firstJoined), false)
+                .addField("Member since", df.format(firstJoined), true)
+                .addField("Shard Number", String.valueOf(event.getJDA().getShardInfo().getShardId()), true)
+                .addField("Total Guilds", String.valueOf(App.totalGuildCount()), true)
                 .setThumbnail(
                         "https://cdn.discordapp.com/avatars/1390058332689137847/878371b41485c8556b90511d612334d9.png?size=1024")
                 .setFooter("Made with ❤️ by JamiTheFox",
-                        event.getJDA().getUserById(190855924368277508L).getAvatarUrl());
+                        App.getShardManager().getUserById(190855924368277508L).getAvatarUrl());
 
         event.replyEmbeds(embed.build()).queue();
     }
@@ -69,17 +72,26 @@ public class info {
             roleString += r.getAsMention() + "\n";
         }
 
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm");
+
+        String title = "";
+
+        String userName = m.getUser().getGlobalName();
+
+        if (m.getNickname() == null) {
+            title = "**" + userName + " Info**";
+        } else {
+            title = String.format("**%s (%s) Info**", userName, m.getNickname());
+        }
 
         EmbedBuilder embed = new EmbedBuilder()
-                .setTitle("**" + m.getUser().getGlobalName() + " Info** (" + m.getNickname() + ")")
+                .setTitle(title)
                 .setDescription(roleString)
                 .setThumbnail(m.getUser().getAvatarUrl())
 
                 // to-do make these times a nice format and add (x days ago)
                 .addField("User Since", m.getTimeCreated().format(dtf), true)
                 .addField("Member Since", m.getTimeJoined().format(dtf), true)
-                .addField("Status", m.getOnlineStatus().toString(), false)
                 .setFooter("User ID: " + String.valueOf(m.getIdLong()));
 
         event.replyEmbeds(embed.build()).queue();

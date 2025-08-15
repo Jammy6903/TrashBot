@@ -194,8 +194,14 @@ public class commandsAdmin {
     for (int i = 1; i < args.size(); i++) {
       status += args.get(i) + " ";
     }
+    final String finalStatus = status;
     App.CONFIG.setBotStatus(status);
-    App.getJDA().getPresence().setActivity(Activity.customStatus(status));
+    try {
+      App.getShardManager().getShards()
+          .forEach(jda -> jda.getPresence().setActivity(Activity.customStatus(finalStatus)));
+    } catch (Exception e) {
+      System.out.println(e);
+    }
     return "Status set to " + status;
   }
 

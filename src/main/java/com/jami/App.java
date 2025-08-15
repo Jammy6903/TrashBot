@@ -23,6 +23,9 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
+import net.dv8tion.jda.api.sharding.ShardManager;
+import net.dv8tion.jda.api.utils.MemberCachePolicy;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -32,7 +35,7 @@ import java.util.Scanner;
 
 public class App {
 
-        private static JDA jda;
+        private static ShardManager shardManager;
         private static final EventWaiter eventWaiter = new EventWaiter();
 
         private static final File propFile = new File("config.properties");
@@ -70,10 +73,12 @@ public class App {
 
                 CONFIG = new config(currentConfig);
                 String status = CONFIG.getBotStatus();
-                if (status == "" || status == " " || status == null) {
-                        status = "-";
+                try {
+                        shardManager.getShards()
+                                        .forEach(jda -> jda.getPresence().setActivity(Activity.customStatus(status)));
+                } catch (Exception e) {
+                        System.out.println(e);
                 }
-                jda.getPresence().setActivity(Activity.customStatus(status));
 
                 Scanner s = new Scanner(System.in);
 
@@ -81,10 +86,12 @@ public class App {
                         String command = s.nextLine();
                         commandsAdmin.adminCommands(null, command);
                 }
+
+                s.close();
         }
 
         private void start(String Token) throws Exception {
-                jda = JDABuilder.createDefault(Token)
+                shardManager = DefaultShardManagerBuilder.createDefault(Token)
                                 .setStatus(OnlineStatus.ONLINE)
                                 .enableIntents(
                                                 GatewayIntent.GUILD_MEMBERS,
@@ -101,13 +108,15 @@ public class App {
                                                 GatewayIntent.MESSAGE_CONTENT,
                                                 GatewayIntent.AUTO_MODERATION_EXECUTION,
                                                 GatewayIntent.GUILD_MESSAGE_POLLS)
-                                .setEventManager(new AnnotatedEventManager())
+                                .setEventManagerProvider(id -> new AnnotatedEventManager())
                                 .addEventListeners(eventWaiter, new eventListeners(), new guildChange(),
                                                 new memberChange(),
                                                 new messages(), new voiceEvents())
+                                .setMemberCachePolicy(MemberCachePolicy.ALL)
+                                .setShardsTotal(-1)
                                 .build();
 
-                getCommands(jda);
+                getCommands();
         }
 
         public static void parseWiktionary() {
@@ -134,11 +143,17 @@ public class App {
                 }
         }
 
-        public static JDA getJDA() {
-                return jda;
+        public static ShardManager getShardManager() {
+                return shardManager;
         }
 
-        private static void getCommands(JDA jda) {
+        public static int totalGuildCount() {
+                return shardManager.getShards().stream()
+                                .mapToInt(jda -> jda.getGuilds().size())
+                                .sum();
+        }
+
+        private static void getCommands() {
 
                 /*
                  * guild-settings sub commnads
@@ -226,7 +241,7 @@ public class App {
                 SubcommandData channel = new SubcommandData("channel", "shows info about a channel")
                                 .addOption(OptionType.CHANNEL, "channel", "which channel?");
 
-                jda.updateCommands().addCommands(
+                shardManager.getShards().forEach(jda -> jda.updateCommands().addCommands(
                                 Commands.slash("featurerequest",
                                                 "submit a feature request for something you think this bot is missing."),
                                 Commands.slash("guild-settings", "change settings for your guild")
@@ -245,6 +260,6 @@ public class App {
                                 Commands.slash("info", "shows info about various objects")
                                                 .addSubcommands(bot, guild, member, user, role, channel)
                                                 .setContexts(InteractionContextType.GUILD))
-                                .queue();
+                                .queue());
         }
 }
