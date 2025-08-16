@@ -1,5 +1,7 @@
 package com.jami.utilities.guildOptions;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.bson.Document;
@@ -13,8 +15,11 @@ import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.EntitySelectInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.interactions.components.selections.EntitySelectMenu;
+import net.dv8tion.jda.api.interactions.components.selections.EntitySelectMenu.SelectTarget;
 import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.Modal;
@@ -91,14 +96,14 @@ public class commandsSettings {
   }
 
   public void generateButtons() {
-    Button expIncBut = Button.secondary("exp-inc", "Exp Increment");
-    Button expVarBut = Button.secondary("exp-var", "Exp Variation");
-    Button expCoolBut = Button.secondary("exp-cool", "Exp Cooldown");
+    Button expIncBut = Button.primary("exp-inc", "Exp Increment");
+    Button expVarBut = Button.primary("exp-var", "Exp Variation");
+    Button expCoolBut = Button.primary("exp-cool", "Exp Cooldown");
 
     ActionRow expRow = ActionRow.of(expIncBut, expVarBut, expCoolBut);
 
-    Button levelBaseBut = Button.secondary("level-base", "Level Base");
-    Button levelGrowthBut = Button.secondary("level-growth", "Level Growth");
+    Button levelBaseBut = Button.primary("level-base", "Level Base");
+    Button levelGrowthBut = Button.primary("level-growth", "Level Growth");
 
     ActionRow levelRow = ActionRow.of(levelBaseBut, levelGrowthBut);
 
@@ -148,7 +153,7 @@ public class commandsSettings {
               }
               generateButtons();
             },
-            5, TimeUnit.MINUTES,
+            10, TimeUnit.MINUTES,
             () -> disableButtons()));
 
   }
@@ -157,26 +162,126 @@ public class commandsSettings {
     event.getHook().editOriginalComponents().queue();
   }
 
-  public void setExpInc() {
-    TextInput exp = TextInput.create("exp-inc", "Exp Increment", TextInputStyle.SHORT)
-        .setPlaceholder("Numbers only")
+  public Modal generateModal(String id, String title, String fieldTitle, String placeholder) {
+    TextInput input = TextInput.create(id, fieldTitle, TextInputStyle.SHORT)
+        .setPlaceholder(placeholder)
         .setRequired(true)
         .build();
-    Modal m = Modal.create("exp-inc", "Set Exp Increment")
-        .addComponents(ActionRow.of(exp))
+    return Modal.create(id, title)
+        .addComponents(ActionRow.of(input))
         .build();
-    currentButtonEvent.replyModal(m)
-        .queue(message -> App.getEventWaiter().waitForEvent(ModalInteractionEvent.class,
+  }
+
+  public void setFromModal(ModalInteractionEvent e, String id) {
+    String option = "";
+    try {
+      int value = Integer.parseInt(e.getValue(id).getAsString());
+      switch (id) {
+        case "exp-inc":
+          gs.setExpIncrement(value);
+          option = "Exp Increment";
+          break;
+        case "exp-var":
+          gs.setExpVariation(value);
+          option = "Exp Variation";
+          break;
+        case "exp-cool":
+          gs.setExpCooldown(value);
+          option = "Exp Cooldown";
+          break;
+        case "level-base":
+          gs.setLevelBase(value);
+          option = "Level Base";
+          break;
+        case "level-growth":
+          gs.setLevelGrowth(value);
+          option = "Level Growth";
+          break;
+      }
+      g.commit();
+      e.reply(option + " set to " + value).setEphemeral(true).queue();
+    } catch (Exception err) {
+      e.reply(option + " must be a number");
+    }
+  }
+
+  public void setExpInc() {
+    String id = "exp-inc";
+    currentButtonEvent.replyModal(generateModal(id, "Set Exp Increment", "Exp Increment", "Numbers Only"))
+        .queue(modal -> App.getEventWaiter().waitForEvent(ModalInteractionEvent.class,
+            e -> e.getUser().equals(event.getUser()),
+            e -> setFromModal(e, id),
+            5, TimeUnit.MINUTES,
+            () -> {
+            }));
+  }
+
+  public void setExpVar() {
+    String id = "exp-var";
+    currentButtonEvent.replyModal(generateModal(id, "Set Exp Variation", "Exp Variation", "Numbers Only"))
+        .queue(modal -> App.getEventWaiter().waitForEvent(ModalInteractionEvent.class,
+            e -> e.getUser().equals(event.getUser()),
+            e -> setFromModal(e, id),
+            5, TimeUnit.MINUTES,
+            () -> {
+            }));
+  }
+
+  public void setExpCool() {
+    String id = "exp-cool";
+    currentButtonEvent.replyModal(generateModal(id, "Set Exp Cooldown", "Exp Cooldown", "Numbers Only"))
+        .queue(modal -> App.getEventWaiter().waitForEvent(ModalInteractionEvent.class,
+            e -> e.getUser().equals(event.getUser()),
+            e -> setFromModal(e, id),
+            5, TimeUnit.MINUTES,
+            () -> {
+            }));
+  }
+
+  public void setLevelBase() {
+    String id = "level-base";
+    currentButtonEvent.replyModal(generateModal(id, "Set Level Base", "Level Base", "Numbers Only"))
+        .queue(modal -> App.getEventWaiter().waitForEvent(ModalInteractionEvent.class,
+            e -> e.getUser().equals(event.getUser()),
+            e -> setFromModal(e, id),
+            5, TimeUnit.MINUTES,
+            () -> {
+            }));
+  }
+
+  public void setLevelGrowth() {
+    String id = "level-growth";
+    currentButtonEvent
+        .replyModal(generateModal(id, "Set Level Growth", "Exp Variation", "Numbers Only (decimals allowed)"))
+        .queue(modal -> App.getEventWaiter().waitForEvent(ModalInteractionEvent.class,
+            e -> e.getUser().equals(event.getUser()),
+            e -> setFromModal(e, id),
+            5, TimeUnit.MINUTES,
+            () -> {
+            }));
+  }
+
+  public void loggingChannels() {
+    List<Button> logButtons = new ArrayList<>();
+    for (String log : logs) {
+      for (Document doc : gs.getLoggingChannels()) {
+        if (doc.getString("logType") == log) {
+          logButtons.add(Button.danger(String.format("remove-%s", log), String.format("Delete %s log", log)));
+        }
+      }
+      logButtons.add(Button.primary(String.format("add-%s", log), String.format("Create %s log", log)));
+    }
+
+    currentButtonEvent.reply("## Select logging type:").setEphemeral(true)
+        .addComponents(ActionRow.of(logButtons))
+        .queue(button -> App.getEventWaiter().waitForEvent(ButtonInteractionEvent.class,
             e -> e.getUser().equals(event.getUser()),
             e -> {
-              try {
-                int value = Integer.parseInt(e.getValue("exp-inc").getAsString());
-                gs.setExpIncrement(value);
-                g.commit();
-                e.reply("Exp Increment set to " + value).queue();
-                generateSettingsPage();
-              } catch (Exception ex) {
-                e.reply("Exp Increment must be a number").setEphemeral(true).queue();
+              String id = e.getComponentId();
+              if (id.startsWith("add")) {
+                addLoggingChannel(id);
+              } else {
+                removeLoggingChanel(id);
               }
             },
             5, TimeUnit.MINUTES,
@@ -184,31 +289,19 @@ public class commandsSettings {
             }));
   }
 
-  public void setExpVar() {
-
+  public void addLoggingChannel(String id) {
+    currentButtonEvent.reply("Pick your logging channel: ")
+        .addActionRow(EntitySelectMenu.create(id, SelectTarget.CHANNEL).build())
+        .setEphemeral(true).queue(message -> App.getEventWaiter().waitForEvent(EntitySelectInteractionEvent.class,
+            e -> e.getUser().equals(event.getUser()),
+            e -> {
+            },
+            5, TimeUnit.MINUTES,
+            () -> {
+            }));
   }
 
-  public void setExpCool() {
-
-  }
-
-  public void setLevelBase() {
-
-  }
-
-  public void setLevelGrowth() {
-
-  }
-
-  public void loggingChannels() {
-
-  }
-
-  public void addLoggingChannel() {
-
-  }
-
-  public void removeLoggingChanel() {
+  public void removeLoggingChanel(String id) {
 
   }
 
