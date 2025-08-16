@@ -48,16 +48,6 @@ public class commandsSettings {
 
   public void generateSettingsPage() {
     String loggingChannels = "**__Logging Channels__**\n";
-    for (String log : logs) {
-      for (Document doc : gs.getLoggingChannels()) {
-        if (doc.getString("logType") == log) {
-          loggingChannels += String.format("%s: %s\n", log,
-              event.getJDA().getChannelById(TextChannel.class, doc.getLong("chanelId")).getAsMention());
-          break;
-        }
-      }
-      loggingChannels += String.format("%s: %s\n", log, "N/A");
-    }
 
     String levellingRoles = "**__Levelling Roles__**\n";
     for (Document doc : gs.getLevellingRoles()) {
@@ -262,43 +252,11 @@ public class commandsSettings {
   }
 
   public void loggingChannels() {
-    List<Button> logButtons = new ArrayList<>();
-    for (String log : logs) {
-      for (Document doc : gs.getLoggingChannels()) {
-        if (doc.getString("logType") == log) {
-          logButtons.add(Button.danger(String.format("remove-%s", log), String.format("Delete %s log", log)));
-        }
-      }
-      logButtons.add(Button.primary(String.format("add-%s", log), String.format("Create %s log", log)));
-    }
 
-    currentButtonEvent.reply("## Select logging type:").setEphemeral(true)
-        .addComponents(ActionRow.of(logButtons))
-        .queue(button -> App.getEventWaiter().waitForEvent(ButtonInteractionEvent.class,
-            e -> e.getUser().equals(event.getUser()),
-            e -> {
-              String id = e.getComponentId();
-              if (id.startsWith("add")) {
-                addLoggingChannel(id);
-              } else {
-                removeLoggingChanel(id);
-              }
-            },
-            5, TimeUnit.MINUTES,
-            () -> {
-            }));
   }
 
   public void addLoggingChannel(String id) {
-    currentButtonEvent.reply("Pick your logging channel: ")
-        .addActionRow(EntitySelectMenu.create(id, SelectTarget.CHANNEL).build())
-        .setEphemeral(true).queue(message -> App.getEventWaiter().waitForEvent(EntitySelectInteractionEvent.class,
-            e -> e.getUser().equals(event.getUser()),
-            e -> {
-            },
-            5, TimeUnit.MINUTES,
-            () -> {
-            }));
+
   }
 
   public void removeLoggingChanel(String id) {

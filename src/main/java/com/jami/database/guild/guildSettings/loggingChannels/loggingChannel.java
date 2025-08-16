@@ -2,6 +2,7 @@ package com.jami.database.guild.guildSettings.loggingChannels;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.bson.Document;
 
@@ -15,7 +16,12 @@ public class loggingChannel {
 
   public loggingChannel(Document doc) {
     this.logChannel = doc.getLong("logChannel");
-    this.associatedLogs = doc.getList("associatedLogs", LogType.class, new ArrayList<>());
+
+    List<String> logStrings = doc.getList("associatedLogs", String.class, new ArrayList<>());
+    List<LogType> associatedLogs = logStrings.stream()
+        .map(LogType::valueOf) // converts "MESSAGE_DELETED" -> LogType.MESSAGE_DELETED
+        .collect(Collectors.toList());
+    this.associatedLogs = associatedLogs;
   }
 
   public long getLogChannel() {

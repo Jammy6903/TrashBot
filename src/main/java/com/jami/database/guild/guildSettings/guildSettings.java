@@ -37,6 +37,7 @@ public class guildSettings {
     this.expCooldown = getOrDefault.Long(s, "expCooldown", App.CONFIG.getExpCooldown());
     this.levelBase = getOrDefault.Long(s, "levelBase", App.CONFIG.getLevelBase());
     this.levelGrowth = getOrDefault.Double(s, "levelGrowth", App.CONFIG.getLevelGrowth());
+    this.loggingChannels = new ArrayList<>();
     for (Document doc : s.getList("loggingChannels", Document.class, defaultLoggingChannels)) {
       this.loggingChannels.add(new loggingChannel(doc));
     }
@@ -97,6 +98,16 @@ public class guildSettings {
       }
     }
     return null;
+  }
+
+  public List<loggingChannel> getLoggingChannelsByLogType(LogType type) {
+    List<loggingChannel> channels = new ArrayList<>();
+    for (loggingChannel channel : loggingChannels) {
+      if (channel.getAssociatedLogs().contains(type)) {
+        channels.add(channel);
+      }
+    }
+    return channels;
   }
 
   public void addLoggingChannel(loggingChannel channel) {
