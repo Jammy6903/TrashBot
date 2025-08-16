@@ -3,16 +3,11 @@ package com.jami;
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
 import com.jami.botAdmin.commandsAdmin;
 import com.jami.database.config.config;
-import com.jami.utilities.guildLogging.guildChange;
-import com.jami.utilities.guildLogging.memberChange;
-import com.jami.utilities.guildLogging.messages;
-import com.jami.utilities.guildLogging.voiceEvents;
+import com.jami.utilities.guildLogging.logging;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 
 import de.tudarmstadt.ukp.jwktl.JWKTL;
-import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Activity;
@@ -109,9 +104,7 @@ public class App {
                                                 GatewayIntent.AUTO_MODERATION_EXECUTION,
                                                 GatewayIntent.GUILD_MESSAGE_POLLS)
                                 .setEventManagerProvider(id -> new AnnotatedEventManager())
-                                .addEventListeners(eventWaiter, new eventListeners(), new guildChange(),
-                                                new memberChange(),
-                                                new messages(), new voiceEvents())
+                                .addEventListeners(eventWaiter, new eventListeners(), new logging())
                                 .setMemberCachePolicy(MemberCachePolicy.ALL)
                                 .setShardsTotal(-1)
                                 .build();

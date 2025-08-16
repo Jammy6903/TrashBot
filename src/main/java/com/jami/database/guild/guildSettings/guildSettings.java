@@ -7,6 +7,7 @@ import org.bson.Document;
 
 import com.jami.App;
 import com.jami.database.getOrDefault;
+import com.jami.database.guild.guildSettings.loggingChannels.*;
 
 public class guildSettings {
   private int expIncrement;
@@ -15,7 +16,7 @@ public class guildSettings {
   private long levelBase;
   private double levelGrowth;
 
-  private List<Document> loggingChannels;
+  private List<loggingChannel> loggingChannels;
   private List<Integer> roleLevels;
   private List<Document> levellingRoles;
   private List<String> disabledFeatures;
@@ -36,7 +37,9 @@ public class guildSettings {
     this.expCooldown = getOrDefault.Long(s, "expCooldown", App.CONFIG.getExpCooldown());
     this.levelBase = getOrDefault.Long(s, "levelBase", App.CONFIG.getLevelBase());
     this.levelGrowth = getOrDefault.Double(s, "levelGrowth", App.CONFIG.getLevelGrowth());
-    this.loggingChannels = s.getList("loggingChannels", Document.class, defaultLoggingChannels);
+    for (Document doc : s.getList("loggingChannels", Document.class, defaultLoggingChannels)) {
+      this.loggingChannels.add(new loggingChannel(doc));
+    }
     this.roleLevels = s.getList("roleLevels", Integer.class, defaultRoleLevels);
     this.levellingRoles = s.getList("levellingRoles", Document.class, defaultLevellingRoles);
     this.disabledFeatures = s.getList("disabledFeatures", String.class, defaultEnabledFeatures);
@@ -83,24 +86,25 @@ public class guildSettings {
     return levelGrowth;
   }
 
-  public void setLoggingChannels(List<Document> channels) {
-    this.loggingChannels = channels;
-  }
-
-  public List<Document> getLoggingChannels() {
+  public List<loggingChannel> getLoggingChannels() {
     return loggingChannels;
   }
 
-  public void addLoggingChannel(Document channel) {
+  public loggingChannel getLoggingChannelByChannelId(long id) {
+    for (loggingChannel channel : loggingChannels) {
+      if (channel.getLogChannel() == id) {
+        return channel;
+      }
+    }
+    return null;
+  }
+
+  public void addLoggingChannel(loggingChannel channel) {
     this.loggingChannels.add(channel);
   }
 
-  public void removeLoggingChannel(Document channel) {
+  public void removeLoggingChannel(loggingChannel channel) {
     this.loggingChannels.remove(channel);
-  }
-
-  public void setRoleLevels(List<Integer> levels) {
-    this.roleLevels = levels;
   }
 
   public List<Integer> getRoleLevels() {
@@ -111,20 +115,12 @@ public class guildSettings {
     this.roleLevels.add(level);
   }
 
-  public void setLevellingRoles(List<Document> docs) {
-    this.levellingRoles = docs;
-  }
-
   public void addLevellingRole(Document doc) {
     this.levellingRoles.add(doc);
   }
 
   public List<Document> getLevellingRoles() {
     return levellingRoles;
-  }
-
-  public void setDisabledFeatures(List<String> features) {
-    this.disabledFeatures = features;
   }
 
   public List<String> getDisabledFeatures() {
@@ -137,10 +133,6 @@ public class guildSettings {
 
   public void removeDisabledFeature(String feature) {
     this.disabledFeatures.remove(feature);
-  }
-
-  public void setWordsDisabledChannels(List<Long> channels) {
-    this.wordsDisabledChannels = channels;
   }
 
   public List<Long> getWordsDisabledChannels() {
@@ -156,12 +148,17 @@ public class guildSettings {
   }
 
   public Document toDocument() {
+    List<Document> loggingChannelsDocs = new ArrayList<>();
+    for (loggingChannel channel : loggingChannels) {
+      loggingChannelsDocs.add(channel.toDocument());
+    }
     return new Document()
         .append("expIncrement", expIncrement)
         .append("expVariation", expVariation)
         .append("expCooldown", expCooldown)
         .append("levelBase", levelBase)
         .append("levelGrowth", levelGrowth)
+        .append("loggingChannels", loggingChannelsDocs)
         .append("roleLevels", roleLevels)
         .append("levellingRoles", levellingRoles)
         .append("disabledFeatures", disabledFeatures)
