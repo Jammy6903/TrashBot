@@ -16,6 +16,13 @@ public class CachedMessage {
     this.attachments = attachments;
   }
 
+  public CachedMessage(CachedMessage originalMessage, String UpdatedMessage) {
+    this.authorId = originalMessage.getAuthorId();
+    this.content = UpdatedMessage;
+    this.timestamp = originalMessage.getTimestamp();
+    this.attachments = originalMessage.getAttachments();
+  }
+
   public long getAuthorId() {
     return authorId;
   }

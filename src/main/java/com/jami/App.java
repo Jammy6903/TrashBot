@@ -106,6 +106,7 @@ public class App {
                                 .setEventManagerProvider(id -> new AnnotatedEventManager())
                                 .addEventListeners(eventWaiter, new eventListeners(), new logging())
                                 .setMemberCachePolicy(MemberCachePolicy.ALL)
+                                .setBulkDeleteSplittingEnabled(true)
                                 .setShardsTotal(-1)
                                 .build();
 

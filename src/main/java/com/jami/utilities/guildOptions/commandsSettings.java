@@ -7,18 +7,24 @@ import java.util.concurrent.TimeUnit;
 import org.bson.Document;
 
 import com.jami.App;
+import com.jami.database.Feature;
+import com.jami.database.LogType;
 import com.jami.database.guild.guild;
 import com.jami.database.guild.guildSettings.guildSettings;
+import com.jami.database.guild.guildSettings.loggingChannels.loggingChannel;
 
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.EntitySelectInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.selections.EntitySelectMenu;
+import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import net.dv8tion.jda.api.interactions.components.selections.EntitySelectMenu.SelectTarget;
 import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
@@ -26,12 +32,12 @@ import net.dv8tion.jda.api.interactions.modals.Modal;
 
 public class commandsSettings {
 
-  private static String[] features = { "levelling", "words", "logging" };
-  private static String[] logs = { "message", "member", "voice", "moderation", "guild" };
-
   guild g;
   guildSettings gs;
   SlashCommandInteractionEvent event;
+  StringSelectInteractionEvent currentSelectionEvent;
+
+  @Deprecated
   ButtonInteractionEvent currentButtonEvent;
 
   public commandsSettings(SlashCommandInteractionEvent event) {
@@ -43,31 +49,38 @@ public class commandsSettings {
   public void start() {
     event.deferReply().queue();
     generateSettingsPage();
-    generateButtons();
+    generateSelectMenu();
   }
 
   public void generateSettingsPage() {
     String loggingChannels = "**__Logging Channels__**\n";
+    for (loggingChannel lc : gs.getLoggingChannels()) {
+      loggingChannels += String.format("- %s\n",
+          event.getJDA().getChannelById(TextChannel.class, lc.getLogChannel()).getAsMention());
+      for (LogType type : lc.getAssociatedLogs()) {
+        loggingChannels += String.format("  - %s\n", type.toString());
+      }
+    }
 
     String levellingRoles = "**__Levelling Roles__**\n";
     for (Document doc : gs.getLevellingRoles()) {
-      levellingRoles += String.format("Level %d: %s\n", doc.getInteger("levelRequirement"),
+      levellingRoles += String.format("- Level %d: %s\n", doc.getInteger("levelRequirement"),
           event.getJDA().getRoleById(doc.getLong("roleId")).getAsMention());
     }
 
     String disabledFeatures = "**__Disabled Features__**\n";
-    for (String feature : features) {
+    for (Feature feature : Feature.values()) {
       if (gs.getDisabledFeatures().contains(feature)) {
-        disabledFeatures += String.format("%s, ", feature);
-      } else {
-        disabledFeatures += String.format("**%s**, ", feature);
+        disabledFeatures += String.format("%s, ", String.valueOf(feature));
       }
+      disabledFeatures = disabledFeatures.substring(0, disabledFeatures.length() - 2);
     }
 
     String wordsDisabledChannels = "**__Words Disabled Channels__**\n";
     for (long channel : gs.getWordsDisabledChannels()) {
       wordsDisabledChannels += String.format("%s, ", event.getJDA().getChannelById(TextChannel.class, channel));
     }
+    wordsDisabledChannels = disabledFeatures.substring(0, disabledFeatures.length() - 2);
 
     String settings = String.format("Exp Increment: %d\n" +
         "Exp Variation: %d\n" +
@@ -85,181 +98,214 @@ public class commandsSettings {
     event.getHook().editOriginalEmbeds(embed.build()).queue();
   }
 
-  public void generateButtons() {
-    Button expIncBut = Button.primary("exp-inc", "Exp Increment");
-    Button expVarBut = Button.primary("exp-var", "Exp Variation");
-    Button expCoolBut = Button.primary("exp-cool", "Exp Cooldown");
+  public void generateSelectMenu() {
+    StringSelectMenu.Builder menu = StringSelectMenu.create("trash_guild_options")
+        .addOption("Exp Increment", OptionType.EXP_INCREMENT.toString(), "How much exp to reward per message")
+        .addOption("Exp Variation", OptionType.EXP_VARIATION.toString(), "How much to vary exp rewards by")
+        .addOption("Exp Cooldown", OptionType.EXP_COOLDOWN.toString(),
+            "How long to wait between messages to reward exp")
+        .addOption("Level Base", OptionType.LEVEL_BASE.toString(), "How much exp to start levelling members")
+        .addOption("Level Growth", OptionType.LEVEL_GROWTH.toString(), "How much to increase exp requirement per level")
+        .addOption("Levelling Roles", OptionType.LEVELLING_ROLE.toString(),
+            "Roles to reward members with upon reaching certain levels")
+        .addOption("Logging Channels", OptionType.LOGGING_CHANNEL.toString(), "Where to send logs")
+        .addOption("Disabled Features", OptionType.DISABLED_FEATURE.toString(), "Features you dont wan't users to use")
+        .addOption("Words Disabled Channels", OptionType.WORDS_DISABLED_CHANNEL.toString(),
+            "Channels you don't want word usage logged in");
 
-    ActionRow expRow = ActionRow.of(expIncBut, expVarBut, expCoolBut);
-
-    Button levelBaseBut = Button.primary("level-base", "Level Base");
-    Button levelGrowthBut = Button.primary("level-growth", "Level Growth");
-
-    ActionRow levelRow = ActionRow.of(levelBaseBut, levelGrowthBut);
-
-    Button loggingChannelBut = Button.secondary("logging-channels", "Logging Channels");
-    Button levellingRoleBut = Button.secondary("levelling-roles", "Levelling Roles");
-
-    Button disabledFeaturesBut = Button.secondary("disabled-features", "Disabled Features");
-    Button wordsDisabledChannelsBut = Button.secondary("words-disabled-channels", "Words Disabled Channels");
-
-    ActionRow otherRowOne = ActionRow.of(loggingChannelBut, levellingRoleBut);
-    ActionRow otherRowTwo = ActionRow.of(disabledFeaturesBut, wordsDisabledChannelsBut);
-
-    event.getHook().editOriginalComponents(expRow, levelRow, otherRowOne, otherRowTwo)
-        .queue(message -> App.getEventWaiter().waitForEvent(ButtonInteractionEvent.class,
-            e -> e.getUser().equals(event.getUser()),
+    event.getHook().editOriginalComponents(ActionRow.of(menu.build()))
+        .queue(message -> App.getEventWaiter().waitForEvent(StringSelectInteractionEvent.class,
             e -> {
-              e.deferReply();
-              this.currentButtonEvent = e;
-              switch (e.getComponentId()) {
-                case "exp-inc":
-                  setExpInc();
+              if (!e.getUser().equals(event.getUser())) {
+                return false;
+              }
+              if (!e.getComponentId().equals("trash_guild_options")) {
+                return false;
+              }
+              return !e.isAcknowledged();
+            },
+            e -> {
+              OptionType type = OptionType.valueOf(e.getValues().get(0));
+              this.currentSelectionEvent = e;
+              switch (type) {
+                case EXP_INCREMENT:
+                  sendModal(OptionType.EXP_INCREMENT, "Exp Increment", "Whole Numbers Only");
                   break;
-                case "exp-var":
-                  setExpVar();
+                case EXP_VARIATION:
+                  sendModal(OptionType.EXP_VARIATION, "Exp Variation", "Whole Numbers Only");
                   break;
-                case "exp-cool":
-                  setExpCool();
+                case EXP_COOLDOWN:
+                  sendModal(OptionType.EXP_COOLDOWN, "Exp Cooldown", "Whole Numbers Only");
                   break;
-                case "level-base":
-                  setLevelBase();
+                case LEVEL_BASE:
+                  sendModal(OptionType.LEVEL_BASE, "Level Base", "Whole Numbers Only");
                   break;
-                case "level-growth":
-                  setLevelGrowth();
+                case LEVEL_GROWTH:
+                  sendModal(OptionType.LEVEL_GROWTH, "Level Growth", "Whole or Decimal Numbers Only");
                   break;
-                case "logging-channels":
-                  loggingChannels();
-                  break;
-                case "levelling-roles":
+                case LEVELLING_ROLE:
                   levellingRoles();
                   break;
-                case "disabled-features":
+                case LOGGING_CHANNEL:
+                  loggingChannels();
+                  break;
+                case DISABLED_FEATURE:
                   disabledFeatures();
                   break;
-                case "words-disabled-channels":
+                case WORDS_DISABLED_CHANNEL:
                   wordsDisabledChannels();
                   break;
               }
-              generateButtons();
+              generateSelectMenu();
             },
-            10, TimeUnit.MINUTES,
-            () -> disableButtons()));
-
+            5, TimeUnit.MINUTES,
+            () -> message.editMessageComponents(ActionRow.of(menu.setDisabled(true).build())).queue()));
   }
 
-  public void disableButtons() {
-    event.getHook().editOriginalComponents().queue();
-  }
-
-  public Modal generateModal(String id, String title, String fieldTitle, String placeholder) {
-    TextInput input = TextInput.create(id, fieldTitle, TextInputStyle.SHORT)
+  public void sendModal(OptionType option, String optionString, String placeholder) {
+    TextInput input = TextInput.create(option.toString(), optionString, TextInputStyle.SHORT)
         .setPlaceholder(placeholder)
         .setRequired(true)
         .build();
-    return Modal.create(id, title)
+    Modal m = Modal.create(option.toString(), String.format("Set %s", optionString))
         .addComponents(ActionRow.of(input))
         .build();
+    currentSelectionEvent.replyModal(m).queue(modal -> App.getEventWaiter().waitForEvent(ModalInteractionEvent.class,
+        e -> {
+          if (!e.getUser().equals(event.getUser())) {
+            return false;
+          }
+          if (!e.getModalId().equals(option.toString())) {
+            return false;
+          }
+          return !e.isAcknowledged();
+        },
+        e -> {
+          try {
+            Integer value = Integer.getInteger(e.getValue(option.toString()).getAsString());
+            setOption(value, option);
+            e.reply(String.format("%s set to %d", optionString, value)).setEphemeral(true).queue();
+          } catch (Exception err) {
+            e.reply("Option requires a whole number").setEphemeral(true).queue();
+            System.out.println(err);
+          }
+        },
+        2, TimeUnit.MINUTES,
+        () -> {
+        }));
   }
 
-  public void setFromModal(ModalInteractionEvent e, String id) {
-    String option = "";
-    try {
-      int value = Integer.parseInt(e.getValue(id).getAsString());
-      switch (id) {
-        case "exp-inc":
-          gs.setExpIncrement(value);
-          option = "Exp Increment";
-          break;
-        case "exp-var":
-          gs.setExpVariation(value);
-          option = "Exp Variation";
-          break;
-        case "exp-cool":
-          gs.setExpCooldown(value);
-          option = "Exp Cooldown";
-          break;
-        case "level-base":
-          gs.setLevelBase(value);
-          option = "Level Base";
-          break;
-        case "level-growth":
-          gs.setLevelGrowth(value);
-          option = "Level Growth";
-          break;
-      }
-      g.commit();
-      e.reply(option + " set to " + value).setEphemeral(true).queue();
-    } catch (Exception err) {
-      e.reply(option + " must be a number");
+  public void setOption(Integer value, OptionType type) {
+    switch (type) {
+      case EXP_INCREMENT:
+        gs.setExpIncrement(value);
+        break;
+      case EXP_VARIATION:
+        gs.setExpVariation(value);
+        break;
+      case EXP_COOLDOWN:
+        gs.setExpCooldown(value);
+        break;
+      case LEVEL_BASE:
+        gs.setLevelBase(value);
+        break;
+      case LEVEL_GROWTH:
+        gs.setLevelGrowth(value);
+        break;
+      default:
+        event.getHook().sendMessage("Unknown error occured.").setEphemeral(true).queue();
+        break;
     }
-  }
-
-  public void setExpInc() {
-    String id = "exp-inc";
-    currentButtonEvent.replyModal(generateModal(id, "Set Exp Increment", "Exp Increment", "Numbers Only"))
-        .queue(modal -> App.getEventWaiter().waitForEvent(ModalInteractionEvent.class,
-            e -> e.getUser().equals(event.getUser()),
-            e -> setFromModal(e, id),
-            5, TimeUnit.MINUTES,
-            () -> {
-            }));
-  }
-
-  public void setExpVar() {
-    String id = "exp-var";
-    currentButtonEvent.replyModal(generateModal(id, "Set Exp Variation", "Exp Variation", "Numbers Only"))
-        .queue(modal -> App.getEventWaiter().waitForEvent(ModalInteractionEvent.class,
-            e -> e.getUser().equals(event.getUser()),
-            e -> setFromModal(e, id),
-            5, TimeUnit.MINUTES,
-            () -> {
-            }));
-  }
-
-  public void setExpCool() {
-    String id = "exp-cool";
-    currentButtonEvent.replyModal(generateModal(id, "Set Exp Cooldown", "Exp Cooldown", "Numbers Only"))
-        .queue(modal -> App.getEventWaiter().waitForEvent(ModalInteractionEvent.class,
-            e -> e.getUser().equals(event.getUser()),
-            e -> setFromModal(e, id),
-            5, TimeUnit.MINUTES,
-            () -> {
-            }));
-  }
-
-  public void setLevelBase() {
-    String id = "level-base";
-    currentButtonEvent.replyModal(generateModal(id, "Set Level Base", "Level Base", "Numbers Only"))
-        .queue(modal -> App.getEventWaiter().waitForEvent(ModalInteractionEvent.class,
-            e -> e.getUser().equals(event.getUser()),
-            e -> setFromModal(e, id),
-            5, TimeUnit.MINUTES,
-            () -> {
-            }));
-  }
-
-  public void setLevelGrowth() {
-    String id = "level-growth";
-    currentButtonEvent
-        .replyModal(generateModal(id, "Set Level Growth", "Exp Variation", "Numbers Only (decimals allowed)"))
-        .queue(modal -> App.getEventWaiter().waitForEvent(ModalInteractionEvent.class,
-            e -> e.getUser().equals(event.getUser()),
-            e -> setFromModal(e, id),
-            5, TimeUnit.MINUTES,
-            () -> {
-            }));
+    g.commit();
   }
 
   public void loggingChannels() {
-
+    Button remove = Button.danger("trash_log_remove", "REMOVE");
+    Button add = Button.success("trash_log_add", "ADD");
+    currentSelectionEvent.reply("Add or Remove a log").addComponents(ActionRow.of(remove, add))
+        .queue(message -> App.getEventWaiter().waitForEvent(ButtonInteractionEvent.class,
+            e -> {
+              if (!e.getUser().equals(event.getUser())) {
+                return false;
+              }
+              if (!(e.getComponentId().equals("trash_log_remove") || e.getComponentId().equals("trash_log_add"))) {
+                return false;
+              }
+              return !e.isAcknowledged();
+            },
+            e -> {
+              message.deleteOriginal().queue();
+              if (e.getComponentId().equals("trash_log_remove")) {
+                removeLoggingChannel();
+              } else {
+                addLoggingChannel(e);
+              }
+            },
+            2, TimeUnit.MINUTES,
+            () -> message.deleteOriginal().queue()));
   }
 
-  public void addLoggingChannel(String id) {
-
+  public void addLoggingChannel(ButtonInteractionEvent be) {
+    OptionType type = OptionType.LOGGING_CHANNEL;
+    EntitySelectMenu menu = EntitySelectMenu.create(type.toString(), SelectTarget.CHANNEL).build();
+    be.reply("Pick logging channel:").addComponents(ActionRow.of(menu))
+        .queue(message -> App.getEventWaiter().waitForEvent(EntitySelectInteractionEvent.class,
+            e -> {
+              if (!e.getUser().equals(event.getUser())) {
+                return false;
+              }
+              if (!e.getComponentId().equals(type.toString())) {
+                return false;
+              }
+              return !e.isAcknowledged();
+            },
+            e -> {
+              message.deleteOriginal().queue();
+              if (!e.getMentions().getChannels().get(0).getType().equals(ChannelType.TEXT)) {
+                e.reply("Channel must be a text channel").setEphemeral(true).queue();
+              } else {
+                pickLogType(e);
+              }
+            },
+            2, TimeUnit.MINUTES,
+            () -> message.deleteOriginal().queue()));
   }
 
-  public void removeLoggingChanel(String id) {
+  public void pickLogType(EntitySelectInteractionEvent me) {
+    OptionType type = OptionType.LOGGING_CHANNEL;
+    TextChannel channel = (TextChannel) me.getMentions().getChannels().get(0);
+    StringSelectMenu.Builder menu = StringSelectMenu.create(type.toString()).setMaxValues(10);
+    for (LogType log : LogType.values()) {
+      menu.addOption(log.toString(), log.toString());
+    }
+    me.reply("Select logs to associate with " + channel.getAsMention()).addComponents(ActionRow.of(menu.build()))
+        .queue(message -> App.getEventWaiter().waitForEvent(StringSelectInteractionEvent.class,
+            e -> {
+              if (!e.getUser().equals(event.getUser())) {
+                return false;
+              }
+              if (!e.getComponentId().equals(type.toString())) {
+                return false;
+              }
+              return !e.isAcknowledged();
+            },
+            e -> {
+              List<LogType> logs = new ArrayList<>();
+              String confirm = "";
+              for (String value : e.getValues()) {
+                logs.add(LogType.valueOf(value));
+                confirm += value + ", ";
+              }
+              confirm = confirm.substring(0, confirm.length() - 2);
+              gs.addLoggingChannel(new loggingChannel(channel.getIdLong(), logs));
+              g.commit();
+              e.reply("Added " + confirm + " log(s) to " + channel.getAsMention()).queue();
+            },
+            2, TimeUnit.MINUTES,
+            () -> message.deleteOriginal().queue()));
+  }
+
+  public void removeLoggingChannel() {
 
   }
 
