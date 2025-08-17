@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.jami.App;
+import com.jami.database.Feature;
 import com.jami.database.config.config;
 
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -127,8 +128,8 @@ public class commandsAdmin {
 
   private static EmbedBuilder showConfig() {
     String disabledFeatures = "";
-    for (String feature : App.CONFIG.getDisabledFeatures()) {
-      disabledFeatures += "- " + feature + "\n";
+    for (Feature feature : App.CONFIG.getDisabledFeatures()) {
+      disabledFeatures += "- " + String.valueOf(feature) + "\n";
     }
     String disabledCommands = "";
     for (String command : App.CONFIG.getDisabledCommands()) {
@@ -154,8 +155,8 @@ public class commandsAdmin {
 
   private static String showConfigConsole() {
     String disabledFeatures = "";
-    for (String feature : App.CONFIG.getDisabledFeatures()) {
-      disabledFeatures += "  - " + feature + "\n";
+    for (Feature feature : App.CONFIG.getDisabledFeatures()) {
+      disabledFeatures += "  - " + String.valueOf(feature) + "\n";
     }
     String disabledCommands = "";
     for (String command : App.CONFIG.getDisabledCommands()) {
@@ -280,7 +281,7 @@ public class commandsAdmin {
     }
     String addedFeatures = "Following features added to Disabled Features: ";
     for (int i = 1; i < args.size(); i++) {
-      App.CONFIG.addDisabledFeature(args.get(i));
+      App.CONFIG.addDisabledFeature(Feature.valueOf(args.get(i)));
       addedFeatures += args.get(i) + ", ";
     }
     return addedFeatures;
@@ -292,7 +293,7 @@ public class commandsAdmin {
     }
     String removedFeatures = "Following features removed from Disabled Features: ";
     for (int i = 1; i < args.size(); i++) {
-      App.CONFIG.removeDisabledFeature(args.get(i));
+      App.CONFIG.removeDisabledFeature(Feature.valueOf(args.get(i)));
       removedFeatures += args.get(i) + ", ";
     }
     return removedFeatures;

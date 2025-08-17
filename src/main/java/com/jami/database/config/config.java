@@ -5,9 +5,11 @@ import static com.mongodb.client.model.Filters.eq;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.bson.Document;
 
+import com.jami.database.Feature;
 import com.jami.database.getOrDefault;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -28,7 +30,7 @@ public class config {
   private long levelBase;
   private double levelGrowth;
 
-  private List<String> disabledFeatures;
+  private List<Feature> disabledFeatures;
   private List<String> disabledCommands;
 
   private List<Long> adminIds;
@@ -47,7 +49,10 @@ public class config {
     this.expCooldown = getOrDefault.Long(entry, "expCooldown", 0L);
     this.levelBase = getOrDefault.Long(entry, "levelBase", 0L);
     this.levelGrowth = getOrDefault.Double(entry, "levelGrowth", 0.0);
-    this.disabledFeatures = entry.getList("disabledFeatures", String.class, new ArrayList<>());
+    List<String> featureStrings = entry.getList("disabledFeatures", String.class, new ArrayList<>());
+    this.disabledFeatures = featureStrings.stream()
+        .map(Feature::valueOf) // converts "MESSAGE_DELETED" -> LogType.MESSAGE_DELETED
+        .collect(Collectors.toList());
     this.disabledCommands = entry.getList("disabledCommands", String.class, new ArrayList<>());
     this.adminIds = entry.getList("adminIds", Long.class, new ArrayList<>());
   }
@@ -116,15 +121,15 @@ public class config {
     return levelGrowth;
   }
 
-  public void addDisabledFeature(String feature) {
+  public void addDisabledFeature(Feature feature) {
     this.disabledFeatures.add(feature);
   }
 
-  public void removeDisabledFeature(String feature) {
+  public void removeDisabledFeature(Feature feature) {
     this.disabledFeatures.remove(feature);
   }
 
-  public List<String> getDisabledFeatures() {
+  public List<Feature> getDisabledFeatures() {
     return disabledFeatures;
   }
 

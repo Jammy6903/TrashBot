@@ -2,32 +2,38 @@ package com.jami.database.user;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.bson.Document;
 
+import com.jami.database.Feature;
+
 public class userSettings {
-  private List<String> disabledFeatures;
+  private List<Feature> disabledFeatures;
 
   public userSettings(Document s) {
     if (s == null) {
       s = new Document();
     }
-    this.disabledFeatures = s.getList("disabledFeatures", String.class, new ArrayList<>());
+    List<String> featureStrings = s.getList("disabledFeatures", String.class, new ArrayList<>());
+    this.disabledFeatures = featureStrings.stream()
+        .map(Feature::valueOf) // converts "MESSAGE_DELETED" -> LogType.MESSAGE_DELETED
+        .collect(Collectors.toList());
   }
 
-  public List<String> getDisabledFeatures() {
+  public List<Feature> getDisabledFeatures() {
     return disabledFeatures;
   }
 
-  public void setDisabledFeatures(List<String> features) {
+  public void setDisabledFeatures(List<Feature> features) {
     this.disabledFeatures = features;
   }
 
-  public void addDisabledFeature(String feature) {
+  public void addDisabledFeature(Feature feature) {
     this.disabledFeatures.add(feature);
   }
 
-  public void removeDisabledFeature(String feature) {
+  public void removeDisabledFeature(Feature feature) {
     this.disabledFeatures.remove(feature);
   }
 

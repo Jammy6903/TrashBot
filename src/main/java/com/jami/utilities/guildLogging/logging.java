@@ -19,14 +19,14 @@ import java.util.concurrent.TimeUnit;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.jami.App;
+import com.jami.database.LogType;
 import com.jami.database.guild.guild;
 import com.jami.database.guild.guildSettings.guildSettings;
-import com.jami.database.guild.guildSettings.loggingChannels.LogType;
 import com.jami.database.guild.guildSettings.loggingChannels.loggingChannel;
 
 public class logging {
 
-  private final Cache<Long, CachedMessage> messageCache = Caffeine.newBuilder()
+  private static final Cache<Long, CachedMessage> messageCache = Caffeine.newBuilder()
       .expireAfterWrite(1, TimeUnit.DAYS)
       .build();
 
@@ -44,8 +44,7 @@ public class logging {
     }
   }
 
-  @SubscribeEvent
-  public void messageSent(MessageReceivedEvent event) {
+  public static void cacheMessage(MessageReceivedEvent event) {
     if (event.getAuthor().isBot()) {
       return;
     }

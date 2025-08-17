@@ -6,6 +6,8 @@ import java.util.stream.Collectors;
 
 import org.bson.Document;
 
+import com.jami.database.LogType;
+
 public class loggingChannel {
   private long logChannel;
   private List<LogType> associatedLogs;
@@ -18,10 +20,9 @@ public class loggingChannel {
     this.logChannel = doc.getLong("logChannel");
 
     List<String> logStrings = doc.getList("associatedLogs", String.class, new ArrayList<>());
-    List<LogType> associatedLogs = logStrings.stream()
+    this.associatedLogs = logStrings.stream()
         .map(LogType::valueOf) // converts "MESSAGE_DELETED" -> LogType.MESSAGE_DELETED
         .collect(Collectors.toList());
-    this.associatedLogs = associatedLogs;
   }
 
   public long getLogChannel() {

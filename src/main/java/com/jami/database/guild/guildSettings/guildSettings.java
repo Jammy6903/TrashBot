@@ -2,10 +2,13 @@ package com.jami.database.guild.guildSettings;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.bson.Document;
 
 import com.jami.App;
+import com.jami.database.Feature;
+import com.jami.database.LogType;
 import com.jami.database.getOrDefault;
 import com.jami.database.guild.guildSettings.loggingChannels.*;
 
@@ -19,14 +22,8 @@ public class guildSettings {
   private List<loggingChannel> loggingChannels;
   private List<Integer> roleLevels;
   private List<Document> levellingRoles;
-  private List<String> disabledFeatures;
+  private List<Feature> disabledFeatures;
   private List<Long> wordsDisabledChannels;
-
-  private static List<Document> defaultLoggingChannels = new ArrayList<>();
-  private static List<Integer> defaultRoleLevels = new ArrayList<>();
-  private static List<Document> defaultLevellingRoles = new ArrayList<>();
-  private static List<String> defaultEnabledFeatures = new ArrayList<>();
-  private static List<Long> defaultWordsDisabledChannels = new ArrayList<>();
 
   public guildSettings(Document s) {
     if (s == null) {
@@ -38,13 +35,16 @@ public class guildSettings {
     this.levelBase = getOrDefault.Long(s, "levelBase", App.CONFIG.getLevelBase());
     this.levelGrowth = getOrDefault.Double(s, "levelGrowth", App.CONFIG.getLevelGrowth());
     this.loggingChannels = new ArrayList<>();
-    for (Document doc : s.getList("loggingChannels", Document.class, defaultLoggingChannels)) {
+    for (Document doc : s.getList("loggingChannels", Document.class, new ArrayList<>())) {
       this.loggingChannels.add(new loggingChannel(doc));
     }
-    this.roleLevels = s.getList("roleLevels", Integer.class, defaultRoleLevels);
-    this.levellingRoles = s.getList("levellingRoles", Document.class, defaultLevellingRoles);
-    this.disabledFeatures = s.getList("disabledFeatures", String.class, defaultEnabledFeatures);
-    this.wordsDisabledChannels = s.getList("wordsDisabledChannels", Long.class, defaultWordsDisabledChannels);
+    this.roleLevels = s.getList("roleLevels", Integer.class, new ArrayList<>());
+    this.levellingRoles = s.getList("levellingRoles", Document.class, new ArrayList<>());
+    List<String> featureStrings = s.getList("disabledFeatures", String.class, new ArrayList<>());
+    this.disabledFeatures = featureStrings.stream()
+        .map(Feature::valueOf) // converts "MESSAGE_DELETED" -> LogType.MESSAGE_DELETED
+        .collect(Collectors.toList());
+    this.wordsDisabledChannels = s.getList("wordsDisabledChannels", Long.class, new ArrayList<>());
   }
 
   public void setExpIncrement(int exp) {
@@ -134,15 +134,15 @@ public class guildSettings {
     return levellingRoles;
   }
 
-  public List<String> getDisabledFeatures() {
+  public List<Feature> getDisabledFeatures() {
     return disabledFeatures;
   }
 
-  public void addDisabledFeature(String feature) {
+  public void addDisabledFeature(Feature feature) {
     this.disabledFeatures.add(feature);
   }
 
-  public void removeDisabledFeature(String feature) {
+  public void removeDisabledFeature(Feature feature) {
     this.disabledFeatures.remove(feature);
   }
 

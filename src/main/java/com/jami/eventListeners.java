@@ -1,5 +1,6 @@
 package com.jami;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.jami.fun.levelling.commandsLevelling;
@@ -7,12 +8,15 @@ import com.jami.fun.levelling.levelling;
 import com.jami.fun.wordCount.commandsWordCount;
 import com.jami.fun.wordCount.wordCount;
 import com.jami.utilities.featureRequests.commandsFeatureRequests;
+import com.jami.utilities.guildLogging.logging;
 import com.jami.utilities.guildOptions.commandsSettings;
 import com.jami.utilities.info.commandsInfo;
 import com.jami.botAdmin.commandsAdmin;
+import com.jami.database.Feature;
 import com.jami.database.guild.guild;
 import com.jami.database.guild.guildSettings.guildSettings;
 import com.jami.database.user.user;
+import com.jami.database.user.userSettings;
 
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
@@ -69,24 +73,42 @@ public class eventListeners {
       return;
     }
 
+    user uu = new user(u.getIdLong());
+    userSettings us = uu.getSettings();
     guild gg = new guild(g.getIdLong());
     guildSettings gs = gg.getSettings();
 
-    List<String> userDisabledFetures = new user(u.getIdLong()).getSettings().getDisabledFeatures();
+    List<List<Feature>> disabledFeaturesLists = new ArrayList<>();
+    disabledFeaturesLists.add(App.CONFIG.getDisabledFeatures());
+    disabledFeaturesLists.add(us.getDisabledFeatures());
+    disabledFeaturesLists.add(gs.getDisabledFeatures());
 
     // Levelling
-    if (!App.CONFIG.getDisabledFeatures().contains("levelling") && !userDisabledFetures.contains("levelling")
-        && !gs.getDisabledFeatures().contains("levelling")) {
+    if (checkDisabled(disabledFeaturesLists, Feature.LEVELLING)) {
       levelling.incrementExps(event, gg, u.getIdLong());
     }
 
     // WordCount
-    if (!App.CONFIG.getDisabledFeatures().contains("words") && !userDisabledFetures.contains("words")
-        && !gs.getDisabledFeatures().contains("words") && !gs.getWordsDisabledChannels().contains(c.getIdLong())) {
+    if (checkDisabled(disabledFeaturesLists, Feature.WORDS)
+        && !gs.getWordsDisabledChannels().contains(c.getIdLong())) {
       wordCount.incrementWords(event.getMessage().getContentRaw(), gg);
     }
 
+    // Message Logging
+    if (checkDisabled(disabledFeaturesLists, Feature.LOGGING)) {
+      logging.cacheMessage(event);
+    }
+
     gg.commit();
+  }
+
+  private boolean checkDisabled(List<List<Feature>> lists, Feature feature) {
+    for (List<Feature> list : lists) {
+      if (list.contains(feature)) {
+        return false;
+      }
+    }
+    return true;
   }
 
 }
