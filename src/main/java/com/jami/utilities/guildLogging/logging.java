@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.jami.App;
+import com.jami.database.Feature;
 import com.jami.database.LogType;
 import com.jami.database.guild.guild;
 import com.jami.database.guild.guildSettings.guildSettings;
@@ -40,6 +41,11 @@ public class logging {
   public void sendLogEntry(LogType type, Guild guild, MessageEmbed content) {
     guild g = new guild(guild.getIdLong());
     guildSettings gs = g.getSettings();
+    if (gs.getDisabledFeatures().contains(Feature.LOGGING)
+        || App.CONFIG.getDisabledFeatures().contains(Feature.LOGGING)) {
+      return;
+    }
+
     List<loggingChannel> channels = gs.getLoggingChannelsByLogType(type);
 
     if (channels.size() == 0) {
@@ -125,6 +131,10 @@ public class logging {
     System.out.println("test");
 
     CachedMessage message = messageCache.getIfPresent(messageId);
+    if (message == null) {
+      return;
+    }
+
     String newMessage = event.getMessage().getContentRaw();
 
     messageCache.put(messageId, new CachedMessage(message, newMessage));
@@ -153,7 +163,11 @@ public class logging {
     List<CachedMessage> messages = new ArrayList<>();
 
     for (Long id : messageIds) {
-      messages.add(messageCache.getIfPresent(id));
+      CachedMessage message = messageCache.getIfPresent(id);
+      if (message == null) {
+        continue;
+      }
+      messages.add(message);
     }
 
     String file = "";

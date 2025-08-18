@@ -10,6 +10,7 @@ import com.jami.App;
 import com.jami.database.Feature;
 import com.jami.database.LogType;
 import com.jami.database.getOrDefault;
+import com.jami.database.guild.guildSettings.levellingRoles.levellingRole;
 import com.jami.database.guild.guildSettings.loggingChannels.*;
 
 public class guildSettings {
@@ -20,8 +21,7 @@ public class guildSettings {
   private double levelGrowth;
 
   private List<loggingChannel> loggingChannels;
-  private List<Integer> roleLevels;
-  private List<Document> levellingRoles;
+  private List<levellingRole> levellingRoles;
   private List<Feature> disabledFeatures;
   private List<Long> wordsDisabledChannels;
 
@@ -38,8 +38,10 @@ public class guildSettings {
     for (Document doc : s.getList("loggingChannels", Document.class, new ArrayList<>())) {
       this.loggingChannels.add(new loggingChannel(doc));
     }
-    this.roleLevels = s.getList("roleLevels", Integer.class, new ArrayList<>());
-    this.levellingRoles = s.getList("levellingRoles", Document.class, new ArrayList<>());
+    this.levellingRoles = new ArrayList<>();
+    for (Document doc : s.getList("levellingRoles", Document.class, new ArrayList<>())) {
+      this.levellingRoles.add(new levellingRole(doc));
+    }
     List<String> featureStrings = s.getList("disabledFeatures", String.class, new ArrayList<>());
     this.disabledFeatures = featureStrings.stream()
         .map(Feature::valueOf) // converts "MESSAGE_DELETED" -> LogType.MESSAGE_DELETED
@@ -118,20 +120,31 @@ public class guildSettings {
     this.loggingChannels.remove(channel);
   }
 
-  public List<Integer> getRoleLevels() {
-    return roleLevels;
+  public levellingRole getLevelRoleByRoleId(long id) {
+    for (levellingRole role : levellingRoles) {
+      if (role.getId() == id) {
+        return role;
+      }
+    }
+    return null;
   }
 
-  public void addRoleLevel(int level) {
-    this.roleLevels.add(level);
+  public List<levellingRole> getLevelRolesByLevel(int level) {
+    List<levellingRole> roles = new ArrayList<>();
+    for (levellingRole role : levellingRoles) {
+      if (role.getLevelRequirement() == level) {
+        roles.add(role);
+      }
+    }
+    return roles;
   }
 
-  public void addLevellingRole(Document doc) {
-    this.levellingRoles.add(doc);
-  }
-
-  public List<Document> getLevellingRoles() {
+  public List<levellingRole> getLevellingRoles() {
     return levellingRoles;
+  }
+
+  public void addLevellingRole(levellingRole role) {
+    this.levellingRoles.add(role);
   }
 
   public List<Feature> getDisabledFeatures() {
@@ -170,7 +183,6 @@ public class guildSettings {
         .append("levelBase", levelBase)
         .append("levelGrowth", levelGrowth)
         .append("loggingChannels", loggingChannelsDocs)
-        .append("roleLevels", roleLevels)
         .append("levellingRoles", levellingRoles)
         .append("disabledFeatures", disabledFeatures)
         .append("wordsDisabledChannels", wordsDisabledChannels);

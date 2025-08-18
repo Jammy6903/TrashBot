@@ -45,8 +45,7 @@ public class commandsFeatureRequests {
                                                         .addField("Status", req.getStatus(), false)
                                                         .setFooter("Requested by " + req.getUserName() + " | "
                                                                         + req.getId());
-                                        e.reply("Feature request submitted:").queue();
-                                        e.getHook().sendMessageEmbeds(embed.build()).queue();
+                                        e.reply("Feature request created:").addEmbeds(embed.build()).queue();
                                         req.commit();
                                 },
                                 10, TimeUnit.MINUTES,

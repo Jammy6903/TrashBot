@@ -16,12 +16,6 @@ public class loggingChannel {
     this.logChannel = id;
   }
 
-  public loggingChannel(long id, List<LogType> type) {
-    this.logChannel = id;
-    this.associatedLogs = new ArrayList<>();
-    this.associatedLogs.addAll(type);
-  }
-
   public loggingChannel(Document doc) {
     this.logChannel = doc.getLong("logChannel");
 
@@ -37,6 +31,10 @@ public class loggingChannel {
 
   public void addAssociatedLog(LogType type) {
     this.associatedLogs.add(type);
+  }
+
+  public void addAssociatedLogs(List<LogType> types) {
+    this.associatedLogs.addAll(types);
   }
 
   public void removeAssociatedLog(LogType type) {

@@ -11,6 +11,7 @@ import com.jami.database.Feature;
 import com.jami.database.LogType;
 import com.jami.database.guild.guild;
 import com.jami.database.guild.guildSettings.guildSettings;
+import com.jami.database.guild.guildSettings.levellingRoles.levellingRole;
 import com.jami.database.guild.guildSettings.loggingChannels.loggingChannel;
 
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -37,9 +38,6 @@ public class commandsSettings {
   SlashCommandInteractionEvent event;
   StringSelectInteractionEvent currentSelectionEvent;
 
-  @Deprecated
-  ButtonInteractionEvent currentButtonEvent;
-
   public commandsSettings(SlashCommandInteractionEvent event) {
     this.g = new guild(event.getGuild().getIdLong());
     this.gs = g.getSettings();
@@ -63,9 +61,9 @@ public class commandsSettings {
     }
 
     String levellingRoles = "**__Levelling Roles__**\n";
-    for (Document doc : gs.getLevellingRoles()) {
-      levellingRoles += String.format("- Level %d: %s\n", doc.getInteger("levelRequirement"),
-          event.getJDA().getRoleById(doc.getLong("roleId")).getAsMention());
+    for (levellingRole role : gs.getLevellingRoles()) {
+      levellingRoles += String.format("- Level %d: %s\n", role.getLevelRequirement(),
+          event.getJDA().getRoleById(role.getId()).getAsMention());
     }
 
     String disabledFeatures = "**__Disabled Features__**\n";
@@ -290,14 +288,26 @@ public class commandsSettings {
               return !e.isAcknowledged();
             },
             e -> {
-              List<LogType> logs = new ArrayList<>();
+              loggingChannel lc = gs.getLoggingChannelByChannelId(channel.getIdLong());
+              if (lc == null) {
+                lc = new loggingChannel(channel.getIdLong());
+              }
+
               String confirm = "";
+              List<LogType> logs = new ArrayList<>();
               for (String value : e.getValues()) {
                 logs.add(LogType.valueOf(value));
                 confirm += value + ", ";
               }
               confirm = confirm.substring(0, confirm.length() - 2);
-              gs.addLoggingChannel(new loggingChannel(channel.getIdLong(), logs));
+
+              for (LogType t : lc.getAssociatedLogs()) {
+                if (logs.contains(t)) {
+                  logs.remove(t);
+                }
+              }
+
+              lc.addAssociatedLogs(logs);
               g.commit();
               e.reply("Added " + confirm + " log(s) to " + channel.getAsMention()).queue();
             },
