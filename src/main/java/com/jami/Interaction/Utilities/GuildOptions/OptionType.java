@@ -1,0 +1,13 @@
+package com.jami.Interaction.Utilities.GuildOptions;
+
+public enum OptionType {
+  EXP_INCREMENT,
+  EXP_VARIATION,
+  EXP_COOLDOWN,
+  LEVEL_BASE,
+  LEVEL_GROWTH,
+  LOGGING_CHANNEL,
+  LEVELLING_ROLE,
+  DISABLED_FEATURE,
+  WORDS_DISABLED_CHANNEL,
+}

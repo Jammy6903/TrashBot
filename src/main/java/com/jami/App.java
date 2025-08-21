@@ -1,22 +1,18 @@
 package com.jami;
 
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
-import com.jami.botAdmin.commandsAdmin;
-import com.jami.database.config.config;
-import com.jami.utilities.guildLogging.logging;
+import com.jami.BotAdmin.CommandsAdmin;
+import com.jami.Database.Config.ConfigRecord;
+import com.jami.Interaction.Utilities.GuildLogging.Logging;
+import com.jami.JDA.CommandsSetup;
+import com.jami.JDA.EventListeners;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 
 import de.tudarmstadt.ukp.jwktl.JWKTL;
 import net.dv8tion.jda.api.OnlineStatus;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.hooks.AnnotatedEventManager;
-import net.dv8tion.jda.api.interactions.InteractionContextType;
-import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
-import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.Commands;
-import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
 import net.dv8tion.jda.api.sharding.ShardManager;
@@ -25,116 +21,126 @@ import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Properties;
 import java.util.Scanner;
 
 public class App {
 
+        // JDA
         private static ShardManager shardManager;
-        private static final EventWaiter eventWaiter = new EventWaiter();
+        private static final EventWaiter EVENT_WAITER = new EventWaiter();
 
-        private static final File propFile = new File("config.properties");
+        // .properties
+        private static final File PROP_FILE = new File("config.properties");
         private static Properties props = new Properties();
 
-        public static MongoClient mongoClient;
+        // MongoDB
+        private static MongoClient mongoClient;
 
-        private static String currentConfig;
-        public static config CONFIG;
+        // Global Config
+        private static ConfigRecord globalConfig;
 
-        private static File dumpFile = new File("assets/dictionary/wiktionary.xml");
-        private static File outputDirectory = new File("assets/dictionary/output");
+        // Wiktionary
+        private static File wiktionaryDumpFile = new File("assets/dictionary/wiktionary.xml");
+        private static File wiktionaryOutputDirectory = new File("assets/dictionary/output");
 
         public static void main(String[] args) {
+                // Increase arbitrary XML limits to allow for Wiktionary parsing
                 System.setProperty("jdk.xml.maxGeneralEntitySizeLimit", "0");
                 System.setProperty("jdk.xml.totalEntitySizeLimit", "0");
 
+                // Load Properties File
+                System.out.println("[INFO] Loading properties file");
                 try {
-                        props.load(new FileInputStream(propFile));
-
-                        currentConfig = props.getProperty("CURRENT_CONFIG");
-
-                        mongoClient = MongoClients.create(props.getProperty("DATABASE_URI"));
-
-                        if (args.length == 1) {
-                                new App().start(args[0]);
-                        } else {
-                                new App().start(props.getProperty("TOKEN"));
-                        }
-                } catch (Exception e) {
-                        System.out.println("Bot startup failed: " + e);
+                        props.load(new FileInputStream(PROP_FILE));
+                } catch (IOException e) {
+                        System.out.println("[ERROR] Property file not found - " + e);
+                        System.exit(1);
                 }
+                System.out.println("[INFO] Properties loaded");
 
-                new config("defaultConfig").saveConfig(); // Makes sure theres always a default config available
+                wiktionaryDumpFile = new File(props.getProperty("WIKTIONARY_XML"));
+                wiktionaryOutputDirectory = new File(props.getProperty("WIKTIONARY_DIRECTORY"));
 
-                CONFIG = new config(currentConfig);
-                String status = CONFIG.getBotStatus();
-                try {
+                // Connect to MongoDB - Keep trying until connected
+                System.out.println("[INFO] Attempting to connect to MongoDB");
+                while (mongoClient == null) {
+                        mongoClient = MongoClients.create(props.getProperty("DATABASE_URI"));
+                        if (mongoClient == null) {
+                                System.out.println("[ERROR] Failed to connect to MongoDB, reattempting in 10 seconds");
+                                wait(10000);
+                        }
+                }
+                System.out.println("[INFO] Connected to MongoDB");
+
+                // Start shard manager
+                System.out.println("[INFO] Attempting to connect to Discord");
+                while (shardManager == null) {
+                        new App().startShardManager(props.getProperty("TOKEN"));
+                        if (shardManager == null) {
+                                System.out.println("[ERROR] Failed to connect to Discord, reattempting in 10 seconds");
+                                wait(1000);
+                        }
+                }
+                System.out.println("[INFO] Connected to Discord");
+
+                new ConfigRecord("defaultConfig").saveConfig(); // Makes sure theres always a default config available
+                globalConfig = new ConfigRecord(props.getProperty("CURRENT_CONFIG")); // Loads current config from DB
+
+                // After-startup bot configuration
+                String status = globalConfig.getBotStatus();
+                if (!status.isEmpty()) {
                         shardManager.getShards()
                                         .forEach(jda -> jda.getPresence().setActivity(Activity.customStatus(status)));
-                } catch (Exception e) {
-                        System.out.println(e);
                 }
+                CommandsSetup.getCommands(shardManager);
 
+                // Start scanner for console commands
                 Scanner s = new Scanner(System.in);
-
                 while (s.hasNext()) {
                         String command = s.nextLine();
-                        commandsAdmin.adminCommands(null, command);
+                        if (command.equals("shutdown")) {
+                                s.close();
+                                shardManager.shutdown();
+                                System.exit(0);
+                        }
+                        CommandsAdmin.adminCommands(null, command);
                 }
-
-                s.close();
         }
 
-        private void start(String Token) throws Exception {
-                shardManager = DefaultShardManagerBuilder.createDefault(Token)
-                                .setStatus(OnlineStatus.ONLINE)
-                                .enableIntents(
-                                                GatewayIntent.GUILD_MEMBERS,
-                                                GatewayIntent.GUILD_MODERATION,
-                                                GatewayIntent.GUILD_WEBHOOKS,
-                                                GatewayIntent.GUILD_INVITES,
-                                                GatewayIntent.GUILD_VOICE_STATES,
-                                                GatewayIntent.GUILD_MESSAGES,
-                                                GatewayIntent.GUILD_MESSAGE_REACTIONS,
-                                                GatewayIntent.GUILD_MESSAGE_TYPING,
-                                                GatewayIntent.DIRECT_MESSAGES,
-                                                GatewayIntent.DIRECT_MESSAGE_REACTIONS,
-                                                GatewayIntent.DIRECT_MESSAGE_TYPING,
-                                                GatewayIntent.MESSAGE_CONTENT,
-                                                GatewayIntent.AUTO_MODERATION_EXECUTION,
-                                                GatewayIntent.GUILD_MESSAGE_POLLS)
-                                .setEventManagerProvider(id -> new AnnotatedEventManager())
-                                .addEventListeners(eventWaiter, new eventListeners(), new logging())
-                                .setMemberCachePolicy(MemberCachePolicy.ALL)
-                                .setBulkDeleteSplittingEnabled(true)
-                                .setShardsTotal(-1)
-                                .build();
-
-                getCommands();
-        }
-
-        public static void parseWiktionary() {
-                new Thread(() -> JWKTL.parseWiktionaryDump(dumpFile, outputDirectory, true)).start();
-        }
-
-        public static File getWiktionary() {
-                return outputDirectory;
+        private void startShardManager(String Token) {
+                try {
+                        shardManager = DefaultShardManagerBuilder.createDefault(Token)
+                                        .setStatus(OnlineStatus.ONLINE)
+                                        .enableIntents(
+                                                        GatewayIntent.GUILD_MEMBERS,
+                                                        GatewayIntent.GUILD_MODERATION,
+                                                        GatewayIntent.GUILD_WEBHOOKS,
+                                                        GatewayIntent.GUILD_INVITES,
+                                                        GatewayIntent.GUILD_VOICE_STATES,
+                                                        GatewayIntent.GUILD_MESSAGES,
+                                                        GatewayIntent.GUILD_MESSAGE_REACTIONS,
+                                                        GatewayIntent.GUILD_MESSAGE_TYPING,
+                                                        GatewayIntent.DIRECT_MESSAGES,
+                                                        GatewayIntent.DIRECT_MESSAGE_REACTIONS,
+                                                        GatewayIntent.DIRECT_MESSAGE_TYPING,
+                                                        GatewayIntent.MESSAGE_CONTENT,
+                                                        GatewayIntent.AUTO_MODERATION_EXECUTION,
+                                                        GatewayIntent.GUILD_MESSAGE_POLLS)
+                                        .setEventManagerProvider(id -> new AnnotatedEventManager())
+                                        .addEventListeners(EVENT_WAITER, new EventListeners(), new Logging())
+                                        .setMemberCachePolicy(MemberCachePolicy.ALL)
+                                        .setBulkDeleteSplittingEnabled(true)
+                                        .setShardsTotal(-1)
+                                        .build();
+                } catch (Exception e) {
+                        System.out.println("[ERROR] Couldn't start shard manager, reattempting in 10 seconds - " + e);
+                }
         }
 
         public static EventWaiter getEventWaiter() {
-                return eventWaiter;
-        }
-
-        public static Properties getProps() {
-                return props;
-        }
-
-        public static void saveProps() {
-                try {
-                        props.store(new FileOutputStream(propFile), null);
-                } catch (Exception e) {
-                        System.out.println("[ERROR] Unable to save to properties file - " + e);
-                }
+                return EVENT_WAITER;
         }
 
         public static ShardManager getShardManager() {
@@ -147,72 +153,45 @@ public class App {
                                 .sum();
         }
 
-        private static void getCommands() {
+        public static void parseWiktionary() {
+                new Thread(() -> JWKTL.parseWiktionaryDump(wiktionaryDumpFile, wiktionaryOutputDirectory, true))
+                                .start();
+        }
 
-                /*
-                 * level sub commands
-                 */
+        public static File getWiktionary() {
+                return wiktionaryOutputDirectory;
+        }
 
-                SubcommandData levelCard = new SubcommandData("card", "See your or another users levelling card")
-                                .addOption(OptionType.USER, "user", "who's level do you want to see?")
-                                .addOption(OptionType.BOOLEAN, "global", "whether to look at global levelling");
+        public static Properties getProps() {
+                return props;
+        }
 
-                SubcommandData levelLeaderboard = new SubcommandData("leaderboard", "See top users")
-                                .addOption(OptionType.INTEGER, "page", "leaderboard page")
-                                .addOption(OptionType.STRING, "order", "what to order by")
-                                .addOption(OptionType.BOOLEAN, "reverse", "whether to reverse the order")
-                                .addOption(OptionType.BOOLEAN, "global", "whether to look at global levelling");
+        public static void saveProps() {
+                try {
+                        props.store(new FileOutputStream(PROP_FILE), null);
+                } catch (Exception e) {
+                        System.out.println("[ERROR] Unable to save to properties file - " + e);
+                }
+        }
 
-                /*
-                 * words sub commands
-                 */
+        public static MongoClient getMongoClient() {
+                return mongoClient;
+        }
 
-                SubcommandData wordInfo = new SubcommandData("info", "See how much a word is used")
-                                .addOption(OptionType.STRING, "word", "What word to see info for", true)
-                                .addOption(OptionType.BOOLEAN, "global", "whether to look at global word stats");
+        public static ConfigRecord getGlobalConfig() {
+                return globalConfig;
+        }
 
-                SubcommandData wordLeaderboard = new SubcommandData("leaderboard", "See top word usage")
-                                .addOption(OptionType.INTEGER, "page", "leaderboard page")
-                                .addOption(OptionType.STRING, "order", "what to order by")
-                                .addOption(OptionType.BOOLEAN, "reverse", "whether to reverse the order")
-                                .addOption(OptionType.BOOLEAN, "global", "whether to look at global word stats");
+        public static void setGlobalConfig(ConfigRecord config) {
+                globalConfig = config;
+        }
 
-                /*
-                 * info sub commands
-                 */
-
-                SubcommandData bot = new SubcommandData("bot", "shows info about the bot");
-
-                SubcommandData guild = new SubcommandData("guild", "shows info about the guild");
-
-                SubcommandData member = new SubcommandData("member", "shows info about a member in the guild")
-                                .addOption(OptionType.USER, "member", "which member?");
-
-                SubcommandData user = new SubcommandData("user", "shows known info about a discord user")
-                                .addOption(OptionType.NUMBER, "user-id", "user's discord ID");
-
-                SubcommandData role = new SubcommandData("role", "shows info about a guild role")
-                                .addOption(OptionType.ROLE, "role", "which role?");
-
-                SubcommandData channel = new SubcommandData("channel", "shows info about a channel")
-                                .addOption(OptionType.CHANNEL, "channel", "which channel?");
-
-                shardManager.getShards().forEach(jda -> jda.updateCommands().addCommands(
-                                Commands.slash("featurerequest",
-                                                "submit a feature request for something you think this bot is missing."),
-                                Commands.slash("guild-settings", "change settings for your guild")
-                                                .setDefaultPermissions(DefaultMemberPermissions
-                                                                .enabledFor(Permission.ADMINISTRATOR))
-                                                .setContexts(InteractionContextType.GUILD),
-                                Commands.slash("level", "check out your level progression")
-                                                .addSubcommands(levelCard, levelLeaderboard)
-                                                .setContexts(InteractionContextType.GUILD),
-                                Commands.slash("word", "check out word usage")
-                                                .addSubcommands(wordInfo, wordLeaderboard)
-                                                .setContexts(InteractionContextType.GUILD),
-                                Commands.slash("info", "shows info about various objects")
-                                                .addSubcommands(bot, guild, member, user, role, channel)
-                                                .setContexts(InteractionContextType.GUILD))
-                                .queue());
+        private static void wait(int ms) {
+                try {
+                        Thread.sleep(ms);
+                } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        ;
+                }
         }
 }
