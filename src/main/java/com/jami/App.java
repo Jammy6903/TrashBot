@@ -6,12 +6,11 @@ import com.jami.Database.Config.ConfigRecord;
 import com.jami.Interaction.Utilities.GuildLogging.Logging;
 import com.jami.JDA.CommandsSetup;
 import com.jami.JDA.EventListeners;
+import com.jami.JDA.JDATools;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 
-import de.tudarmstadt.ukp.jwktl.JWKTL;
 import net.dv8tion.jda.api.OnlineStatus;
-import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.hooks.AnnotatedEventManager;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
@@ -25,7 +24,13 @@ import java.io.IOException;
 import java.util.Properties;
 import java.util.Scanner;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class App {
+
+        // Logger
+        private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
 
         // JDA
         private static ShardManager shardManager;
@@ -42,58 +47,25 @@ public class App {
         private static ConfigRecord globalConfig;
 
         // Wiktionary
-        private static File wiktionaryDumpFile = new File("assets/dictionary/wiktionary.xml");
-        private static File wiktionaryOutputDirectory = new File("assets/dictionary/output");
-
         public static void main(String[] args) {
                 // Increase arbitrary XML limits to allow for Wiktionary parsing
                 System.setProperty("jdk.xml.maxGeneralEntitySizeLimit", "0");
                 System.setProperty("jdk.xml.totalEntitySizeLimit", "0");
 
                 // Load Properties File
-                System.out.println("[INFO] Loading properties file");
-                try {
-                        props.load(new FileInputStream(PROP_FILE));
-                } catch (IOException e) {
-                        System.out.println("[ERROR] Property file not found - " + e);
-                        System.exit(1);
-                }
-                System.out.println("[INFO] Properties loaded");
+                loadProperties();
 
-                wiktionaryDumpFile = new File(props.getProperty("WIKTIONARY_XML"));
-                wiktionaryOutputDirectory = new File(props.getProperty("WIKTIONARY_DIRECTORY"));
-
-                // Connect to MongoDB - Keep trying until connected
-                System.out.println("[INFO] Attempting to connect to MongoDB");
-                while (mongoClient == null) {
-                        mongoClient = MongoClients.create(props.getProperty("DATABASE_URI"));
-                        if (mongoClient == null) {
-                                System.out.println("[ERROR] Failed to connect to MongoDB, reattempting in 10 seconds");
-                                wait(10000);
-                        }
-                }
-                System.out.println("[INFO] Connected to MongoDB");
+                // Connect to MongoDb
+                connectMongoDb();
 
                 // Start shard manager
-                System.out.println("[INFO] Attempting to connect to Discord");
-                while (shardManager == null) {
-                        new App().startShardManager(props.getProperty("TOKEN"));
-                        if (shardManager == null) {
-                                System.out.println("[ERROR] Failed to connect to Discord, reattempting in 10 seconds");
-                                wait(1000);
-                        }
-                }
-                System.out.println("[INFO] Connected to Discord");
+                new App().startShardManager(props.getProperty("TOKEN"));
 
-                new ConfigRecord("defaultConfig").saveConfig(); // Makes sure theres always a default config available
-                globalConfig = new ConfigRecord(props.getProperty("CURRENT_CONFIG")); // Loads current config from DB
+                // Load Config from DB
+                loadConfig();
 
                 // After-startup bot configuration
-                String status = globalConfig.getBotStatus();
-                if (!status.isEmpty()) {
-                        shardManager.getShards()
-                                        .forEach(jda -> jda.getPresence().setActivity(Activity.customStatus(status)));
-                }
+                JDATools.SetBotStatus(globalConfig.getBotStatus());
                 CommandsSetup.getCommands(shardManager);
 
                 // Start scanner for console commands
@@ -102,41 +74,80 @@ public class App {
                         String command = s.nextLine();
                         if (command.equals("shutdown")) {
                                 s.close();
-                                shardManager.shutdown();
-                                System.exit(0);
+                                shutdown();
                         }
                         CommandsAdmin.adminCommands(null, command);
                 }
         }
 
-        private void startShardManager(String Token) {
+        private static void loadProperties() {
+                LOGGER.info("[INFO] Loading properties file");
                 try {
-                        shardManager = DefaultShardManagerBuilder.createDefault(Token)
-                                        .setStatus(OnlineStatus.ONLINE)
-                                        .enableIntents(
-                                                        GatewayIntent.GUILD_MEMBERS,
-                                                        GatewayIntent.GUILD_MODERATION,
-                                                        GatewayIntent.GUILD_WEBHOOKS,
-                                                        GatewayIntent.GUILD_INVITES,
-                                                        GatewayIntent.GUILD_VOICE_STATES,
-                                                        GatewayIntent.GUILD_MESSAGES,
-                                                        GatewayIntent.GUILD_MESSAGE_REACTIONS,
-                                                        GatewayIntent.GUILD_MESSAGE_TYPING,
-                                                        GatewayIntent.DIRECT_MESSAGES,
-                                                        GatewayIntent.DIRECT_MESSAGE_REACTIONS,
-                                                        GatewayIntent.DIRECT_MESSAGE_TYPING,
-                                                        GatewayIntent.MESSAGE_CONTENT,
-                                                        GatewayIntent.AUTO_MODERATION_EXECUTION,
-                                                        GatewayIntent.GUILD_MESSAGE_POLLS)
-                                        .setEventManagerProvider(id -> new AnnotatedEventManager())
-                                        .addEventListeners(EVENT_WAITER, new EventListeners(), new Logging())
-                                        .setMemberCachePolicy(MemberCachePolicy.ALL)
-                                        .setBulkDeleteSplittingEnabled(true)
-                                        .setShardsTotal(-1)
-                                        .build();
-                } catch (Exception e) {
-                        System.out.println("[ERROR] Couldn't start shard manager, reattempting in 10 seconds - " + e);
+                        props.load(new FileInputStream(PROP_FILE));
+                } catch (IOException e) {
+                        LOGGER.error("[ERROR] Property file not found at {}", PROP_FILE, e);
+                        System.exit(1);
                 }
+                LOGGER.info("[INFO] Properties loaded");
+        }
+
+        private static void connectMongoDb() {
+                LOGGER.info("[INFO] Attempting to connect to MongoDB");
+                while (mongoClient == null) {
+                        mongoClient = MongoClients.create(props.getProperty("DATABASE_URI"));
+                        if (mongoClient == null) {
+                                LOGGER.error("[ERROR] Failed to connect to MongoDB, reattempting in 10 seconds");
+                                wait(10000);
+                        }
+                }
+                LOGGER.info("[INFO] Connected to MongoDB");
+        }
+
+        private static void loadConfig() {
+                new ConfigRecord("defaultConfig").saveConfig(); // Makes sure theres always a default config available
+                globalConfig = new ConfigRecord(props.getProperty("CURRENT_CONFIG")); // Loads current config from DB
+
+        }
+
+        private void startShardManager(String Token) {
+                LOGGER.info("[INFO] Attempting to connect to Discord...");
+                while (shardManager == null) {
+                        try {
+                                shardManager = DefaultShardManagerBuilder.createDefault(Token)
+                                                .setStatus(OnlineStatus.ONLINE)
+                                                .enableIntents(
+                                                                GatewayIntent.GUILD_MEMBERS,
+                                                                GatewayIntent.GUILD_MODERATION,
+                                                                GatewayIntent.GUILD_WEBHOOKS,
+                                                                GatewayIntent.GUILD_INVITES,
+                                                                GatewayIntent.GUILD_VOICE_STATES,
+                                                                GatewayIntent.GUILD_MESSAGES,
+                                                                GatewayIntent.GUILD_MESSAGE_REACTIONS,
+                                                                GatewayIntent.GUILD_MESSAGE_TYPING,
+                                                                GatewayIntent.DIRECT_MESSAGES,
+                                                                GatewayIntent.DIRECT_MESSAGE_REACTIONS,
+                                                                GatewayIntent.DIRECT_MESSAGE_TYPING,
+                                                                GatewayIntent.MESSAGE_CONTENT,
+                                                                GatewayIntent.AUTO_MODERATION_EXECUTION,
+                                                                GatewayIntent.GUILD_MESSAGE_POLLS)
+                                                .setEventManagerProvider(id -> new AnnotatedEventManager())
+                                                .addEventListeners(EVENT_WAITER, new EventListeners(), new Logging())
+                                                .setMemberCachePolicy(MemberCachePolicy.ALL)
+                                                .setBulkDeleteSplittingEnabled(true)
+                                                .setShardsTotal(-1)
+                                                .build();
+                        } catch (Exception e) {
+                                LOGGER.error("[ERROR] Couldn't start shard manager, reattempting in 10 seconds", e);
+                                wait(10000);
+                        }
+                }
+                LOGGER.info("[INFO] Connected to Discord");
+        }
+
+        private static void shutdown() {
+                shardManager.shutdown();
+                mongoClient.close();
+                System.exit(0);
         }
 
         public static EventWaiter getEventWaiter() {
@@ -147,21 +158,6 @@ public class App {
                 return shardManager;
         }
 
-        public static int totalGuildCount() {
-                return shardManager.getShards().stream()
-                                .mapToInt(jda -> jda.getGuilds().size())
-                                .sum();
-        }
-
-        public static void parseWiktionary() {
-                new Thread(() -> JWKTL.parseWiktionaryDump(wiktionaryDumpFile, wiktionaryOutputDirectory, true))
-                                .start();
-        }
-
-        public static File getWiktionary() {
-                return wiktionaryOutputDirectory;
-        }
-
         public static Properties getProps() {
                 return props;
         }
@@ -170,7 +166,7 @@ public class App {
                 try {
                         props.store(new FileOutputStream(PROP_FILE), null);
                 } catch (Exception e) {
-                        System.out.println("[ERROR] Unable to save to properties file - " + e);
+                        LOGGER.error("[ERROR] Unable to save to properties file - ", e);
                 }
         }
 
@@ -184,6 +180,10 @@ public class App {
 
         public static void setGlobalConfig(ConfigRecord config) {
                 globalConfig = config;
+        }
+
+        public static Logger getLogger() {
+                return LOGGER;
         }
 
         private static void wait(int ms) {

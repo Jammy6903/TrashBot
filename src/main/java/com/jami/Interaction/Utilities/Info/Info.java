@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.jami.App;
 import com.jami.Database.Guild.GuildRecord;
+import com.jami.JDA.JDATools;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
@@ -34,7 +35,7 @@ public class Info {
                         "Trash bot is a multi-purpose Discord bot designed for the twenty one pilots Manchester Discord server\n\n/featurerequest to request new features!\n/help for help!\n\n[Support Discord](https://discord.gg/ZUcg6ArVzp)")
                 .addField("Member since", df.format(firstJoined), true)
                 .addField("Shard Number", String.valueOf(event.getJDA().getShardInfo().getShardId()), true)
-                .addField("Total Guilds", String.valueOf(App.totalGuildCount()), true)
+                .addField("Total Guilds", String.valueOf(JDATools.totalGuildCount()), true)
                 .setThumbnail(
                         "https://cdn.discordapp.com/avatars/1390058332689137847/878371b41485c8556b90511d612334d9.png?size=1024")
                 .setFooter("Made with ❤️ by JamiTheFox",

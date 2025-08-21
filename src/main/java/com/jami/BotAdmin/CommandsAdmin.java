@@ -7,6 +7,7 @@ import java.util.List;
 import com.jami.App;
 import com.jami.Database.Feature;
 import com.jami.Database.Config.ConfigRecord;
+import com.jami.JDA.Wiktionary;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Activity;
@@ -86,7 +87,7 @@ public class CommandsAdmin {
         break;
       case "parse-wiktionary":
         response = "Parsing wiktionary...";
-        App.parseWiktionary();
+        Wiktionary.parseWiktionary();
         break;
       default:
         response = "**Unknown Command:** available options - set-config, load-config, save-config, " +

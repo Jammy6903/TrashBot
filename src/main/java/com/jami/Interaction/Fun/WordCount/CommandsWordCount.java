@@ -9,6 +9,7 @@ import java.util.List;
 import com.jami.App;
 import com.jami.Database.Guild.GuildRecord;
 import com.jami.Database.Guild.GuildWordRecord;
+import com.jami.JDA.Wiktionary;
 import com.jami.Database.Fun.WordRecord;
 
 import de.tudarmstadt.ukp.jwktl.JWKTL;
@@ -49,7 +50,7 @@ public class CommandsWordCount {
     String definition = "**Definitions:**\n";
 
     try {
-      IWiktionaryEdition wkt = JWKTL.openEdition(App.getWiktionary());
+      IWiktionaryEdition wkt = JWKTL.openEdition(Wiktionary.getWiktionary());
       try {
         IWiktionaryPage page = wkt.getPageForWord(word);
         IWiktionaryEntry entry = page.getEntry(0);
