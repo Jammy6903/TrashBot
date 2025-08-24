@@ -1,8 +1,8 @@
 package com.jami.Interaction.Utilities.WelcomeMessage;
 
 import com.jami.Database.Guild.GuildRecord;
-import com.jami.Database.Guild.guildSettings.GuildSettings;
-import com.jami.Database.Guild.guildSettings.WelcomeMessage.WelcomeMessageSettings;
+import com.jami.Database.Guild.guildSettings.WelcomeMessageSettings.WelcomeMessageSettings;
+import com.jami.Database.repositories.GuildRepo;
 
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -28,9 +28,8 @@ public class WelcomeMessage {
     User u = event.getUser();
     Guild g = event.getGuild();
 
-    GuildRecord gg = new GuildRecord(g.getIdLong());
-    GuildSettings gs = gg.getSettings();
-    WelcomeMessageSettings wms = gs.getWelcomeMessageSettings();
+    GuildRecord guildRecord = GuildRepo.getById(g.getIdLong());
+    WelcomeMessageSettings wms = guildRecord.getSettings().getWelcomeMessageSettings();
 
     String welcomeMessage = wms.getWelcomeMessage();
     welcomeMessage = welcomeMessage.replaceAll("$userName$", u.getName());

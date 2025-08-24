@@ -26,11 +26,12 @@ import java.util.stream.Collectors;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.jami.App;
-import com.jami.Database.Feature;
-import com.jami.Database.LogType;
+import com.jami.Database.Enumerators.Feature;
+import com.jami.Database.Enumerators.LogType;
 import com.jami.Database.Guild.GuildRecord;
 import com.jami.Database.Guild.guildSettings.GuildSettings;
-import com.jami.Database.Guild.guildSettings.LoggingChannels.LoggingChannel;
+import com.jami.Database.Guild.guildSettings.LoggingChannel.LoggingChannel;
+import com.jami.Database.repositories.GuildRepo;
 
 public class Logging {
 
@@ -39,7 +40,7 @@ public class Logging {
       .build();
 
   public void sendLogEntry(LogType type, Guild guild, MessageEmbed content) {
-    GuildRecord g = new GuildRecord(guild.getIdLong());
+    GuildRecord g = GuildRepo.getById(guild.getIdLong());
     GuildSettings gs = g.getSettings();
     if (gs.getDisabledFeatures().contains(Feature.LOGGING)
         || App.getGlobalConfig().getDisabledFeatures().contains(Feature.LOGGING)) {
@@ -184,9 +185,8 @@ public class Logging {
 
     ByteArrayInputStream inputStream = new ByteArrayInputStream(file.getBytes(StandardCharsets.UTF_8));
 
-    GuildRecord g = new GuildRecord(event.getGuild().getIdLong());
-    GuildSettings gs = g.getSettings();
-    List<LoggingChannel> channels = gs.getLoggingChannelsByLogType(LogType.MESSAGE_DELETED);
+    GuildRecord guildRecord = GuildRepo.getById(event.getGuild().getIdLong());
+    List<LoggingChannel> channels = guildRecord.getSettings().getLoggingChannelsByLogType(LogType.MESSAGE_DELETED);
 
     if (channels.size() == 0) {
       return;

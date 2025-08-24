@@ -5,18 +5,20 @@ import java.util.List;
 
 import com.jami.App;
 import com.jami.BotAdmin.CommandsAdmin;
-import com.jami.Database.Feature;
+import com.jami.Database.Enumerators.Command;
+import com.jami.Database.Enumerators.Feature;
 import com.jami.Database.Guild.GuildRecord;
 import com.jami.Database.Guild.guildSettings.GuildSettings;
 import com.jami.Database.User.UserRecord;
 import com.jami.Database.User.UserSettings;
+import com.jami.Database.repositories.GuildRepo;
+import com.jami.Database.repositories.UserRepo;
 import com.jami.Interaction.Fun.Levelling.CommandsLevelling;
 import com.jami.Interaction.Fun.Levelling.Levelling;
 import com.jami.Interaction.Fun.WordCount.CommandsWordCount;
 import com.jami.Interaction.Fun.WordCount.WordCount;
 import com.jami.Interaction.Utilities.FeatureRequests.commandsFeatureRequests;
 import com.jami.Interaction.Utilities.GuildLogging.Logging;
-import com.jami.Interaction.Utilities.GuildOptions.CommandsSettings;
 import com.jami.Interaction.Utilities.Info.CommandsInfo;
 
 import net.dv8tion.jda.api.entities.Guild;
@@ -31,7 +33,7 @@ public class EventListeners {
   @SubscribeEvent
   public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
 
-    if (App.getGlobalConfig().getDisabledCommands().contains(event.getName())) {
+    if (App.getGlobalConfig().getDisabledCommands().contains(Command.valueOf(event.getName()))) {
       event.reply("Sorry! That command is disabled at the moment.").queue();
       return;
     }
@@ -41,7 +43,6 @@ public class EventListeners {
         commandsFeatureRequests.newFeatureRequest(event);
         break;
       case "guild-settings":
-        new CommandsSettings(event).start();
         break;
       case "level":
         CommandsLevelling.levellingCommands(event);
@@ -74,25 +75,25 @@ public class EventListeners {
       return;
     }
 
-    UserRecord uu = new UserRecord(u.getIdLong());
-    UserSettings us = uu.getSettings();
-    GuildRecord gg = new GuildRecord(g.getIdLong());
-    GuildSettings gs = gg.getSettings();
+    UserRecord userRecord = UserRepo.getById(u.getIdLong());
+    UserSettings userSettings = userRecord.getSettings();
+    GuildRecord guildRecord = GuildRepo.getById(g.getIdLong());
+    GuildSettings guildSettings = guildRecord.getSettings();
 
     List<List<Feature>> disabledFeaturesLists = new ArrayList<>();
     disabledFeaturesLists.add(App.getGlobalConfig().getDisabledFeatures());
-    disabledFeaturesLists.add(us.getDisabledFeatures());
-    disabledFeaturesLists.add(gs.getDisabledFeatures());
+    disabledFeaturesLists.add(userSettings.getDisabledFeatures());
+    disabledFeaturesLists.add(guildSettings.getDisabledFeatures());
 
     // Levelling
     if (checkDisabled(disabledFeaturesLists, Feature.LEVELLING)) {
-      Levelling.incrementExps(event, gg, u.getIdLong());
+      Levelling.incrementExps(event, userRecord, guildSettings.getLevellingSettings());
     }
 
     // WordCount
     if (checkDisabled(disabledFeaturesLists, Feature.WORDS)
-        && !gs.getWordsDisabledChannels().contains(c.getIdLong())) {
-      WordCount.incrementWords(event.getMessage().getContentRaw(), gg);
+        && !guildSettings.getWordsDisabledChannels().contains(c.getIdLong())) {
+      WordCount.incrementWords(m);
     }
 
     // Message Logging
@@ -100,7 +101,6 @@ public class EventListeners {
       Logging.cacheMessage(event);
     }
 
-    gg.commit();
   }
 
   private boolean checkDisabled(List<List<Feature>> lists, Feature feature) {

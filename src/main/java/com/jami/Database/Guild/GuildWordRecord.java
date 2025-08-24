@@ -3,33 +3,35 @@ package com.jami.Database.Guild;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 
-import com.jami.Database.GetOrDefault;
-
 public class GuildWordRecord {
-  private ObjectId id;
+  private ObjectId recordId;
+  private long guildId;
   private String word;
   private long count;
   private long firstUse;
 
-  public GuildWordRecord(Document entry, String word) {
-    if (entry == null) {
-      entry = new Document();
-    }
-    this.id = GetOrDefault.ObjectId(entry, "_id");
-    this.word = word;
-    this.count = GetOrDefault.Long(entry, "count", 0L);
-    this.firstUse = GetOrDefault.Long(entry, "firstUse", System.currentTimeMillis());
+  public GuildWordRecord(Document doc) {
+    this.recordId = doc.getObjectId("_id");
+    this.guildId = doc.getLong("guildId");
+    this.word = doc.getString("word");
+    this.count = doc.getLong("count");
+    this.firstUse = doc.getLong("firstUse");
   }
 
-  public GuildWordRecord(ObjectId id, String word, long count, long firstUse) {
-    this.id = id;
+  public GuildWordRecord(long guildId, String word) {
+    this.recordId = new ObjectId();
+    this.guildId = guildId;
     this.word = word;
-    this.count = count;
-    this.firstUse = firstUse;
+    this.count = 0;
+    this.firstUse = System.currentTimeMillis();
   }
 
-  public ObjectId getId() {
-    return id;
+  public String getRecordId() {
+    return recordId.toString();
+  }
+
+  public long getGuildId() {
+    return guildId;
   }
 
   public String getWord() {
@@ -49,10 +51,11 @@ public class GuildWordRecord {
   }
 
   public Document toDocument() {
-    return new Document("$set", new Document()
-        .append("_id", id)
+    return new Document()
+        .append("_id", recordId)
+        .append("guildId", guildId)
         .append("word", word)
         .append("count", count)
-        .append("firstUse", firstUse));
+        .append("firstUse", firstUse);
   }
 }

@@ -1,66 +1,89 @@
 package com.jami.Database.Guild;
 
 import org.bson.Document;
-
-import com.jami.Database.GetOrDefault;
+import org.bson.types.ObjectId;
 
 public class GuildUserRecord {
+  private ObjectId recordId;
+  private long guildId;
   private long userId;
   private long userExp;
   private int userLevel;
   private long userLastMessage;
 
-  public GuildUserRecord(Document user, long id) {
-    if (user == null) {
-      user = new Document();
-    }
-    this.userId = id;
-    this.userExp = GetOrDefault.Long(user, "userExp", 0L);
-    this.userLevel = user.getInteger("userLevel", 0);
-    this.userLastMessage = GetOrDefault.Long(user, "userLastMessage", 0L);
+  public GuildUserRecord(Document doc) {
+    this.recordId = doc.getObjectId("_id");
+    this.guildId = doc.getLong("guildId");
+    this.userId = doc.getLong("userId");
+    this.userExp = doc.getLong("userExp");
+    this.userLevel = doc.getInteger("userLevel");
+    this.userLastMessage = doc.getLong("userLastMessage");
   }
 
-  public long getId() {
+  public GuildUserRecord(long guildId, long userId) {
+    this.recordId = new ObjectId();
+    this.guildId = guildId;
+    this.userId = userId;
+    this.userExp = 0;
+    this.userLevel = 0;
+    this.userLastMessage = System.currentTimeMillis();
+  }
+
+  public void newRecordId() {
+    recordId = new ObjectId();
+  }
+
+  public String getRecordId() {
+    return recordId.toString();
+  }
+
+  public void setGuildId(long guildId) {
+    this.guildId = guildId;
+  }
+
+  public long getGuildId() {
+    return guildId;
+  }
+
+  public void setUserId(long userId) {
+    this.userId = userId;
+  }
+
+  public long getUserId() {
     return userId;
-  }
-
-  public void setId(long id) {
-    this.userId = id;
-  }
-
-  public long getExp() {
-    return this.userExp;
   }
 
   public void setExp(long exp) {
     this.userExp = exp;
   }
 
-  public int getLevel() {
-    return this.userLevel;
+  public long getExp() {
+    return this.userExp;
   }
 
   public void setLevel(int level) {
     this.userLevel = level;
   }
 
-  public long getUserLastMessage() {
-    return userLastMessage;
+  public int getLevel() {
+    return this.userLevel;
   }
 
   public void setUserLastMessage(long time) {
     this.userLastMessage = time;
   }
 
-  public long getRequiredExp(long levelBase, double levelGrowth) {
-    return (long) Math.floor(levelBase * Math.pow(userLevel + 1, levelGrowth));
+  public long getUserLastMessage() {
+    return userLastMessage;
   }
 
   public Document toDocument() {
-    return new Document("$set", new Document()
-        .append("_id", userId)
+    return new Document()
+        .append("_id", recordId)
+        .append("guildId", guildId)
+        .append("userId", userId)
         .append("userExp", userExp)
         .append("userLevel", userLevel)
-        .append("userLastMessage", userLastMessage));
+        .append("userLastMessage", userLastMessage);
   }
 }

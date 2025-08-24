@@ -1,25 +1,29 @@
 package com.jami.Database.Utilities;
 
-import static com.mongodb.client.model.Filters.eq;
-
 import org.bson.Document;
 import org.bson.types.ObjectId;
 
-import com.jami.App;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.UpdateOptions;
+import com.jami.Database.GetorDefault;
+import com.jami.Database.Enumerators.EnumToString;
+import com.jami.Database.Enumerators.FeatureRequestStatus;
 
 public class FeatureRequestRecord {
-  private static MongoDatabase db = App.getMongoClient().getDatabase("TRASHBOT");
-  private static MongoCollection<Document> requests = db.getCollection("featureRequests");
 
   private ObjectId requestId;
   private String requestTitle;
   private String requestDescription;
   private String userName;
-  private String status;
   private long userId;
+  private FeatureRequestStatus status;
+
+  public FeatureRequestRecord(Document doc) {
+    this.requestId = doc.getObjectId("_id");
+    this.requestTitle = doc.getString("requestTitle");
+    this.requestDescription = doc.getString("requestDescription");
+    this.userName = doc.getString("userName");
+    this.userId = doc.getLong("userId");
+    this.status = GetorDefault.Enum(doc, "status", FeatureRequestStatus.class, FeatureRequestStatus.REQUESTED);
+  }
 
   public FeatureRequestRecord(String title, String description, String userName, long userId) {
     this.requestId = new ObjectId();
@@ -27,17 +31,7 @@ public class FeatureRequestRecord {
     this.requestDescription = description;
     this.userName = userName;
     this.userId = userId;
-    this.status = "Requested";
-  }
-
-  public FeatureRequestRecord(ObjectId id) {
-    Document req = requests.find(eq("_id", id)).first();
-    this.requestId = id;
-    this.requestTitle = req.getString("requestTitle");
-    this.requestDescription = req.getString("requestDescription");
-    this.userName = req.getString("userName");
-    this.userId = req.getLong("userId");
-    this.status = req.getString("status");
+    this.status = FeatureRequestStatus.REQUESTED;
   }
 
   public String getId() {
@@ -76,27 +70,21 @@ public class FeatureRequestRecord {
     return userId;
   }
 
-  public void setStatus(String st) {
-    this.status = st;
+  public void setStatus(FeatureRequestStatus status) {
+    this.status = status;
   }
 
-  public String getStatus() {
+  public FeatureRequestStatus getStatus() {
     return status;
   }
 
-  public void commit() {
-    Document r = new Document("$set", new Document()
+  public Document toDocument() {
+    return new Document()
         .append("_id", requestId)
         .append("requestTitle", requestTitle)
         .append("requestDescription", requestDescription)
         .append("userName", userName)
         .append("userId", userId)
-        .append("status", status));
-    try {
-      UpdateOptions opts = new UpdateOptions().upsert(true);
-      requests.updateOne(eq("_id", requestId), r, opts);
-    } catch (Exception e) {
-      System.out.println("[ERROR] MongoDB Write Error - " + e);
-    }
+        .append("status", EnumToString.get(status));
   }
 }

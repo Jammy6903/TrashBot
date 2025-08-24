@@ -1,4 +1,4 @@
-package com.jami.Database;
+package com.jami.Database.Enumerators;
 
 public enum LogType {
   MESSAGE_DELETED,

@@ -3,17 +3,35 @@ package com.jami.Database.Guild;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 
+import com.jami.Database.GetorDefault;
+import com.jami.Database.Enumerators.EnumToString;
+import com.jami.Database.Enumerators.PunishmentType;
+
 public class GuildPunishmentRecord {
   private ObjectId punishmentId;
+  private long guildId;
   private long userId;
-  private String punishmentType;
+  private PunishmentType punishmentType;
   private String punishmentReason;
   private long punishmentLength;
   private long punishmentTime;
   private boolean active;
 
-  public GuildPunishmentRecord(long userId, String punishmentType, String punishmentReason, long punishmentLength) {
+  public GuildPunishmentRecord(Document doc) {
+    this.punishmentId = doc.getObjectId("_id");
+    this.guildId = doc.getLong("guildId");
+    this.userId = doc.getLong("userId");
+    this.punishmentType = GetorDefault.Enum(doc, "punishmentType", PunishmentType.class, null);
+    this.punishmentReason = doc.getString("punishmentReason");
+    this.punishmentLength = doc.getLong("punishmentLength");
+    this.punishmentTime = doc.getLong("punishmentTime");
+    this.active = doc.getBoolean("active");
+  }
+
+  public GuildPunishmentRecord(long guildId, long userId, PunishmentType punishmentType, String punishmentReason,
+      long punishmentLength) {
     this.punishmentId = new ObjectId();
+    this.guildId = guildId;
     this.userId = userId;
     this.punishmentType = punishmentType;
     this.punishmentReason = punishmentReason;
@@ -22,36 +40,35 @@ public class GuildPunishmentRecord {
     this.active = true;
   }
 
-  public GuildPunishmentRecord(Document p) {
-    if (p == null) {
-      p = new Document();
-    }
-    this.punishmentId = p.getObjectId("_id");
-    this.userId = p.getLong("userId");
-    this.punishmentType = p.getString("punishmentType");
-    this.punishmentReason = p.getString("punishmentReason");
-    this.punishmentLength = p.getLong("punishmentLength");
-    this.punishmentTime = p.getLong("punishmentTime");
-    this.active = p.getBoolean("active");
+  public void setPunishmentId(String id) {
+    this.punishmentId = new ObjectId(id);
   }
 
-  public String getId() {
+  public String getPunishmentId() {
     return punishmentId.toString();
   }
 
-  public void setUserId(long uId) {
-    this.userId = uId;
+  public void setGuildId(long guildId) {
+    this.guildId = guildId;
+  }
+
+  public long getGuildId() {
+    return guildId;
+  }
+
+  public void setUserId(long userId) {
+    this.userId = userId;
   }
 
   public long getUserId() {
     return userId;
   }
 
-  public void setType(String type) {
+  public void setType(PunishmentType type) {
     this.punishmentType = type;
   }
 
-  public String getType() {
+  public PunishmentType getType() {
     return punishmentType;
   }
 
@@ -90,8 +107,9 @@ public class GuildPunishmentRecord {
   public Document toDocument() {
     return new Document()
         .append("_id", punishmentId)
+        .append("guildId", guildId)
         .append("userId", punishmentId)
-        .append("punishmentType", punishmentType)
+        .append("punishmentType", EnumToString.get(punishmentType))
         .append("punishmentReason", punishmentReason)
         .append("punishmentLength", punishmentLength)
         .append("punishmentTime", punishmentTime)

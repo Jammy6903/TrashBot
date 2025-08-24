@@ -1,8 +1,10 @@
-package com.jami.Database.Guild.guildSettings.WelcomeMessage;
+package com.jami.Database.Guild.guildSettings.WelcomeMessageSettings;
 
 import org.bson.Document;
 
-import com.jami.Database.GetOrDefault;
+import com.jami.Database.GetorDefault;
+import com.jami.Database.Enumerators.EnumToString;
+import com.jami.Database.Enumerators.WelcomeMessageType;
 
 public class WelcomeMessageSettings {
   private WelcomeMessageType messageType;
@@ -10,9 +12,9 @@ public class WelcomeMessageSettings {
   private long welcomeChannelId;
 
   public WelcomeMessageSettings(Document doc) {
-    this.messageType = GetOrDefault.WelcomeMessageType(doc, "messageType", WelcomeMessageType.MESSAGE);
-    this.welcomeMessage = GetOrDefault.String(doc, "welcomeMessage", "Welcome, $userMention$");
-    this.welcomeChannelId = GetOrDefault.Long(doc, "welcomeChannelId", null);
+    this.messageType = GetorDefault.Enum(doc, "messageType", WelcomeMessageType.class, WelcomeMessageType.TEXT);
+    this.welcomeMessage = GetorDefault.String(doc, "welcomeMessage", "Welcome $userMention$");
+    this.welcomeChannelId = GetorDefault.Long(doc, "welcomeChannelId", 0L);
   }
 
   public void setMessageType(WelcomeMessageType type) {
@@ -41,8 +43,9 @@ public class WelcomeMessageSettings {
 
   public Document toDocument() {
     return new Document()
-        .append("messageType", messageType)
+        .append("messageType", EnumToString.get(messageType))
         .append("welcomeMessage", welcomeMessage)
         .append("welcomeChannelId", welcomeChannelId);
   }
+
 }

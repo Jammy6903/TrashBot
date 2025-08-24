@@ -3,6 +3,7 @@ package com.jami;
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
 import com.jami.BotAdmin.CommandsAdmin;
 import com.jami.Database.Config.ConfigRecord;
+import com.jami.Database.repositories.ConfigRepo;
 import com.jami.Interaction.Utilities.GuildLogging.Logging;
 import com.jami.JDA.CommandsSetup;
 import com.jami.JDA.EventListeners;
@@ -104,8 +105,9 @@ public class App {
         }
 
         private static void loadConfig() {
-                new ConfigRecord("defaultConfig").saveConfig(); // Makes sure theres always a default config available
-                globalConfig = new ConfigRecord(props.getProperty("CURRENT_CONFIG")); // Loads current config from DB
+                // Makes sure theres always a default config available
+                globalConfig = ConfigRepo.getByName(props.getProperty("CURRENT_CONFIG")); // Loads current config from
+                                                                                          // DB
 
         }
 

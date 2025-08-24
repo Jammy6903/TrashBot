@@ -4,6 +4,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.jami.App;
 import com.jami.Database.Utilities.FeatureRequestRecord;
+import com.jami.Database.repositories.FeatureRequestRepo;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
@@ -36,18 +37,18 @@ public class commandsFeatureRequests {
                                         return !e.isAcknowledged();
                                 },
                                 e -> {
-                                        FeatureRequestRecord req = new FeatureRequestRecord(
+                                        FeatureRequestRecord req = FeatureRequestRepo.createRequest(
                                                         e.getValue("title").getAsString(),
                                                         e.getValue("description").getAsString(), e.getUser().getName(),
                                                         e.getUser().getIdLong());
                                         EmbedBuilder embed = new EmbedBuilder()
                                                         .setTitle(req.getTitle())
                                                         .setDescription(req.getDescription())
-                                                        .addField("Status", req.getStatus(), false)
+                                                        .addField("Status", req.getStatus().toString(), false)
                                                         .setFooter("Requested by " + req.getUserName() + " | "
                                                                         + req.getId());
                                         e.reply("Feature request created:").addEmbeds(embed.build()).queue();
-                                        req.commit();
+                                        FeatureRequestRepo.save(req);
                                 },
                                 10, TimeUnit.MINUTES,
                                 () -> {

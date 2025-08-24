@@ -7,10 +7,13 @@ import java.util.Date;
 import java.util.List;
 
 import com.jami.App;
+import com.jami.Database.Config.ConfigRecord;
+import com.jami.Database.Fun.WordRecord;
 import com.jami.Database.Guild.GuildRecord;
 import com.jami.Database.Guild.GuildWordRecord;
+import com.jami.Database.repositories.GuildRepo;
+import com.jami.Database.repositories.WordRepo;
 import com.jami.JDA.Wiktionary;
-import com.jami.Database.Fun.WordRecord;
 
 import de.tudarmstadt.ukp.jwktl.JWKTL;
 import de.tudarmstadt.ukp.jwktl.api.IWiktionaryEdition;
@@ -22,6 +25,8 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 
 public class CommandsWordCount {
+  private static ConfigRecord config = App.getGlobalConfig();
+
   public static void wordCommands(SlashCommandInteractionEvent event) {
     switch (event.getSubcommandName()) {
       case "info":
@@ -47,7 +52,23 @@ public class CommandsWordCount {
       global = optGlobal.getAsBoolean();
     }
 
-    String definition = "**Definitions:**\n";
+    EmbedBuilder embed;
+
+    if (global) {
+      embed = globalWordInfo(WordRepo.getByWord(word), getDefinitions(word));
+    } else {
+      long guildId = event.getGuild().getIdLong();
+      GuildRecord guildRecord = GuildRepo.getById(guildId);
+      GuildWordRecord wordRecord = GuildRepo.getGuildWordByWord(guildId, word);
+      String guildName = event.getGuild().getName();
+      embed = guildWordInfo(guildRecord, guildName, wordRecord, getDefinitions(word));
+    }
+
+    event.replyEmbeds(embed.build()).queue();
+  }
+
+  private static String getDefinitions(String word) {
+    String definitions = "**Definitions:**\n";
 
     try {
       IWiktionaryEdition wkt = JWKTL.openEdition(Wiktionary.getWiktionary());
@@ -55,29 +76,47 @@ public class CommandsWordCount {
         IWiktionaryPage page = wkt.getPageForWord(word);
         IWiktionaryEntry entry = page.getEntry(0);
         for (IWiktionarySense sense : entry.getSenses()) {
-          definition += "- " + sense.getGloss().getPlainText() + "\n";
+          definitions += "- " + sense.getGloss().getPlainText() + "\n";
         }
       } catch (Exception e) {
-        definition = "No Definitions :(";
+        definitions = "No Definitions :(";
       }
       wkt.close();
     } catch (Exception e) {
-      System.out.println(e);
-      event.reply("Dictionary parsing in progress, this command wont work for the time being.").queue();
-      return;
+      App.getLogger().error(e.getMessage());
+      return "No definitions.";
     }
 
-    EmbedBuilder embed;
+    return definitions;
+  }
 
-    if (global) {
-      embed = globalWordInfo(new WordRecord(word), definition);
-    } else {
-      GuildRecord g = new GuildRecord(event.getGuild().getIdLong());
-      String guildName = event.getGuild().getName();
-      embed = guildWordInfo(g, guildName, g.getWord(word), definition);
-    }
+  private static EmbedBuilder globalWordInfo(WordRecord word, String definition) {
+    Date firstUse = new Date(word.getFirstUse());
+    SimpleDateFormat df = new SimpleDateFormat("dd/MM/yy");
 
-    event.replyEmbeds(embed.build()).queue();
+    return new EmbedBuilder()
+        .setColor(Color.decode(config.getBotColors().getSecondary()))
+        .setTitle("**\"" + word.getWord() + "\" Stats**")
+        .setDescription(definition)
+        .addField("Uses", String.valueOf(word.getCount()), true)
+        .addField("First Used", df.format(firstUse), true)
+        .setFooter("Data gathered from Aug 2025 - " + word.getId());
+  }
+
+  private static EmbedBuilder guildWordInfo(GuildRecord g, String guildName, GuildWordRecord word, String definition) {
+    Date firstUse = new Date(word.getFirstUse());
+    SimpleDateFormat df = new SimpleDateFormat("dd/MM/yy");
+
+    Date firstJoined = new Date(g.getFirstJoined());
+    SimpleDateFormat df2 = new SimpleDateFormat("MMM yyyy");
+
+    return new EmbedBuilder()
+        .setColor(Color.decode(config.getBotColors().getSecondary()))
+        .setTitle("**\"" + word.getWord() + "\" Stats in " + guildName + "**")
+        .setDescription(definition)
+        .addField("Uses", String.valueOf(word.getCount()), true)
+        .addField("First Used", df.format(firstUse), true)
+        .setFooter("Data gathered from " + df2.format(firstJoined) + " - " + word.getRecordId());
   }
 
   private static void leaderboardCommand(SlashCommandInteractionEvent event) {
@@ -107,58 +146,30 @@ public class CommandsWordCount {
     EmbedBuilder embed;
 
     if (global) {
-      embed = generateGlobalLeaderboard(WordRecord.getWords(10, page, order, reverse));
+      embed = generateGlobalLeaderboard(WordRepo.getWords(10, page, order, reverse));
     } else {
-      GuildRecord g = new GuildRecord(event.getGuild().getIdLong());
+      long guildId = event.getGuild().getIdLong();
+      GuildRecord guildRecord = GuildRepo.getById(guildId);
       String guildName = event.getGuild().getName();
-      embed = generateGuildLeaderboard(g, guildName, g.getWords(10, page, order, reverse));
+      embed = generateGuildLeaderboard(guildRecord, guildName, GuildRepo.getWords(guildId, 10, page, order, reverse));
     }
 
     event.replyEmbeds(embed.build()).queue();
   }
 
-  private static EmbedBuilder globalWordInfo(WordRecord word, String definition) {
-    Date firstUse = new Date(word.getFirstUse());
-    SimpleDateFormat df = new SimpleDateFormat("dd/MM/yy");
-
-    return new EmbedBuilder()
-        .setColor(Color.getColor(App.getGlobalConfig().getBotColor()))
-        .setTitle("**\"" + word.getWord() + "\" Stats**")
-        .setDescription(definition)
-        .addField("Uses", String.valueOf(word.getCount()), true)
-        .addField("First Used", df.format(firstUse), true)
-        .setFooter("Data gathered from Aug 2025 - " + word.getId());
-  }
-
-  private static EmbedBuilder guildWordInfo(GuildRecord g, String guildName, GuildWordRecord word, String definition) {
-    Date firstUse = new Date(word.getFirstUse());
-    SimpleDateFormat df = new SimpleDateFormat("dd/MM/yy");
-
-    Date firstJoined = new Date(g.getFirstJoined());
-    SimpleDateFormat df2 = new SimpleDateFormat("MMM yyyy");
-
-    return new EmbedBuilder()
-        .setColor(Color.getColor(App.getGlobalConfig().getBotColor()))
-        .setTitle("**\"" + word.getWord() + "\" Stats in " + guildName + "**")
-        .setDescription(definition)
-        .addField("Uses", String.valueOf(word.getCount()), true)
-        .addField("First Used", df.format(firstUse), true)
-        .setFooter("Data gathered from " + df2.format(firstJoined) + " - " + word.getId());
-  }
-
   private static EmbedBuilder generateGlobalLeaderboard(List<WordRecord> words) {
     String content = "";
 
-    for (int i = 0; i < words.size(); i++) {
-      WordRecord w = words.get(i);
+    for (WordRecord w : words) {
       Date firstUse = new Date(w.getFirstUse());
       SimpleDateFormat df = new SimpleDateFormat("dd/MM/yy");
-      content += String.format("**%d.** %s - Used **%d** times - First used %s\n", i + 1, w.getWord(), w.getCount(),
+      content += String.format("**%d.** %s - Used **%d** times - First used %s\n", words.indexOf(w) + 1, w.getWord(),
+          w.getCount(),
           df.format(firstUse));
     }
 
     return new EmbedBuilder()
-        .setColor(Color.getColor(App.getGlobalConfig().getBotColor()))
+        .setColor(Color.getColor(config.getBotColors().getSecondary()))
         .setTitle("**Global Word Leaderboard**")
         .setDescription(content)
         .setFooter("Data gathered from Aug 2025");
@@ -167,11 +178,11 @@ public class CommandsWordCount {
   private static EmbedBuilder generateGuildLeaderboard(GuildRecord g, String guildName, List<GuildWordRecord> words) {
     String content = "";
 
-    for (int i = 0; i < words.size(); i++) {
-      GuildWordRecord w = words.get(i);
+    for (GuildWordRecord w : words) {
       Date date = new Date(w.getFirstUse());
       SimpleDateFormat df = new SimpleDateFormat("dd/MM/yy");
-      content += String.format("**%d.** %s - Used **%d** times - First used %s\n", i + 1, w.getWord(), w.getCount(),
+      content += String.format("**%d.** %s - Used **%d** times - First used %s\n", words.indexOf(w), w.getWord(),
+          w.getCount(),
           df.format(date));
     }
 
@@ -179,7 +190,7 @@ public class CommandsWordCount {
     SimpleDateFormat df = new SimpleDateFormat("MMM yyyy");
 
     return new EmbedBuilder()
-        .setColor(Color.getColor(App.getGlobalConfig().getBotColor()))
+        .setColor(Color.getColor(config.getBotColors().getSecondary()))
         .setTitle("**" + guildName + " Word Leaderboard**")
         .setDescription(content)
         .setFooter("Data gathered from " + df.format(firstJoined));

@@ -1,39 +1,36 @@
 package com.jami.Database.User;
 
-import com.jami.App;
-import com.jami.Database.GetOrDefault;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.UpdateOptions;
-
-import static com.mongodb.client.model.Filters.eq;
-
 import org.bson.Document;
 
 public class UserRecord {
-  private static final MongoDatabase db = App.getMongoClient().getDatabase("TRASHBOT");
-  private static final MongoCollection<Document> users = db.getCollection("users");
-
   private long userId;
   private long userExp;
   private int userLevel;
   private long userLastMessage;
   private UserSettings userSettings;
 
-  private static long defaultUserExp = 0;
-  private static int defaultUserLevel = 0;
-  private static long defaultUserLastMessage = 0;
+  public UserRecord(Document doc) {
+    this.userId = doc.getLong("_id");
+    this.userExp = doc.getLong("userExp");
+    this.userLevel = doc.getInteger("userLevel");
+    this.userLastMessage = doc.getLong("userLastMessage");
+    this.userSettings = new UserSettings(doc.get("userSettings", Document.class));
+  }
 
-  public UserRecord(long id) {
-    Document u = users.find(eq("_id", id)).first();
-    if (u == null) {
-      u = new Document();
-    }
-    this.userId = id;
-    this.userExp = GetOrDefault.Long(u, "userExp", defaultUserExp);
-    this.userLevel = u.getInteger("userLevel", defaultUserLevel);
-    this.userLastMessage = GetOrDefault.Long(u, "userLastMessage", defaultUserLastMessage);
-    this.userSettings = GetOrDefault.userSettings(u, "settings");
+  public UserRecord(long userId) {
+    this.userId = userId;
+    this.userExp = 0;
+    this.userLevel = 0;
+    this.userLastMessage = System.currentTimeMillis();
+    this.userSettings = new UserSettings(new Document());
+  }
+
+  public void setUserId(long userId) {
+    this.userId = userId;
+  }
+
+  public long getUserId() {
+    return userId;
   }
 
   public void setExp(long exp) {
@@ -64,31 +61,12 @@ public class UserRecord {
     return userSettings;
   }
 
-  public void setSettings(UserSettings s) {
-    this.userSettings = s;
-  }
-
-  public long getRequiredExp(long levelBase, double levelGrowth) {
-    return (long) Math.floor(levelBase * Math.pow(userLevel + 1, levelGrowth));
-  }
-
-  /**
-   * @brief Commits user object to database, if the user exists, updates existing
-   *        entry, otherwise create new entry.
-   */
-
-  public void commit() {
-    Document u = new Document("$set", new Document()
+  public Document toDocument() {
+    return new Document()
         .append("_id", userId)
         .append("userExp", userExp)
         .append("userLevel", userLevel)
         .append("userLastMessage", userLastMessage)
-        .append("settings", userSettings.toDocument()));
-    try {
-      UpdateOptions opts = new UpdateOptions().upsert(true);
-      users.updateOne(eq("_id", userId), u, opts);
-    } catch (Exception e) {
-      System.out.println("[ERROR] MongoDB Write Error - " + e);
-    }
+        .append("settings", userSettings.toDocument());
   }
 }

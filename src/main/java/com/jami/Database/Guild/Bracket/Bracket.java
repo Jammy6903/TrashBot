@@ -9,7 +9,7 @@ public class Bracket {
   private long roleId;
   private long interval;
 
-  public Bracket(Document b, long id) {
+  public Bracket(Document b) {
 
   }
 
@@ -43,6 +43,10 @@ public class Bracket {
           .append("name", teamName)
           .append("image", teamImage);
     }
+  }
+
+  public Document toDocument() {
+    return new Document();
   }
 
 }

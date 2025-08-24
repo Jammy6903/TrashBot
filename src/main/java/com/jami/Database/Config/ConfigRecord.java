@@ -1,60 +1,60 @@
 package com.jami.Database.Config;
 
-import static com.mongodb.client.model.Filters.eq;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.bson.Document;
+import org.bson.types.ObjectId;
 
-import com.jami.App;
-import com.jami.Database.Feature;
-import com.jami.Database.GetOrDefault;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.UpdateOptions;
+import com.jami.Database.GetorDefault;
+import com.jami.Database.Config.BotColors.BotColors;
+import com.jami.Database.Config.LevellingConfig.LevellingConfig;
+import com.jami.Database.Enumerators.Command;
+import com.jami.Database.Enumerators.Feature;
 
 public class ConfigRecord {
-  private static MongoDatabase db = App.getMongoClient().getDatabase("TRASHBOT");
-  private static MongoCollection<Document> configs = db.getCollection("configs");
-
+  private ObjectId configId;
   private String configName;
-
   private String botStatus;
-  private String botColor;
-
-  private int expIncrement;
-  private int expVariation;
-  private long expCooldown;
-  private long levelBase;
-  private double levelGrowth;
-
+  private BotColors botColors;
+  private LevellingConfig levellingConfig;
   private List<Feature> disabledFeatures;
-  private List<String> disabledCommands;
-
+  private List<Command> disabledCommands;
   private List<Long> adminIds;
 
-  public ConfigRecord(String configName) {
-    Document entry = configs.find(eq("_id", configName)).first();
-    if (entry == null) {
-      entry = new Document();
-    }
+  private static String defaultBotStatus = "Bottin'";
+  private static List<Feature> defaultDisabledFeatures = new ArrayList<>();
+  private static List<Command> defaultDisabledCommands = new ArrayList<>();
+  private static List<Long> defaultAdminIds = new ArrayList<>();
 
-    this.configName = GetOrDefault.String(entry, "_id", configName);
-    this.botStatus = GetOrDefault.String(entry, "botStatus", "");
-    this.botColor = GetOrDefault.String(entry, "botColor", "000000");
-    this.expIncrement = entry.getInteger("expIncrement", 0);
-    this.expVariation = entry.getInteger("expVariation", 0);
-    this.expCooldown = GetOrDefault.Long(entry, "expCooldown", 0L);
-    this.levelBase = GetOrDefault.Long(entry, "levelBase", 0L);
-    this.levelGrowth = GetOrDefault.Double(entry, "levelGrowth", 0.0);
-    List<String> featureStrings = entry.getList("disabledFeatures", String.class, new ArrayList<>());
-    this.disabledFeatures = featureStrings.stream()
-        .map(Feature::valueOf) // converts "MESSAGE_DELETED" -> LogType.MESSAGE_DELETED
-        .collect(Collectors.toList());
-    this.disabledCommands = entry.getList("disabledCommands", String.class, new ArrayList<>());
-    this.adminIds = entry.getList("adminIds", Long.class, new ArrayList<>());
+  public ConfigRecord(Document doc) {
+    this.configId = doc.getObjectId("_id");
+    this.configName = doc.getString("configName");
+    this.botStatus = GetorDefault.String(doc, "botStatus", defaultBotStatus);
+    this.botColors = new BotColors(doc.get("botColors", Document.class));
+    this.levellingConfig = new LevellingConfig(doc.get("levellingConfig", Document.class));
+    this.disabledFeatures = GetorDefault.EnumList(doc, "disabledFeatures", Feature.class, defaultDisabledFeatures);
+    this.disabledCommands = GetorDefault.EnumList(doc, "disabledCommands", Command.class, defaultDisabledCommands);
+    this.adminIds = doc.getList("adminIds", Long.class, defaultAdminIds);
+  }
+
+  public ConfigRecord(String configName) {
+    this.configId = new ObjectId();
+    this.configName = configName;
+    this.botStatus = defaultBotStatus;
+    this.botColors = new BotColors(new Document());
+    this.levellingConfig = new LevellingConfig(new Document());
+    this.disabledFeatures = defaultDisabledFeatures;
+    this.disabledCommands = defaultDisabledCommands;
+    this.adminIds = defaultAdminIds;
+  }
+
+  public void newConfigId() {
+    this.configId = new ObjectId();
+  }
+
+  public String getConfigId() {
+    return configId.toString();
   }
 
   public void setConfigName(String name) {
@@ -73,52 +73,12 @@ public class ConfigRecord {
     return botStatus;
   }
 
-  public void setBotColor(String color) {
-    this.botColor = color;
+  public BotColors getBotColors() {
+    return botColors;
   }
 
-  public String getBotColor() {
-    return botColor;
-  }
-
-  public void setExpIncrement(int increment) {
-    this.expIncrement = increment;
-  }
-
-  public int getExpIncrement() {
-    return expIncrement;
-  }
-
-  public void setExpVariation(int variation) {
-    this.expVariation = variation;
-  }
-
-  public int getExpVariation() {
-    return expVariation;
-  }
-
-  public void setExpCooldown(long cooldown) {
-    this.expCooldown = cooldown;
-  }
-
-  public long getExpCooldown() {
-    return expCooldown;
-  }
-
-  public void setLevelBase(long levelBase) {
-    this.levelBase = levelBase;
-  }
-
-  public long getLevelBase() {
-    return levelBase;
-  }
-
-  public void setLevelGrowth(double growth) {
-    this.levelGrowth = growth;
-  }
-
-  public double getLevelGrowth() {
-    return levelGrowth;
+  public LevellingConfig getLevellingConfig() {
+    return levellingConfig;
   }
 
   public void addDisabledFeature(Feature feature) {
@@ -133,15 +93,15 @@ public class ConfigRecord {
     return disabledFeatures;
   }
 
-  public void addDisabledCommand(String feature) {
+  public void addDisabledCommand(Command feature) {
     this.disabledCommands.add(feature);
   }
 
-  public void removeDisabledCommand(String feature) {
+  public void removeDisabledCommand(Command feature) {
     this.disabledCommands.add(feature);
   }
 
-  public List<String> getDisabledCommands() {
+  public List<Command> getDisabledCommands() {
     return disabledCommands;
   }
 
@@ -157,21 +117,16 @@ public class ConfigRecord {
     return adminIds;
   }
 
-  public void saveConfig() {
-    Document config = new Document("$set", new Document()
-        .append("_id", configName)
+  public Document toDocument() {
+    return new Document()
+        .append("configId", configId)
+        .append("configName", configName)
         .append("botStatus", botStatus)
-        .append("botColor", botColor)
-        .append("expIncrement", expIncrement)
-        .append("expVariation", expVariation)
-        .append("expCooldown", expCooldown)
-        .append("levelBase", levelBase)
-        .append("levelGrowth", levelGrowth)
+        .append("botColors", botColors.toDocument())
+        .append("levellingConfig", levellingConfig.toDocument())
         .append("disabledFeatures", disabledFeatures)
         .append("disabledCommands", disabledCommands)
-        .append("adminIds", adminIds));
-    UpdateOptions opts = new UpdateOptions().upsert(true);
-    configs.updateOne(eq("_id", configName), config, opts);
+        .append("adminIds", adminIds);
   }
 
 }

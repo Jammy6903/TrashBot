@@ -5,8 +5,12 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.jami.App;
-import com.jami.Database.Feature;
 import com.jami.Database.Config.ConfigRecord;
+import com.jami.Database.Config.BotColors.BotColors;
+import com.jami.Database.Config.LevellingConfig.LevellingConfig;
+import com.jami.Database.Enumerators.Command;
+import com.jami.Database.Enumerators.Feature;
+import com.jami.Database.repositories.ConfigRepo;
 import com.jami.JDA.Wiktionary;
 
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -14,6 +18,8 @@ import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class CommandsAdmin {
+  private static ConfigRecord globalConfig = App.getGlobalConfig();
+
   public static void adminCommands(MessageReceivedEvent event, String command) {
     List<String> args;
     if (event != null) {
@@ -111,7 +117,7 @@ public class CommandsAdmin {
     }
     App.getProps().setProperty("CURRENT_getGlobalConfig()", args.get(1));
     App.saveProps();
-    App.setGlobalConfig(new ConfigRecord(args.get(1)));
+    App.setGlobalConfig(ConfigRepo.getByName(args.get(1)));
     return "Config set to " + args.get(1);
   }
 
@@ -119,37 +125,41 @@ public class CommandsAdmin {
     if (args.size() == 1) {
       return "**Command Usage:** a!load-config <configName>";
     }
-    App.setGlobalConfig(new ConfigRecord(args.get(1)));
+    App.setGlobalConfig(ConfigRepo.getByName(args.get(1)));
     return "Config " + args.get(1) + " loaded";
   }
 
   private static String saveConfig() {
-    App.getGlobalConfig().saveConfig();
-    return "Config " + App.getGlobalConfig().getConfigName() + " saved";
+    ConfigRepo.save(globalConfig);
+    return "Config " + globalConfig.getConfigName() + " saved";
   }
 
   private static EmbedBuilder showConfig() {
     String disabledFeatures = "";
-    for (Feature feature : App.getGlobalConfig().getDisabledFeatures()) {
+    for (Feature feature : globalConfig.getDisabledFeatures()) {
       disabledFeatures += "- " + String.valueOf(feature) + "\n";
     }
     String disabledCommands = "";
-    for (String command : App.getGlobalConfig().getDisabledCommands()) {
+    for (Command command : globalConfig.getDisabledCommands()) {
       disabledCommands += "- " + command + "\n";
     }
     String adminIds = "";
-    for (long id : App.getGlobalConfig().getAdminIds()) {
+    for (long id : globalConfig.getAdminIds()) {
       adminIds += "- " + String.valueOf(id) + "\n";
     }
+    BotColors colors = globalConfig.getBotColors();
+    LevellingConfig level = globalConfig.getLevellingConfig();
     return new EmbedBuilder()
-        .setTitle(App.getGlobalConfig().getConfigName())
-        .setDescription("Status: " + App.getGlobalConfig().getBotStatus() + "\n" +
-            "Color: " + App.getGlobalConfig().getBotColor() + "\n" +
-            "Exp Increment: " + App.getGlobalConfig().getExpIncrement() + "\n" +
-            "Exp Variation: " + App.getGlobalConfig().getExpVariation() + "\n" +
-            "Exp Cooldown: " + App.getGlobalConfig().getExpCooldown() + "\n" +
-            "Level Base: " + App.getGlobalConfig().getLevelBase() + "\n" +
-            "Level Growth: " + App.getGlobalConfig().getLevelGrowth() + "\n" +
+        .setTitle(globalConfig.getConfigName())
+        .setDescription("Status: " + globalConfig.getBotStatus() + "\n" +
+            String.format("Colors: #%s #%s #%s #%s\n", colors.getPrimary(), colors.getSecondary(), colors.getWarn(),
+                colors.getError())
+            +
+            "Exp Increment: " + level.getExpIncrement() + "\n" +
+            "Exp Variation: " + level.getExpVariation() + "\n" +
+            "Exp Cooldown: " + level.getExpCooldown() + "\n" +
+            "Level Base: " + level.getLevelBase() + "\n" +
+            "Level Growth: " + level.getLevelGrowth() + "\n" +
             "Disabled Features: \n" + disabledFeatures + "\n" +
             "Disabled Commands: \n" + disabledCommands + "\n" +
             "Admin IDs: \n" + adminIds);
@@ -157,25 +167,29 @@ public class CommandsAdmin {
 
   private static String showConfigConsole() {
     String disabledFeatures = "";
-    for (Feature feature : App.getGlobalConfig().getDisabledFeatures()) {
+    for (Feature feature : globalConfig.getDisabledFeatures()) {
       disabledFeatures += "  - " + String.valueOf(feature) + "\n";
     }
     String disabledCommands = "";
-    for (String command : App.getGlobalConfig().getDisabledCommands()) {
+    for (Command command : globalConfig.getDisabledCommands()) {
       disabledCommands += "  - " + command + "\n";
     }
     String adminIds = "";
-    for (long id : App.getGlobalConfig().getAdminIds()) {
+    for (long id : globalConfig.getAdminIds()) {
       adminIds += "  - " + String.valueOf(id) + "\n";
     }
-    return App.getGlobalConfig().getConfigName() + ":\n" +
-        "Status: " + App.getGlobalConfig().getBotStatus() + "\n" +
-        "Color: " + App.getGlobalConfig().getBotColor() + "\n" +
-        "Exp Increment: " + App.getGlobalConfig().getExpIncrement() + "\n" +
-        "Exp Variation: " + App.getGlobalConfig().getExpVariation() + "\n" +
-        "Exp Cooldown: " + App.getGlobalConfig().getExpCooldown() + "\n" +
-        "Level Base: " + App.getGlobalConfig().getLevelBase() + "\n" +
-        "Level Growth: " + App.getGlobalConfig().getLevelGrowth() + "\n" +
+    BotColors colors = globalConfig.getBotColors();
+    LevellingConfig level = globalConfig.getLevellingConfig();
+    return globalConfig.getConfigName() + ":\n" +
+        "Status: " + globalConfig.getBotStatus() + "\n" +
+        String.format("Colors: #%s #%s #%s #%s\n", colors.getPrimary(), colors.getSecondary(), colors.getWarn(),
+            colors.getError())
+        +
+        "Exp Increment: " + level.getExpIncrement() + "\n" +
+        "Exp Variation: " + level.getExpVariation() + "\n" +
+        "Exp Cooldown: " + level.getExpCooldown() + "\n" +
+        "Level Base: " + level.getLevelBase() + "\n" +
+        "Level Growth: " + level.getLevelGrowth() + "\n" +
         "Disabled Features: \n" + disabledFeatures + "\n" +
         "Disabled Commands: \n" + disabledCommands + "\n" +
         "Admin IDs: \n" + adminIds;
@@ -185,7 +199,7 @@ public class CommandsAdmin {
     if (args.size() == 1) {
       return "**Command Usage:** a!set-config-name <configName>";
     }
-    App.getGlobalConfig().setConfigName(args.get(1));
+    globalConfig.setConfigName(args.get(1));
     return "Config name set to " + args.get(1);
   }
 
@@ -198,7 +212,7 @@ public class CommandsAdmin {
       status += args.get(i) + " ";
     }
     final String finalStatus = status;
-    App.getGlobalConfig().setBotStatus(status);
+    globalConfig.setBotStatus(status);
     try {
       App.getShardManager().getShards()
           .forEach(jda -> jda.getPresence().setActivity(Activity.customStatus(finalStatus)));
@@ -213,7 +227,7 @@ public class CommandsAdmin {
       return "**Command Usage:** a!set-bot-color <#color>";
     }
     String color = args.get(1).replaceFirst("#", "");
-    App.getGlobalConfig().setBotColor(color);
+    globalConfig.getBotColors().setPrimary(color);
     return "Color set to" + color;
   }
 
@@ -222,7 +236,7 @@ public class CommandsAdmin {
       return "**Command Usage:** a!set-exp-increment <exp>";
     }
     try {
-      App.getGlobalConfig().setExpIncrement(Integer.valueOf(args.get(1)));
+      globalConfig.getLevellingConfig().setExpIncrement(Integer.valueOf(args.get(1)));
       return "Exp Increment set to " + args.get(1);
     } catch (Exception e) {
       return "**Command Usage:** a!set-exp-increment <exp>";
@@ -234,7 +248,7 @@ public class CommandsAdmin {
       return "**Command Usage:** a!set-exp-variation <variation>";
     }
     try {
-      App.getGlobalConfig().setExpVariation(Integer.valueOf(args.get(1)));
+      globalConfig.getLevellingConfig().setExpVariation(Integer.valueOf(args.get(1)));
       return "Exp Variation set to ";
     } catch (Exception e) {
       return "**Command Usage:** a!set-exp-variation <variation>";
@@ -246,7 +260,7 @@ public class CommandsAdmin {
       return "**Command Usage:** a!set-exp-cooldown <cooldown>";
     }
     try {
-      App.getGlobalConfig().setExpCooldown(Long.valueOf(args.get(1)));
+      globalConfig.getLevellingConfig().setExpCooldown(Integer.valueOf(args.get(1)));
       return "Exp Cooldown set to " + args.get(1);
     } catch (Exception e) {
       return "**Command Usage:** a!set-exp-cooldown <cooldown>";
@@ -258,7 +272,7 @@ public class CommandsAdmin {
       return "**Command Usage:** a!set-level-base <exp>";
     }
     try {
-      App.getGlobalConfig().setLevelBase(Long.valueOf(args.get(1)));
+      globalConfig.getLevellingConfig().setLevelBase(Long.valueOf(args.get(1)));
       return "Level Base set to " + args.get(1);
     } catch (Exception e) {
       return "**Command Usage:** a!set-level-base <exp>";
@@ -270,7 +284,7 @@ public class CommandsAdmin {
       return "**Command Usage:** a!set-level-growth <growth>";
     }
     try {
-      App.getGlobalConfig().setLevelGrowth(Double.valueOf(args.get(1)));
+      globalConfig.getLevellingConfig().setLevelGrowth(Double.valueOf(args.get(1)));
       return "Level Growth set to " + args.get(1);
     } catch (Exception e) {
       return "**Command Usage:** a!set-level-growth <growth>";
@@ -283,7 +297,7 @@ public class CommandsAdmin {
     }
     String addedFeatures = "Following features added to Disabled Features: ";
     for (int i = 1; i < args.size(); i++) {
-      App.getGlobalConfig().addDisabledFeature(Feature.valueOf(args.get(i)));
+      globalConfig.addDisabledFeature(Feature.valueOf(args.get(i)));
       addedFeatures += args.get(i) + ", ";
     }
     return addedFeatures;
@@ -295,7 +309,7 @@ public class CommandsAdmin {
     }
     String removedFeatures = "Following features removed from Disabled Features: ";
     for (int i = 1; i < args.size(); i++) {
-      App.getGlobalConfig().removeDisabledFeature(Feature.valueOf(args.get(i)));
+      globalConfig.removeDisabledFeature(Feature.valueOf(args.get(i)));
       removedFeatures += args.get(i) + ", ";
     }
     return removedFeatures;
@@ -307,7 +321,7 @@ public class CommandsAdmin {
     }
     String addedCommands = "Following commands added from Disabled Commands: ";
     for (int i = 1; i < args.size(); i++) {
-      App.getGlobalConfig().addDisabledCommand(args.get(i));
+      globalConfig.addDisabledCommand(Command.valueOf(args.get(i)));
       addedCommands += args.get(i) + ", ";
     }
     return addedCommands;
@@ -319,7 +333,7 @@ public class CommandsAdmin {
     }
     String removedCommands = "Following commands removed from Disabled Commands: ";
     for (int i = 1; i < args.size(); i++) {
-      App.getGlobalConfig().removeDisabledCommand(args.get(i));
+      globalConfig.removeDisabledCommand(Command.valueOf(args.get(i)));
       removedCommands += args.get(i) + ", ";
     }
     return removedCommands;
@@ -334,7 +348,7 @@ public class CommandsAdmin {
     String addedIds = "Following IDs added to Admin IDs: ";
     for (int i = 1; i < args.size(); i++) {
       try {
-        App.getGlobalConfig().addAdminId(Long.valueOf(args.get(i)));
+        globalConfig.addAdminId(Long.valueOf(args.get(i)));
         addedIds += args.get(i) + ", ";
       } catch (Exception e) {
         addError = true;
@@ -356,7 +370,7 @@ public class CommandsAdmin {
     String removedIds = "Following IDs removed from Admin IDs: ";
     for (int i = 1; i < args.size(); i++) {
       try {
-        App.getGlobalConfig().removeAdminId(Long.valueOf(args.get(i)));
+        globalConfig.removeAdminId(Long.valueOf(args.get(i)));
         removedIds += args.get(i) + ", ";
       } catch (Exception e) {
         error = true;
