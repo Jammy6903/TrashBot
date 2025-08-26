@@ -1,23 +1,29 @@
 package com.jami.Database.Config.BotColors;
 
-import org.bson.Document;
-
-import com.jami.Database.GetorDefault;
+import org.bson.codecs.pojo.annotations.BsonProperty;
 
 public class BotColors {
 
+  @BsonProperty("botPrimaryColor")
   private String botPrimaryColor;
+
+  @BsonProperty("botSecondaryColor")
   private String botSecondaryColor;
+
+  @BsonProperty("botWarnColor")
   private String botWarnColor;
+
+  @BsonProperty("botErrorColor")
   private String botErrorColor;
 
-  private static String defaultColor = "000000";
+  public BotColors() {
+  }
 
-  public BotColors(Document doc) {
-    this.botPrimaryColor = GetorDefault.String(doc, "botPrimaryColor", defaultColor);
-    this.botSecondaryColor = GetorDefault.String(doc, "botSecondaryColor", defaultColor);
-    this.botWarnColor = GetorDefault.String(doc, "botWarnColor", defaultColor);
-    this.botErrorColor = GetorDefault.String(doc, "botErrorColor", defaultColor);
+  public BotColors(boolean d) {
+    this.botPrimaryColor = "#61eaff";
+    this.botSecondaryColor = "#9061ff";
+    this.botWarnColor = "#ffe761";
+    this.botErrorColor = "#ff6171";
   }
 
   public void setPrimary(String color) {
@@ -50,13 +56,5 @@ public class BotColors {
 
   public String getError() {
     return botErrorColor;
-  }
-
-  public Document toDocument() {
-    return new Document()
-        .append("botPrimaryColor", botPrimaryColor)
-        .append("botSecondaryColor", botSecondaryColor)
-        .append("botWarnColor", botWarnColor)
-        .append("botErrorColor", botErrorColor);
   }
 }

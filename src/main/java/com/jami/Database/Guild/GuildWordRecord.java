@@ -1,42 +1,48 @@
 package com.jami.Database.Guild;
 
-import org.bson.Document;
+import org.bson.codecs.pojo.annotations.BsonId;
+import org.bson.codecs.pojo.annotations.BsonProperty;
 import org.bson.types.ObjectId;
 
 public class GuildWordRecord {
+
+  @BsonId
   private ObjectId recordId;
+
+  @BsonProperty("guildId")
   private long guildId;
+
+  @BsonProperty("word")
   private String word;
+
+  @BsonProperty("count")
   private long count;
-  private long firstUse;
 
-  public GuildWordRecord(Document doc) {
-    this.recordId = doc.getObjectId("_id");
-    this.guildId = doc.getLong("guildId");
-    this.word = doc.getString("word");
-    this.count = doc.getLong("count");
-    this.firstUse = doc.getLong("firstUse");
+  @BsonProperty("dateCreated")
+  private long dateCreated;
+
+  public GuildWordRecord() {
   }
 
-  public GuildWordRecord(long guildId, String word) {
-    this.recordId = new ObjectId();
-    this.guildId = guildId;
-    this.word = word;
-    this.count = 0;
-    this.firstUse = System.currentTimeMillis();
+  // RecordId
+
+  public ObjectId getRecordId() {
+    return recordId;
   }
 
-  public String getRecordId() {
-    return recordId.toString();
-  }
+  // GuildId
 
   public long getGuildId() {
     return guildId;
   }
 
+  // WordId
+
   public String getWord() {
     return word;
   }
+
+  // Count
 
   public void setCount(long c) {
     this.count = c;
@@ -46,16 +52,9 @@ public class GuildWordRecord {
     return count;
   }
 
-  public long getFirstUse() {
-    return firstUse;
-  }
+  // DateCreated
 
-  public Document toDocument() {
-    return new Document()
-        .append("_id", recordId)
-        .append("guildId", guildId)
-        .append("word", word)
-        .append("count", count)
-        .append("firstUse", firstUse);
+  public long getDateCreated() {
+    return dateCreated;
   }
 }

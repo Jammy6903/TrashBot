@@ -1,28 +1,38 @@
 package com.jami.Database.Utilities;
 
-import org.bson.Document;
+import org.bson.codecs.pojo.annotations.BsonId;
+import org.bson.codecs.pojo.annotations.BsonProperty;
 import org.bson.types.ObjectId;
 
-import com.jami.Database.GetorDefault;
-import com.jami.Database.Enumerators.EnumToString;
 import com.jami.Database.Enumerators.FeatureRequestStatus;
 
 public class FeatureRequestRecord {
 
+  @BsonId
   private ObjectId requestId;
+
+  @BsonProperty("requestTitle")
   private String requestTitle;
+
+  @BsonProperty("requestDescription")
   private String requestDescription;
+
+  @BsonProperty("userName")
   private String userName;
+
+  @BsonProperty("userId")
   private long userId;
+
+  @BsonProperty("upvotes")
+  private long upvotes;
+
+  @BsonProperty("status")
   private FeatureRequestStatus status;
 
-  public FeatureRequestRecord(Document doc) {
-    this.requestId = doc.getObjectId("_id");
-    this.requestTitle = doc.getString("requestTitle");
-    this.requestDescription = doc.getString("requestDescription");
-    this.userName = doc.getString("userName");
-    this.userId = doc.getLong("userId");
-    this.status = GetorDefault.Enum(doc, "status", FeatureRequestStatus.class, FeatureRequestStatus.REQUESTED);
+  @BsonProperty("dateCreated")
+  private long dateCreated;
+
+  public FeatureRequestRecord() {
   }
 
   public FeatureRequestRecord(String title, String description, String userName, long userId) {
@@ -31,12 +41,18 @@ public class FeatureRequestRecord {
     this.requestDescription = description;
     this.userName = userName;
     this.userId = userId;
+    this.upvotes = 0;
     this.status = FeatureRequestStatus.REQUESTED;
+    this.dateCreated = System.currentTimeMillis();
   }
 
-  public String getId() {
-    return requestId.toString();
+  // requestId
+
+  public ObjectId getId() {
+    return requestId;
   }
+
+  // Title
 
   public void setTitle(String title) {
     this.requestTitle = title;
@@ -46,6 +62,8 @@ public class FeatureRequestRecord {
     return requestTitle;
   }
 
+  // Description
+
   public void setDescription(String description) {
     this.requestDescription = description;
   }
@@ -53,6 +71,8 @@ public class FeatureRequestRecord {
   public String getDescription() {
     return requestDescription;
   }
+
+  // UserName
 
   public void setUserName(String name) {
     this.userName = name;
@@ -62,13 +82,23 @@ public class FeatureRequestRecord {
     return userName;
   }
 
-  public void setUserId(long id) {
-    this.userId = id;
-  }
+  // UserId
 
   public long getUserId() {
     return userId;
   }
+
+  // Upvotes
+
+  public void setUpvotes(long v) {
+    this.upvotes = v;
+  }
+
+  public long getUpvotes() {
+    return upvotes;
+  }
+
+  // Status
 
   public void setStatus(FeatureRequestStatus status) {
     this.status = status;
@@ -78,13 +108,9 @@ public class FeatureRequestRecord {
     return status;
   }
 
-  public Document toDocument() {
-    return new Document()
-        .append("_id", requestId)
-        .append("requestTitle", requestTitle)
-        .append("requestDescription", requestDescription)
-        .append("userName", userName)
-        .append("userId", userId)
-        .append("status", EnumToString.get(status));
+  // DateCreated
+  public long getDateCreated() {
+    return dateCreated;
   }
+
 }

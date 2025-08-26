@@ -3,50 +3,53 @@ package com.jami.Database.Config;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bson.Document;
+import org.bson.codecs.pojo.annotations.BsonId;
+import org.bson.codecs.pojo.annotations.BsonProperty;
 import org.bson.types.ObjectId;
 
-import com.jami.Database.GetorDefault;
 import com.jami.Database.Config.BotColors.BotColors;
 import com.jami.Database.Config.LevellingConfig.LevellingConfig;
 import com.jami.Database.Enumerators.Command;
 import com.jami.Database.Enumerators.Feature;
 
 public class ConfigRecord {
+
+  @BsonId
   private ObjectId configId;
+
+  @BsonProperty("configName")
   private String configName;
+
+  @BsonProperty("botStatus")
   private String botStatus;
-  private BotColors botColors;
-  private LevellingConfig levellingConfig;
-  private List<Feature> disabledFeatures;
-  private List<Command> disabledCommands;
-  private List<Long> adminIds;
 
-  private static String defaultBotStatus = "Bottin'";
-  private static List<Feature> defaultDisabledFeatures = new ArrayList<>();
-  private static List<Command> defaultDisabledCommands = new ArrayList<>();
-  private static List<Long> defaultAdminIds = new ArrayList<>();
+  @BsonProperty("botColors")
+  private BotColors botColors = new BotColors();
 
-  public ConfigRecord(Document doc) {
-    this.configId = doc.getObjectId("_id");
-    this.configName = doc.getString("configName");
-    this.botStatus = GetorDefault.String(doc, "botStatus", defaultBotStatus);
-    this.botColors = new BotColors(doc.get("botColors", Document.class));
-    this.levellingConfig = new LevellingConfig(doc.get("levellingConfig", Document.class));
-    this.disabledFeatures = GetorDefault.EnumList(doc, "disabledFeatures", Feature.class, defaultDisabledFeatures);
-    this.disabledCommands = GetorDefault.EnumList(doc, "disabledCommands", Command.class, defaultDisabledCommands);
-    this.adminIds = doc.getList("adminIds", Long.class, defaultAdminIds);
+  @BsonProperty("levellingConfig")
+  private LevellingConfig levellingConfig = new LevellingConfig();
+
+  @BsonProperty("disabledFeatures")
+  private List<Feature> disabledFeatures = new ArrayList<>();
+
+  @BsonProperty("disabledCommands")
+  private List<Command> disabledCommands = new ArrayList<>();
+
+  @BsonProperty("adminIds")
+  private List<Long> adminIds = new ArrayList<>();
+
+  public ConfigRecord() {
   }
 
   public ConfigRecord(String configName) {
     this.configId = new ObjectId();
     this.configName = configName;
-    this.botStatus = defaultBotStatus;
-    this.botColors = new BotColors(new Document());
-    this.levellingConfig = new LevellingConfig(new Document());
-    this.disabledFeatures = defaultDisabledFeatures;
-    this.disabledCommands = defaultDisabledCommands;
-    this.adminIds = defaultAdminIds;
+    this.botStatus = "bottin'";
+    this.botColors = new BotColors(true);
+    this.levellingConfig = new LevellingConfig(true);
+    this.disabledFeatures = new ArrayList<>();
+    this.disabledCommands = new ArrayList<>();
+    this.adminIds = new ArrayList<>();
   }
 
   public void newConfigId() {
@@ -115,18 +118,6 @@ public class ConfigRecord {
 
   public List<Long> getAdminIds() {
     return adminIds;
-  }
-
-  public Document toDocument() {
-    return new Document()
-        .append("configId", configId)
-        .append("configName", configName)
-        .append("botStatus", botStatus)
-        .append("botColors", botColors.toDocument())
-        .append("levellingConfig", levellingConfig.toDocument())
-        .append("disabledFeatures", disabledFeatures)
-        .append("disabledCommands", disabledCommands)
-        .append("adminIds", adminIds);
   }
 
 }

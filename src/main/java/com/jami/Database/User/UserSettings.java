@@ -3,18 +3,19 @@ package com.jami.Database.User;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bson.Document;
+import org.bson.codecs.pojo.annotations.BsonProperty;
 
-import com.jami.Database.GetorDefault;
-import com.jami.Database.Enumerators.EnumToString;
 import com.jami.Database.Enumerators.Feature;
 
 public class UserSettings {
-  private List<Feature> disabledFeatures;
 
-  public UserSettings(Document doc) {
-    this.disabledFeatures = GetorDefault.EnumList(doc, "disabledFeatures", Feature.class, new ArrayList<>());
+  @BsonProperty("disabledFeatures")
+  private List<Feature> disabledFeatures = new ArrayList<>();
+
+  public UserSettings() {
   }
+
+  // DisabledFeatures
 
   public void addDisabledFeature(Feature feature) {
     this.disabledFeatures.add(feature);
@@ -28,8 +29,4 @@ public class UserSettings {
     return disabledFeatures;
   }
 
-  public Document toDocument() {
-    return new Document()
-        .append("disabledFeatures", EnumToString.getFromList(disabledFeatures));
-  }
 }

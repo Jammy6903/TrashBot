@@ -3,7 +3,6 @@ package com.jami.Interaction.Utilities.FeatureRequests;
 import java.util.concurrent.TimeUnit;
 
 import com.jami.App;
-import com.jami.Database.Utilities.FeatureRequestRecord;
 import com.jami.Database.repositories.FeatureRequestRepo;
 
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -37,18 +36,19 @@ public class commandsFeatureRequests {
                                         return !e.isAcknowledged();
                                 },
                                 e -> {
-                                        FeatureRequestRecord req = FeatureRequestRepo.createRequest(
-                                                        e.getValue("title").getAsString(),
-                                                        e.getValue("description").getAsString(), e.getUser().getName(),
-                                                        e.getUser().getIdLong());
+                                        String t = e.getValue("title").getAsString();
+                                        String d = e.getValue("description").getAsString();
+                                        String un = e.getUser().getName();
+                                        long ui = e.getUser().getIdLong();
+                                        String reqId = FeatureRequestRepo.createRequest(
+                                                        t, d, un, ui);
                                         EmbedBuilder embed = new EmbedBuilder()
-                                                        .setTitle(req.getTitle())
-                                                        .setDescription(req.getDescription())
-                                                        .addField("Status", req.getStatus().toString(), false)
-                                                        .setFooter("Requested by " + req.getUserName() + " | "
-                                                                        + req.getId());
+                                                        .setTitle(t)
+                                                        .setDescription(d)
+                                                        .addField("Status", "REQUESTED", false)
+                                                        .setFooter(String.format("Requested by: %s (%d) | ID: %s", un,
+                                                                        ui, reqId));
                                         e.reply("Feature request created:").addEmbeds(embed.build()).queue();
-                                        FeatureRequestRepo.save(req);
                                 },
                                 10, TimeUnit.MINUTES,
                                 () -> {

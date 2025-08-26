@@ -5,7 +5,6 @@ import java.util.List;
 
 import com.jami.App;
 import com.jami.BotAdmin.CommandsAdmin;
-import com.jami.Database.Enumerators.Command;
 import com.jami.Database.Enumerators.Feature;
 import com.jami.Database.Guild.GuildRecord;
 import com.jami.Database.Guild.guildSettings.GuildSettings;
@@ -32,11 +31,6 @@ public class EventListeners {
 
   @SubscribeEvent
   public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
-
-    if (App.getGlobalConfig().getDisabledCommands().contains(Command.valueOf(event.getName()))) {
-      event.reply("Sorry! That command is disabled at the moment.").queue();
-      return;
-    }
 
     switch (event.getName()) {
       case "featurerequest":
@@ -93,7 +87,7 @@ public class EventListeners {
     // WordCount
     if (checkDisabled(disabledFeaturesLists, Feature.WORDS)
         && !guildSettings.getWordsDisabledChannels().contains(c.getIdLong())) {
-      WordCount.incrementWords(m);
+      WordCount.incrementWords(m, g.getIdLong());
     }
 
     // Message Logging

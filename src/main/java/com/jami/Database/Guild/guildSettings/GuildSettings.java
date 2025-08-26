@@ -3,10 +3,8 @@ package com.jami.Database.Guild.guildSettings;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bson.Document;
+import org.bson.codecs.pojo.annotations.BsonProperty;
 
-import com.jami.Database.GetorDefault;
-import com.jami.Database.Enumerators.EnumToString;
 import com.jami.Database.Enumerators.Feature;
 import com.jami.Database.Enumerators.LogType;
 import com.jami.Database.Guild.guildSettings.LevellingSettings.LevellingSettings;
@@ -15,32 +13,47 @@ import com.jami.Database.Guild.guildSettings.WelcomeMessageSettings.WelcomeMessa
 
 public class GuildSettings {
 
-  private LevellingSettings levellingSettings;
-  private WelcomeMessageSettings welcomeMessageSettings;
+  @BsonProperty("levellingSettings")
+  private LevellingSettings levellingSettings = new LevellingSettings();
+
+  @BsonProperty("welcomeMessageSettings")
+  private WelcomeMessageSettings welcomeMessageSettings = new WelcomeMessageSettings();
+
+  @BsonProperty("loggingChannels")
   private List<LoggingChannel> loggingChannels = new ArrayList<>();
+
+  @BsonProperty("disabledFeatures")
   private List<Feature> disabledFeatures = new ArrayList<>();
+
+  @BsonProperty("wordsDisabledChannels")
   private List<Long> wordsDisabledChannels = new ArrayList<>();
 
-  public GuildSettings(Document doc) {
-    this.levellingSettings = new LevellingSettings(GetorDefault.Document(doc, "levellingSettings"));
-    this.welcomeMessageSettings = new WelcomeMessageSettings(GetorDefault.Document(doc, "welcomeMessageSettings"));
-    for (Document lc : doc.getList("loggingChannels", Document.class)) {
-      loggingChannels.add(new LoggingChannel(lc));
-    }
-    this.disabledFeatures = GetorDefault.EnumList(doc, "disabledFeatures", Feature.class, new ArrayList<>());
-    this.wordsDisabledChannels = GetorDefault.List(doc, "wordsDisabledChannels", Long.class, new ArrayList<>());
+  public GuildSettings() {
   }
+
+  public GuildSettings(boolean d) {
+    this.levellingSettings = new LevellingSettings(true);
+    this.welcomeMessageSettings = new WelcomeMessageSettings(true);
+  }
+
+  // LevellingSettings
 
   public LevellingSettings getLevellingSettings() {
     return levellingSettings;
   }
 
-  public List<LoggingChannel> getLoggingChannels() {
-    return loggingChannels;
+  // LoggingChannel
+
+  public void addLoggingChannel(LoggingChannel channel) {
+    this.loggingChannels.add(channel);
   }
 
-  public WelcomeMessageSettings getWelcomeMessageSettings() {
-    return welcomeMessageSettings;
+  public void removeLoggingChannel(LoggingChannel channel) {
+    this.loggingChannels.remove(channel);
+  }
+
+  public List<LoggingChannel> getLoggingChannels() {
+    return loggingChannels;
   }
 
   public LoggingChannel getLoggingChannelByChannelId(long id) {
@@ -62,17 +75,13 @@ public class GuildSettings {
     return channels;
   }
 
-  public void addLoggingChannel(LoggingChannel channel) {
-    this.loggingChannels.add(channel);
+  // WelcomeMessageSettings
+
+  public WelcomeMessageSettings getWelcomeMessageSettings() {
+    return welcomeMessageSettings;
   }
 
-  public void removeLoggingChannel(LoggingChannel channel) {
-    this.loggingChannels.remove(channel);
-  }
-
-  public List<Feature> getDisabledFeatures() {
-    return disabledFeatures;
-  }
+  // DisabledFeatures
 
   public void addDisabledFeature(Feature feature) {
     this.disabledFeatures.add(feature);
@@ -82,9 +91,11 @@ public class GuildSettings {
     this.disabledFeatures.remove(feature);
   }
 
-  public List<Long> getWordsDisabledChannels() {
-    return wordsDisabledChannels;
+  public List<Feature> getDisabledFeatures() {
+    return disabledFeatures;
   }
+
+  // WordsDisabledChannels
 
   public void addWordsDisabledChannel(long channelId) {
     this.wordsDisabledChannels.add(channelId);
@@ -94,17 +105,7 @@ public class GuildSettings {
     this.wordsDisabledChannels.remove(channelId);
   }
 
-  public Document toDocument() {
-    List<Document> lcs = new ArrayList<>();
-    for (LoggingChannel lc : loggingChannels) {
-      lcs.add(lc.toDocument());
-    }
-    return new Document()
-        .append("levellingSettings", levellingSettings.toDocument())
-        .append("welcomeMessageSettings", welcomeMessageSettings.toDocument())
-        .append("loggingChannels", lcs)
-        .append("disabledFeatures", EnumToString.getFromList(disabledFeatures))
-        .append("wordsDisabledChannels", wordsDisabledChannels);
+  public List<Long> getWordsDisabledChannels() {
+    return wordsDisabledChannels;
   }
-
 }

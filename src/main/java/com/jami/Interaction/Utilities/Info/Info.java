@@ -6,8 +6,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import com.jami.App;
-import com.jami.Database.Guild.GuildRecord;
 import com.jami.JDA.JDATools;
+import com.jami.Database.repositories.GuildRepo;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
@@ -26,7 +26,7 @@ public class Info {
     }
 
     public void bot() {
-        Date firstJoined = new Date(new GuildRecord(event.getGuild().getIdLong()).getFirstJoined());
+        Date firstJoined = new Date(GuildRepo.getById(event.getIdLong()).getDateCreated());
         SimpleDateFormat df = new SimpleDateFormat("dd/MM/yy");
 
         EmbedBuilder embed = new EmbedBuilder()

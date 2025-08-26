@@ -1,30 +1,36 @@
 package com.jami.Database.Config.LevellingConfig;
 
-import org.bson.Document;
-
-import com.jami.Database.GetorDefault;
+import org.bson.codecs.pojo.annotations.BsonProperty;
 
 public class LevellingConfig {
 
+  @BsonProperty("expIncrement")
   private int expIncrement;
+
+  @BsonProperty("expVariation")
   private int expVariation;
+
+  @BsonProperty("expCooldown")
   private int expCooldown;
+
+  @BsonProperty("levelBase")
   private long levelBase;
+
+  @BsonProperty("levelGrowth")
   private double levelGrowth;
 
-  private static int defaultExpIncrement = 3;
-  private static int defaultExpVariation = 1;
-  private static int defaultExpCooldown = 60;
-  private static long defaultLevelBase = 200;
-  static double defaultlevelGrowth = 1.5;
-
-  public LevellingConfig(Document doc) {
-    this.expIncrement = GetorDefault.Integer(doc, "expIncrement", defaultExpIncrement);
-    this.expVariation = GetorDefault.Integer(doc, "expVariation", defaultExpVariation);
-    this.expCooldown = GetorDefault.Integer(doc, "expCooldown", defaultExpCooldown);
-    this.levelBase = GetorDefault.Long(doc, "levelBase", defaultLevelBase);
-    this.levelGrowth = GetorDefault.Double(doc, "levelGrowth", defaultlevelGrowth);
+  public LevellingConfig() {
   }
+
+  public LevellingConfig(boolean d) {
+    this.expIncrement = 3;
+    this.expVariation = 1;
+    this.expCooldown = 60;
+    this.levelBase = 200;
+    this.levelGrowth = 1.5;
+  }
+
+  // Exp
 
   public void setExpIncrement(int exp) {
     this.expIncrement = exp;
@@ -50,6 +56,8 @@ public class LevellingConfig {
     return expCooldown;
   }
 
+  // Level
+
   public void setLevelBase(long exp) {
     this.levelBase = exp;
   }
@@ -66,12 +74,4 @@ public class LevellingConfig {
     return levelGrowth;
   }
 
-  public Document toDocument() {
-    return new Document()
-        .append("expIncrement", expIncrement)
-        .append("expVariation", expVariation)
-        .append("expCooldown", expCooldown)
-        .append("levelBase", levelBase)
-        .append("levelGrowth", levelGrowth);
-  }
 }

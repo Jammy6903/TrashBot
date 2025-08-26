@@ -1,6 +1,7 @@
 package com.jami;
 
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
+
 import com.jami.BotAdmin.CommandsAdmin;
 import com.jami.Database.Config.ConfigRecord;
 import com.jami.Database.repositories.ConfigRepo;
@@ -8,8 +9,15 @@ import com.jami.Interaction.Utilities.GuildLogging.Logging;
 import com.jami.JDA.CommandsSetup;
 import com.jami.JDA.EventListeners;
 import com.jami.JDA.JDATools;
+import com.mongodb.ConnectionString;
+import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
+
+import org.bson.codecs.pojo.PojoCodecProvider;
+import org.bson.codecs.configuration.CodecRegistry;
+
+import static org.bson.codecs.configuration.CodecRegistries.*;
 
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.hooks.AnnotatedEventManager;
@@ -43,6 +51,7 @@ public class App {
 
         // MongoDB
         private static MongoClient mongoClient;
+        private static CodecRegistry pojoCodecRegistry;
 
         // Global Config
         private static ConfigRecord globalConfig;
@@ -66,7 +75,9 @@ public class App {
                 loadConfig();
 
                 // After-startup bot configuration
-                JDATools.SetBotStatus(globalConfig.getBotStatus());
+                if (globalConfig != null) {
+                        JDATools.SetBotStatus(globalConfig.getBotStatus());
+                }
                 CommandsSetup.getCommands(shardManager);
 
                 // Start scanner for console commands
@@ -95,7 +106,15 @@ public class App {
         private static void connectMongoDb() {
                 LOGGER.info("[INFO] Attempting to connect to MongoDB");
                 while (mongoClient == null) {
-                        mongoClient = MongoClients.create(props.getProperty("DATABASE_URI"));
+                        pojoCodecRegistry = fromRegistries(
+                                        MongoClientSettings.getDefaultCodecRegistry(),
+                                        fromProviders(PojoCodecProvider.builder().automatic(true).build()));
+                        MongoClientSettings settings = MongoClientSettings.builder()
+                                        .applyConnectionString(new ConnectionString(props.getProperty("DATABASE_URI")))
+                                        .codecRegistry(pojoCodecRegistry)
+                                        .retryWrites(true)
+                                        .build();
+                        mongoClient = MongoClients.create(settings);
                         if (mongoClient == null) {
                                 LOGGER.error("[ERROR] Failed to connect to MongoDB, reattempting in 10 seconds");
                                 wait(10000);
@@ -105,7 +124,6 @@ public class App {
         }
 
         private static void loadConfig() {
-                // Makes sure theres always a default config available
                 globalConfig = ConfigRepo.getByName(props.getProperty("CURRENT_CONFIG")); // Loads current config from
                                                                                           // DB
 

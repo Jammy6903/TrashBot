@@ -1,52 +1,81 @@
 package com.jami.Database.Guild.Bracket;
 
-import org.bson.Document;
+import java.util.List;
+
+import org.bson.codecs.pojo.annotations.BsonProperty;
 
 public class Bracket {
-  private String bracketId;
+
+  @BsonProperty("bracketName")
   private String bracketName;
+
+  @BsonProperty("bracketDescription")
   private String bracketDescription;
+
+  @BsonProperty("roleId")
   private long roleId;
+
+  @BsonProperty("interval")
   private long interval;
 
-  public Bracket(Document b) {
+  @BsonProperty("teams")
+  private List<Team> teams;
+
+  public Bracket() {
 
   }
 
-  public class team {
-    private String teamName;
-    private String teamImage;
+  // Name
 
-    public team(String name, String image) {
-      this.teamName = name;
-      this.teamImage = image;
-    }
-
-    public void setName(String name) {
-      this.teamName = name;
-    }
-
-    public String getName() {
-      return teamName;
-    }
-
-    public void setImage(String image) {
-      this.teamImage = image;
-    }
-
-    public String getImage() {
-      return teamImage;
-    }
-
-    public Document toDocument() {
-      return new Document()
-          .append("name", teamName)
-          .append("image", teamImage);
-    }
+  public void setBracketName(String name) {
+    this.bracketName = name;
   }
 
-  public Document toDocument() {
-    return new Document();
+  public String getBracketName() {
+    return bracketName;
   }
 
+  // Description
+
+  public void setBracketDescription(String description) {
+    this.bracketDescription = description;
+  }
+
+  public String getBracketDescription() {
+    return bracketDescription;
+  }
+
+  // PingRoleId
+
+  public void setRoleId(long id) {
+    this.roleId = id;
+  }
+
+  public long getRoleId() {
+    return roleId;
+  }
+
+  // Interval
+
+  public void setInterval(long time) {
+    this.interval = time;
+  }
+
+  public long getInterval() {
+    return interval;
+  }
+
+  // Teams
+
+  public void addTeam(Team team) {
+    this.teams.add(team);
+  }
+
+  public void removeTeam(Team team) {
+    this.teams.remove(team);
+  }
+
+  public List<Team> getTeams() {
+    return teams;
+  }
 }

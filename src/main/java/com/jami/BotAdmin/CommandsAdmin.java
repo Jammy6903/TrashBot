@@ -33,6 +33,9 @@ public class CommandsAdmin {
     String response = "";
 
     switch (args.get(0)) {
+      case "create-config":
+        response = createConfig(args);
+        break;
       case "set-config":
         response = setConfig(args);
         break;
@@ -109,6 +112,14 @@ public class CommandsAdmin {
     }
 
     event.getMessage().reply(response).queue();
+  }
+
+  private static String createConfig(List<String> args) {
+    if (args.size() == 1) {
+      return "**Command Usage:** a!create-config <configName>";
+    }
+    ConfigRepo.create(args.get(1));
+    return String.format("Config \"%s\" created.", args.get(1));
   }
 
   private static String setConfig(List<String> args) {

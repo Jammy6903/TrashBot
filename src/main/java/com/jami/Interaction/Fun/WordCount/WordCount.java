@@ -8,11 +8,11 @@ import com.jami.Database.repositories.GuildRepo;
 import com.jami.Database.repositories.WordRepo;
 
 public class WordCount {
-  public static void incrementWords(String message) {
+  public static void incrementWords(String message, long guildId) {
     ArrayList<String> words = getWords(message);
     for (String word : words) {
       WordRepo.incrementWord(word);
-      GuildRepo.incrementWord(word);
+      GuildRepo.incrementWord(guildId, word);
     }
   }
 

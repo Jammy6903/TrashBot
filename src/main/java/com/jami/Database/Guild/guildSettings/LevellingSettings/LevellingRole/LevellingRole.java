@@ -1,21 +1,22 @@
 package com.jami.Database.Guild.guildSettings.LevellingSettings.LevellingRole;
 
-import org.bson.Document;
+import org.bson.codecs.pojo.annotations.BsonProperty;
 
 public class LevellingRole {
+
+  @BsonProperty("roleId")
   private long roleId;
+
+  @BsonProperty("levelRequirement")
   private int levelRequirement;
+
+  @BsonProperty("customLevelUpMessage")
   private String customLevelUpMessage;
 
-  public LevellingRole(Document doc) {
-    this.roleId = doc.getLong("roleId");
-    this.levelRequirement = doc.getInteger("levelRequirement");
-    this.customLevelUpMessage = doc.getString("customLevelUpMessage");
+  public LevellingRole() {
   }
 
-  public LevellingRole(long roleId) {
-    this.roleId = roleId;
-  }
+  // RoleId
 
   public void setRoleId(long id) {
     this.roleId = id;
@@ -25,6 +26,8 @@ public class LevellingRole {
     return roleId;
   }
 
+  // LevelRequirement
+
   public void setLevelRequirement(int requirement) {
     this.levelRequirement = requirement;
   }
@@ -33,6 +36,8 @@ public class LevellingRole {
     return levelRequirement;
   }
 
+  // CustomLevelUpMessage
+
   public void setCustomLevelUpMessage(String message) {
     this.customLevelUpMessage = message;
   }
@@ -40,12 +45,4 @@ public class LevellingRole {
   public String getCustomLevelUpMessage() {
     return customLevelUpMessage;
   }
-
-  public Document toDocument() {
-    return new Document()
-        .append("roleId", roleId)
-        .append("levelRequirement", levelRequirement)
-        .append("customLevelUpMessage", customLevelUpMessage);
-  }
-
 }

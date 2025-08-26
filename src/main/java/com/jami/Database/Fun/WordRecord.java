@@ -1,37 +1,33 @@
 package com.jami.Database.Fun;
 
-import org.bson.Document;
-
+import org.bson.codecs.pojo.annotations.BsonId;
+import org.bson.codecs.pojo.annotations.BsonProperty;
 import org.bson.types.ObjectId;
 
 public class WordRecord {
 
+  @BsonId
   private ObjectId recordId;
+
+  @BsonProperty("word")
   private String word;
+
+  @BsonProperty("count")
   private long count;
+
+  @BsonProperty("firstUse")
   private long firstUse;
 
-  public WordRecord(Document doc) {
-    this.recordId = doc.getObjectId("_id");
-    this.word = doc.getString("word");
-    this.count = doc.getLong("count");
-    this.firstUse = doc.getLong("firstUse");
+  public WordRecord() {
   }
 
-  public WordRecord(String word) {
-    this.recordId = new ObjectId();
-    this.word = word;
-    this.count = 0;
-    this.firstUse = System.currentTimeMillis();
+  // ID
+
+  public ObjectId getId() {
+    return recordId;
   }
 
-  public void newRecordId() {
-    this.recordId = new ObjectId();
-  }
-
-  public String getId() {
-    return recordId.toString();
-  }
+  // Word
 
   public void setWord(String word) {
     this.word = word;
@@ -41,6 +37,8 @@ public class WordRecord {
     return word;
   }
 
+  // Count
+
   public void setCount(long count) {
     this.count = count;
   }
@@ -49,19 +47,10 @@ public class WordRecord {
     return count;
   }
 
-  public void setFirstUser(long time) {
-    this.firstUse = time;
-  }
+  // FirstUse
 
   public long getFirstUse() {
     return firstUse;
   }
 
-  public Document toDocument() {
-    return new Document()
-        .append("_id", recordId)
-        .append("word", word)
-        .append("count", count)
-        .append("firstUse", firstUse);
-  }
 }

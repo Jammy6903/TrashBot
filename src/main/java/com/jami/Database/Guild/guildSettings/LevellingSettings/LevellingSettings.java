@@ -3,31 +3,45 @@ package com.jami.Database.Guild.guildSettings.LevellingSettings;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bson.Document;
+import org.bson.codecs.pojo.annotations.BsonProperty;
 
-import com.jami.Database.GetorDefault;
 import com.jami.Database.Guild.guildSettings.LevellingSettings.LevellingRole.LevellingRole;
 
 public class LevellingSettings {
-  private int expIncrement;
-  private int expVariation;
-  private int expCooldown;
-  private long levelBase;
-  private double levelGrowth;
-  private List<LevellingRole> levellingRoles = new ArrayList<>();
-  private List<Long> disabledChannels;
 
-  public LevellingSettings(Document doc) {
-    this.expIncrement = GetorDefault.Integer(doc, "expIncrement", 3);
-    this.expVariation = GetorDefault.Integer(doc, "expVariation", 1);
-    this.expCooldown = GetorDefault.Integer(doc, "expCooldown", 60);
-    this.levelBase = GetorDefault.Long(doc, "levelBase", 200L);
-    this.levelGrowth = GetorDefault.Double(doc, "levelGrowth", 1.5);
-    for (Document lr : doc.getList("levellingRoles", Document.class, new ArrayList<>())) {
-      this.levellingRoles.add(new LevellingRole(lr));
-    }
-    this.disabledChannels = GetorDefault.List(doc, "disabledChannels", Long.class, new ArrayList<>());
+  @BsonProperty("expIncrement")
+  private int expIncrement;
+
+  @BsonProperty("expVariation")
+  private int expVariation;
+
+  @BsonProperty("expCooldown")
+  private int expCooldown;
+
+  @BsonProperty("levelBase")
+  private long levelBase;
+
+  @BsonProperty("levelGrowth")
+  private double levelGrowth;
+
+  @BsonProperty("levellingRoles")
+  private List<LevellingRole> levellingRoles = new ArrayList<>();
+
+  @BsonProperty("disabledChannels")
+  private List<Long> disabledChannels = new ArrayList<>();
+
+  public LevellingSettings() {
   }
+
+  public LevellingSettings(boolean d) {
+    this.expIncrement = 3;
+    this.expVariation = 1;
+    this.expCooldown = 60;
+    this.levelBase = 200L;
+    this.levelGrowth = 1.5;
+  }
+
+  // ExpIncrement
 
   public void setExpIncrement(int exp) {
     this.expIncrement = exp;
@@ -37,6 +51,8 @@ public class LevellingSettings {
     return expIncrement;
   }
 
+  // ExpVariation
+
   public void setExpVariation(int variation) {
     this.expVariation = variation;
   }
@@ -45,13 +61,17 @@ public class LevellingSettings {
     return expVariation;
   }
 
+  // ExpCooldown
+
   public void setExpCooldown(int cooldown) {
     this.expCooldown = cooldown;
   }
 
-  public long getExpCooldown() {
+  public int getExpCooldown() {
     return expCooldown;
   }
+
+  // LevelBase
 
   public void setLevelBase(long base) {
     this.levelBase = base;
@@ -61,6 +81,8 @@ public class LevellingSettings {
     return levelBase;
   }
 
+  // LevelGrowth
+
   public void setLevelGrowth(double growth) {
     this.levelGrowth = growth;
   }
@@ -68,6 +90,8 @@ public class LevellingSettings {
   public double getLevelGrowth() {
     return levelGrowth;
   }
+
+  // LevellingRoles
 
   public void addLevellingRole(LevellingRole role) {
     this.levellingRoles.add(role);
@@ -81,6 +105,8 @@ public class LevellingSettings {
     return levellingRoles;
   }
 
+  // DisabledChannels
+
   public void addDisabledChannel(long channelId) {
     this.disabledChannels.add(channelId);
   }
@@ -91,20 +117,5 @@ public class LevellingSettings {
 
   public List<Long> getDisabledChannels() {
     return disabledChannels;
-  }
-
-  public Document toDocument() {
-    List<Document> lrs = new ArrayList<>();
-    for (LevellingRole role : levellingRoles) {
-      lrs.add(role.toDocument());
-    }
-    return new Document()
-        .append("expIncrement", expIncrement)
-        .append("expVariation", expVariation)
-        .append("expCooldown", expCooldown)
-        .append("levelBase", levelBase)
-        .append("levelGrowth", levelGrowth)
-        .append("levellingRoles", lrs)
-        .append("disabledChannels", disabledChannels);
   }
 }

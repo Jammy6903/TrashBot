@@ -104,10 +104,10 @@ public class CommandsWordCount {
   }
 
   private static EmbedBuilder guildWordInfo(GuildRecord g, String guildName, GuildWordRecord word, String definition) {
-    Date firstUse = new Date(word.getFirstUse());
+    Date firstUse = new Date(word.getDateCreated());
     SimpleDateFormat df = new SimpleDateFormat("dd/MM/yy");
 
-    Date firstJoined = new Date(g.getFirstJoined());
+    Date firstJoined = new Date(g.getDateCreated());
     SimpleDateFormat df2 = new SimpleDateFormat("MMM yyyy");
 
     return new EmbedBuilder()
@@ -179,14 +179,14 @@ public class CommandsWordCount {
     String content = "";
 
     for (GuildWordRecord w : words) {
-      Date date = new Date(w.getFirstUse());
+      Date date = new Date(w.getDateCreated());
       SimpleDateFormat df = new SimpleDateFormat("dd/MM/yy");
       content += String.format("**%d.** %s - Used **%d** times - First used %s\n", words.indexOf(w), w.getWord(),
           w.getCount(),
           df.format(date));
     }
 
-    Date firstJoined = new Date(g.getFirstJoined());
+    Date firstJoined = new Date(g.getDateCreated());
     SimpleDateFormat df = new SimpleDateFormat("MMM yyyy");
 
     return new EmbedBuilder()

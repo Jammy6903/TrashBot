@@ -32,14 +32,23 @@ public class Levelling {
   }
 
   private static void global(LevellingConfig config, UserRecord user, long userId) {
+    if (user.getUserLastMessage() < System.currentTimeMillis() + (config.getExpCooldown() * 1000)) {
+      return;
+    }
+
     int inc = variate(config.getExpIncrement(), config.getExpVariation());
     UserRepo.incrementExp(userId, inc);
-    if (user.getExp() + inc >= getRequiredExp(user.getLevel(), config.getLevelBase(), config.getLevelGrowth())) {
+    if (user.getUserExp() + inc >= getRequiredExp(user.getUserLevel(), config.getLevelBase(),
+        config.getLevelGrowth())) {
       UserRepo.incrementLevel(userId);
     }
   }
 
   private static boolean guild(LevellingSettings settings, GuildUserRecord user, long guildId, long userId) {
+    if (user.getUserLastMessage() < System.currentTimeMillis() + (settings.getExpCooldown() * 1000)) {
+      return false;
+    }
+
     int inc = variate(settings.getExpIncrement(), settings.getExpVariation());
     GuildRepo.incrementExp(guildId, userId, inc);
     if (user.getExp() + inc >= getRequiredExp(user.getLevel(), settings.getLevelBase(), settings.getLevelGrowth())) {

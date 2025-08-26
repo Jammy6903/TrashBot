@@ -1,72 +1,77 @@
 package com.jami.Database.User;
 
-import org.bson.Document;
+import org.bson.codecs.pojo.annotations.BsonId;
+import org.bson.codecs.pojo.annotations.BsonProperty;
 
 public class UserRecord {
+
+  @BsonId
   private long userId;
+
+  @BsonProperty("userExp")
   private long userExp;
+
+  @BsonProperty("userLevel")
   private int userLevel;
+
+  @BsonProperty("userLastMessage")
   private long userLastMessage;
-  private UserSettings userSettings;
 
-  public UserRecord(Document doc) {
-    this.userId = doc.getLong("_id");
-    this.userExp = doc.getLong("userExp");
-    this.userLevel = doc.getInteger("userLevel");
-    this.userLastMessage = doc.getLong("userLastMessage");
-    this.userSettings = new UserSettings(doc.get("userSettings", Document.class));
+  @BsonProperty("userSettings")
+  private UserSettings userSettings = new UserSettings();
+
+  @BsonProperty("dateCreated")
+  private long dateCreated;
+
+  public UserRecord() {
   }
 
-  public UserRecord(long userId) {
-    this.userId = userId;
-    this.userExp = 0;
-    this.userLevel = 0;
-    this.userLastMessage = System.currentTimeMillis();
-    this.userSettings = new UserSettings(new Document());
-  }
-
-  public void setUserId(long userId) {
-    this.userId = userId;
-  }
+  // UserId
 
   public long getUserId() {
     return userId;
   }
 
-  public void setExp(long exp) {
+  // Experience
+
+  public void setUserExp(long exp) {
     this.userExp = exp;
   }
 
-  public long getExp() {
+  public long getUserExp() {
     return userExp;
   }
 
-  public void setLevel(int level) {
+  // Level
+
+  public void setUserLevel(int level) {
     this.userLevel = level;
   }
 
-  public int getLevel() {
+  public int getUserLevel() {
     return userLevel;
   }
 
-  public void setLastMessage(long time) {
+  // LastMessage
+
+  public void setUserLastMessage(long time) {
     this.userLastMessage = time;
   }
 
-  public long getLastMessage() {
+  public long getUserLastMessage() {
     return userLastMessage;
   }
+
+  // Settings
 
   public UserSettings getSettings() {
     return userSettings;
   }
 
-  public Document toDocument() {
-    return new Document()
-        .append("_id", userId)
-        .append("userExp", userExp)
-        .append("userLevel", userLevel)
-        .append("userLastMessage", userLastMessage)
-        .append("settings", userSettings.toDocument());
+  // Date
+
+  public long getDateCreated() {
+    return dateCreated;
   }
+
 }
