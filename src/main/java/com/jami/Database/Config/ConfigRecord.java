@@ -3,6 +3,8 @@ package com.jami.Database.Config;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bson.Document;
+import org.bson.codecs.pojo.annotations.BsonExtraElements;
 import org.bson.codecs.pojo.annotations.BsonId;
 import org.bson.codecs.pojo.annotations.BsonProperty;
 import org.bson.types.ObjectId;
@@ -37,6 +39,9 @@ public class ConfigRecord {
 
   @BsonProperty("adminIds")
   private List<Long> adminIds = new ArrayList<>();
+
+  @BsonExtraElements
+  private Document legacyValues;
 
   public ConfigRecord() {
   }

@@ -3,6 +3,8 @@ package com.jami.Database.Guild.guildSettings.LevellingSettings;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bson.Document;
+import org.bson.codecs.pojo.annotations.BsonExtraElements;
 import org.bson.codecs.pojo.annotations.BsonProperty;
 
 import com.jami.Database.Guild.guildSettings.LevellingSettings.LevellingRole.LevellingRole;
@@ -30,15 +32,10 @@ public class LevellingSettings {
   @BsonProperty("disabledChannels")
   private List<Long> disabledChannels = new ArrayList<>();
 
-  public LevellingSettings() {
-  }
+  @BsonExtraElements
+  private Document legacyValues;
 
-  public LevellingSettings(boolean d) {
-    this.expIncrement = 3;
-    this.expVariation = 1;
-    this.expCooldown = 60;
-    this.levelBase = 200L;
-    this.levelGrowth = 1.5;
+  public LevellingSettings() {
   }
 
   // ExpIncrement

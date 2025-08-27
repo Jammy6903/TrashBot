@@ -1,5 +1,7 @@
 package com.jami.Database.Config.LevellingConfig;
 
+import org.bson.Document;
+import org.bson.codecs.pojo.annotations.BsonExtraElements;
 import org.bson.codecs.pojo.annotations.BsonProperty;
 
 public class LevellingConfig {
@@ -18,6 +20,9 @@ public class LevellingConfig {
 
   @BsonProperty("levelGrowth")
   private double levelGrowth;
+
+  @BsonExtraElements
+  private Document legacyValues;
 
   public LevellingConfig() {
   }

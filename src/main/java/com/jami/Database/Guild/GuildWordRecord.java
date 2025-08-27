@@ -1,5 +1,7 @@
 package com.jami.Database.Guild;
 
+import org.bson.Document;
+import org.bson.codecs.pojo.annotations.BsonExtraElements;
 import org.bson.codecs.pojo.annotations.BsonId;
 import org.bson.codecs.pojo.annotations.BsonProperty;
 import org.bson.types.ObjectId;
@@ -20,6 +22,9 @@ public class GuildWordRecord {
 
   @BsonProperty("dateCreated")
   private long dateCreated;
+
+  @BsonExtraElements
+  private Document legacyValues;
 
   public GuildWordRecord() {
   }

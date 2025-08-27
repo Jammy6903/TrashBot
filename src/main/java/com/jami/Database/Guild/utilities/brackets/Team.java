@@ -1,5 +1,7 @@
-package com.jami.Database.Guild.Bracket;
+package com.jami.Database.Guild.utilities.brackets;
 
+import org.bson.Document;
+import org.bson.codecs.pojo.annotations.BsonExtraElements;
 import org.bson.codecs.pojo.annotations.BsonProperty;
 
 public class Team {
@@ -9,6 +11,9 @@ public class Team {
 
   @BsonProperty("teamImage")
   private String teamImage;
+
+  @BsonExtraElements
+  private Document legacyValues;
 
   public Team() {
   }

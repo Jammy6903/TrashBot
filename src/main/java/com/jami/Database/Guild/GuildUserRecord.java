@@ -1,5 +1,7 @@
 package com.jami.Database.Guild;
 
+import org.bson.Document;
+import org.bson.codecs.pojo.annotations.BsonExtraElements;
 import org.bson.codecs.pojo.annotations.BsonId;
 import org.bson.codecs.pojo.annotations.BsonProperty;
 import org.bson.types.ObjectId;
@@ -21,11 +23,17 @@ public class GuildUserRecord {
   @BsonProperty("userLevel")
   private int userLevel;
 
+  @BsonProperty("countingHighestNumber")
+  private long countingHighestNumber;
+
   @BsonProperty("userLastMessage")
   private long userLastMessage;
 
   @BsonProperty("dateCreated")
   private long dateCreated;
+
+  @BsonExtraElements
+  private Document legacyValues;
 
   public GuildUserRecord() {
   }
@@ -66,6 +74,16 @@ public class GuildUserRecord {
 
   public int getLevel() {
     return this.userLevel;
+  }
+
+  // countingHighestNumber
+
+  public void setCountingHighestNumber(long number) {
+    this.countingHighestNumber = number;
+  }
+
+  public long getCountingHighestNumber() {
+    return countingHighestNumber;
   }
 
   // UserLastMessage

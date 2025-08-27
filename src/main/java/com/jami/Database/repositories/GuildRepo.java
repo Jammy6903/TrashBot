@@ -60,7 +60,7 @@ public class GuildRepo {
   public static GuildRecord getById(long id) {
     return guilds.findOneAndUpdate(eq("_id", id), combine(
         setOnInsert("firstJoined", System.currentTimeMillis()),
-        setOnInsert("guildSettings", new GuildSettings(true)),
+        setOnInsert("guildSettings", new GuildSettings()),
         setOnInsert("brackets", new ArrayList<>())),
         RETURN_UPSERT);
   }

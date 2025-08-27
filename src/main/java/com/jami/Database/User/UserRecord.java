@@ -1,5 +1,7 @@
 package com.jami.Database.User;
 
+import org.bson.Document;
+import org.bson.codecs.pojo.annotations.BsonExtraElements;
 import org.bson.codecs.pojo.annotations.BsonId;
 import org.bson.codecs.pojo.annotations.BsonProperty;
 
@@ -22,6 +24,9 @@ public class UserRecord {
 
   @BsonProperty("dateCreated")
   private long dateCreated;
+
+  @BsonExtraElements
+  private Document legacyValues;
 
   public UserRecord() {
   }

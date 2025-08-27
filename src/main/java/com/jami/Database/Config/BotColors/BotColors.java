@@ -1,5 +1,7 @@
 package com.jami.Database.Config.BotColors;
 
+import org.bson.Document;
+import org.bson.codecs.pojo.annotations.BsonExtraElements;
 import org.bson.codecs.pojo.annotations.BsonProperty;
 
 public class BotColors {
@@ -15,6 +17,9 @@ public class BotColors {
 
   @BsonProperty("botErrorColor")
   private String botErrorColor;
+
+  @BsonExtraElements
+  private Document legacyValues;
 
   public BotColors() {
   }

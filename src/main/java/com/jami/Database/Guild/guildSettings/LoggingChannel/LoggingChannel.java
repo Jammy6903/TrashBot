@@ -3,6 +3,8 @@ package com.jami.Database.Guild.guildSettings.LoggingChannel;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bson.Document;
+import org.bson.codecs.pojo.annotations.BsonExtraElements;
 import org.bson.codecs.pojo.annotations.BsonProperty;
 
 import com.jami.Database.Enumerators.LogType;
@@ -14,6 +16,9 @@ public class LoggingChannel {
 
   @BsonProperty("associatedLogs")
   private List<LogType> associatedLogs = new ArrayList<>();
+
+  @BsonExtraElements
+  private Document legacyValues;
 
   public LoggingChannel() {
   }

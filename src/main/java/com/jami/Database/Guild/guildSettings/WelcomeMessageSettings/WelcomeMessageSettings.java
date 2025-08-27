@@ -1,5 +1,7 @@
 package com.jami.Database.Guild.guildSettings.WelcomeMessageSettings;
 
+import org.bson.Document;
+import org.bson.codecs.pojo.annotations.BsonExtraElements;
 import org.bson.codecs.pojo.annotations.BsonProperty;
 
 import com.jami.Database.Enumerators.WelcomeMessageType;
@@ -15,13 +17,10 @@ public class WelcomeMessageSettings {
   @BsonProperty("welcomeChannelId")
   private long welcomeChannelId;
 
-  public WelcomeMessageSettings() {
-  }
+  @BsonExtraElements
+  private Document legacyValues;
 
-  public WelcomeMessageSettings(boolean d) {
-    this.messageType = WelcomeMessageType.TEXT;
-    this.welcomeMessage = "Welcome $userMention$!";
-    this.welcomeChannelId = 0L;
+  public WelcomeMessageSettings() {
   }
 
   // MessageType

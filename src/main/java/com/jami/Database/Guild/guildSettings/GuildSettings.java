@@ -3,6 +3,8 @@ package com.jami.Database.Guild.guildSettings;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bson.Document;
+import org.bson.codecs.pojo.annotations.BsonExtraElements;
 import org.bson.codecs.pojo.annotations.BsonProperty;
 
 import com.jami.Database.Enumerators.Feature;
@@ -10,11 +12,15 @@ import com.jami.Database.Enumerators.LogType;
 import com.jami.Database.Guild.guildSettings.LevellingSettings.LevellingSettings;
 import com.jami.Database.Guild.guildSettings.LoggingChannel.LoggingChannel;
 import com.jami.Database.Guild.guildSettings.WelcomeMessageSettings.WelcomeMessageSettings;
+import com.jami.Database.Guild.guildSettings.countingSettings.CountingSettings;
 
 public class GuildSettings {
 
   @BsonProperty("levellingSettings")
   private LevellingSettings levellingSettings = new LevellingSettings();
+
+  @BsonProperty("countingSettings")
+  private CountingSettings countingSettings = new CountingSettings();
 
   @BsonProperty("welcomeMessageSettings")
   private WelcomeMessageSettings welcomeMessageSettings = new WelcomeMessageSettings();
@@ -28,18 +34,22 @@ public class GuildSettings {
   @BsonProperty("wordsDisabledChannels")
   private List<Long> wordsDisabledChannels = new ArrayList<>();
 
-  public GuildSettings() {
-  }
+  @BsonExtraElements
+  private Document legacyValues;
 
-  public GuildSettings(boolean d) {
-    this.levellingSettings = new LevellingSettings(true);
-    this.welcomeMessageSettings = new WelcomeMessageSettings(true);
+  public GuildSettings() {
   }
 
   // LevellingSettings
 
   public LevellingSettings getLevellingSettings() {
     return levellingSettings;
+  }
+
+  // CountingSettings
+
+  public CountingSettings getCountingSettings() {
+    return countingSettings;
   }
 
   // LoggingChannel

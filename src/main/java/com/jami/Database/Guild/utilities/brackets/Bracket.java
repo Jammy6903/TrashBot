@@ -1,7 +1,9 @@
-package com.jami.Database.Guild.Bracket;
+package com.jami.Database.Guild.utilities.brackets;
 
 import java.util.List;
 
+import org.bson.Document;
+import org.bson.codecs.pojo.annotations.BsonExtraElements;
 import org.bson.codecs.pojo.annotations.BsonProperty;
 
 public class Bracket {
@@ -20,6 +22,9 @@ public class Bracket {
 
   @BsonProperty("teams")
   private List<Team> teams;
+
+  @BsonExtraElements
+  private Document legacyValues;
 
   public Bracket() {
 

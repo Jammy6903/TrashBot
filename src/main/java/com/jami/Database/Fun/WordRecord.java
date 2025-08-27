@@ -1,5 +1,7 @@
 package com.jami.Database.Fun;
 
+import org.bson.Document;
+import org.bson.codecs.pojo.annotations.BsonExtraElements;
 import org.bson.codecs.pojo.annotations.BsonId;
 import org.bson.codecs.pojo.annotations.BsonProperty;
 import org.bson.types.ObjectId;
@@ -17,6 +19,9 @@ public class WordRecord {
 
   @BsonProperty("firstUse")
   private long firstUse;
+
+  @BsonExtraElements
+  private Document legacyValues;
 
   public WordRecord() {
   }

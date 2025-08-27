@@ -95,6 +95,10 @@ public class EventListeners {
       Logging.cacheMessage(event);
     }
 
+    if (guildSettings.getCountingSettings().getChannelId() != 0L) {
+
+    }
+
   }
 
   private boolean checkDisabled(List<List<Feature>> lists, Feature feature) {

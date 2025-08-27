@@ -1,5 +1,7 @@
 package com.jami.Database.Guild.guildSettings.LevellingSettings.LevellingRole;
 
+import org.bson.Document;
+import org.bson.codecs.pojo.annotations.BsonExtraElements;
 import org.bson.codecs.pojo.annotations.BsonProperty;
 
 public class LevellingRole {
@@ -12,6 +14,9 @@ public class LevellingRole {
 
   @BsonProperty("customLevelUpMessage")
   private String customLevelUpMessage;
+
+  @BsonExtraElements
+  private Document legacyValues;
 
   public LevellingRole() {
   }
