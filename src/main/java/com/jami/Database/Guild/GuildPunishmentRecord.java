@@ -94,6 +94,10 @@ public class GuildPunishmentRecord {
     return punishmentTime;
   }
 
+  public void setPunishmentTime(long punishmentTime) {
+    this.punishmentTime = punishmentTime;
+  }
+
   // Active
 
   public void setActive(boolean bool) {

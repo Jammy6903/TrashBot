@@ -8,12 +8,10 @@ import org.bson.types.ObjectId;
 import com.jami.App;
 import com.jami.Database.Utilities.FeatureRequestRecord;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.ReplaceOptions;
 
 public class FeatureRequestRepo {
-  private static final MongoDatabase database = App.getMongoClient().getDatabase("TRASHBOT");
-  private static final MongoCollection<FeatureRequestRecord> featureRequests = database
+  private static final MongoCollection<FeatureRequestRecord> featureRequests = App.getDatabase()
       .getCollection("FEATURE_REQUESTS", FeatureRequestRecord.class);
 
   public static void ensureIndexes() {

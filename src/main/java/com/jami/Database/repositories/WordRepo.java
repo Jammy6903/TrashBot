@@ -12,7 +12,6 @@ import com.jami.App;
 import com.jami.Database.Fun.WordRecord;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
-import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.FindOneAndUpdateOptions;
 import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.Indexes;
@@ -25,8 +24,7 @@ import static com.mongodb.client.model.Updates.*;
 import static com.mongodb.client.model.Sorts.*;
 
 public class WordRepo {
-  private static final MongoDatabase database = App.getMongoClient().getDatabase("TRASHBOT");
-  private static final MongoCollection<WordRecord> words = database.getCollection("WORDS", WordRecord.class);
+  private static final MongoCollection<WordRecord> words = App.getDatabase().getCollection("WORDS", WordRecord.class);
 
   private static final UpdateOptions UPSERT = new UpdateOptions().upsert(true);
   private static final ReplaceOptions REPLACE_UPSERT = new ReplaceOptions().upsert(true);

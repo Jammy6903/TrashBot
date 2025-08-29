@@ -18,16 +18,16 @@ public class GuildUserRecord {
   private long userId;
 
   @BsonProperty("userExp")
-  private long userExp;
+  private long userExp = 0;
 
   @BsonProperty("userLevel")
-  private int userLevel;
+  private int userLevel = 0;
 
   @BsonProperty("countingHighestNumber")
-  private long countingHighestNumber;
+  private long countingHighestNumber = 0;
 
   @BsonProperty("userLastMessage")
-  private long userLastMessage;
+  private long userLastMessage = 0;
 
   @BsonProperty("dateCreated")
   private long dateCreated;
@@ -100,6 +100,10 @@ public class GuildUserRecord {
 
   public long getDateCreated() {
     return dateCreated;
+  }
+
+  public void setDateCreated(long dateCreated) {
+    this.dateCreated = dateCreated;
   }
 
 }

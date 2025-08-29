@@ -4,6 +4,7 @@ import com.jami.Database.Guild.fun.Counting;
 import com.jami.Database.Guild.guildSettings.*;
 import com.jami.Database.Guild.utilities.brackets.Bracket;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.bson.Document;
@@ -23,7 +24,7 @@ public class GuildRecord {
   private Counting counting = new Counting();
 
   @BsonProperty("brackets")
-  private List<Bracket> brackets;
+  private List<Bracket> brackets = new ArrayList<>();
 
   @BsonProperty("dateCreated")
   private long dateCreated;
@@ -46,6 +47,20 @@ public class GuildRecord {
     return guildSettings;
   }
 
+  public void setSettings(GuildSettings settings) {
+    this.guildSettings = settings;
+  }
+
+  // Counting
+
+  public Counting getCounting() {
+    return counting;
+  }
+
+  public void setCounting(Counting counting) {
+    this.counting = counting;
+  }
+
   // Brackets
 
   public void addBracket(Bracket bracket) {
@@ -60,10 +75,18 @@ public class GuildRecord {
     return brackets;
   }
 
+  public void setBrackets(List<Bracket> brackets) {
+    this.brackets = brackets;
+  }
+
   // FirstJoined
 
   public long getDateCreated() {
     return dateCreated;
+  }
+
+  public void setDateCreated(long dateCreated) {
+    this.dateCreated = dateCreated;
   }
 
 }

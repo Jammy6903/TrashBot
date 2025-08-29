@@ -11,13 +11,13 @@ public class UserRecord {
   private long userId;
 
   @BsonProperty("userExp")
-  private long userExp;
+  private long userExp = 0;
 
   @BsonProperty("userLevel")
-  private int userLevel;
+  private int userLevel = 0;
 
   @BsonProperty("userLastMessage")
-  private long userLastMessage;
+  private long userLastMessage = 0;
 
   @BsonProperty("userSettings")
   private UserSettings userSettings = new UserSettings();
@@ -73,10 +73,18 @@ public class UserRecord {
     return userSettings;
   }
 
+  public void setSettings(UserSettings userSettings) {
+    this.userSettings = userSettings;
+  }
+
   // Date
 
   public long getDateCreated() {
     return dateCreated;
+  }
+
+  public void setDateCreated(long dateCreated) {
+    this.dateCreated = dateCreated;
   }
 
 }

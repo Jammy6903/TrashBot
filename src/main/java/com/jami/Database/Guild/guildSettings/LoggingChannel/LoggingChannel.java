@@ -51,4 +51,8 @@ public class LoggingChannel {
     return associatedLogs;
   }
 
+  public void setAssociatedLogs(List<LogType> associatedLogs) {
+    this.associatedLogs = associatedLogs;
+  }
+
 }

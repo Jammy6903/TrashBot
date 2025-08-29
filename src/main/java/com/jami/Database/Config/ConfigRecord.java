@@ -50,8 +50,8 @@ public class ConfigRecord {
     this.configId = new ObjectId();
     this.configName = configName;
     this.botStatus = "bottin'";
-    this.botColors = new BotColors(true);
-    this.levellingConfig = new LevellingConfig(true);
+    this.botColors = new BotColors();
+    this.levellingConfig = new LevellingConfig();
     this.disabledFeatures = new ArrayList<>();
     this.disabledCommands = new ArrayList<>();
     this.adminIds = new ArrayList<>();
@@ -85,8 +85,16 @@ public class ConfigRecord {
     return botColors;
   }
 
+  public void setBotColors(BotColors botColors) {
+    this.botColors = botColors;
+  }
+
   public LevellingConfig getLevellingConfig() {
     return levellingConfig;
+  }
+
+  public void setLevellingConfig(LevellingConfig levellingConfig) {
+    this.levellingConfig = levellingConfig;
   }
 
   public void addDisabledFeature(Feature feature) {
@@ -101,16 +109,24 @@ public class ConfigRecord {
     return disabledFeatures;
   }
 
+  public void setDisabledFeatures(List<Feature> disabledFeatures) {
+    this.disabledFeatures = disabledFeatures;
+  }
+
   public void addDisabledCommand(Command feature) {
     this.disabledCommands.add(feature);
   }
 
   public void removeDisabledCommand(Command feature) {
-    this.disabledCommands.add(feature);
+    this.disabledCommands.remove(feature);
   }
 
   public List<Command> getDisabledCommands() {
     return disabledCommands;
+  }
+
+  public void setDisabledCommands(List<Command> disabledCommands) {
+    this.disabledCommands = disabledCommands;
   }
 
   public void addAdminId(long id) {
@@ -123,6 +139,10 @@ public class ConfigRecord {
 
   public List<Long> getAdminIds() {
     return adminIds;
+  }
+
+  public void setAdminIds(List<Long> adminIds) {
+    this.adminIds = adminIds;
   }
 
 }

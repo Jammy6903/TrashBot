@@ -34,4 +34,8 @@ public class UserSettings {
     return disabledFeatures;
   }
 
+  public void setDisabledFeatures(List<Feature> disabledFeatures) {
+    this.disabledFeatures = disabledFeatures;
+  }
+
 }

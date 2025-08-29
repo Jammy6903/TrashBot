@@ -15,7 +15,7 @@ public class WordRecord {
   private String word;
 
   @BsonProperty("count")
-  private long count;
+  private long count = 0;
 
   @BsonProperty("firstUse")
   private long firstUse;
@@ -53,6 +53,10 @@ public class WordRecord {
   }
 
   // FirstUse
+
+  public void setFirstUse(long firstUse) {
+    this.firstUse = firstUse;
+  }
 
   public long getFirstUse() {
     return firstUse;

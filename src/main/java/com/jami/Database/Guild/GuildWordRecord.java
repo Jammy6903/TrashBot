@@ -47,6 +47,10 @@ public class GuildWordRecord {
     return word;
   }
 
+  public void setWord(String word) {
+    this.word = word;
+  }
+
   // Count
 
   public void setCount(long c) {
@@ -61,5 +65,9 @@ public class GuildWordRecord {
 
   public long getDateCreated() {
     return dateCreated;
+  }
+
+  public void setDateCreated(long dateCreated) {
+    this.dateCreated = dateCreated;
   }
 }

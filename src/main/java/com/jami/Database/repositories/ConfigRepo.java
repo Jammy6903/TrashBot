@@ -7,12 +7,11 @@ import org.bson.types.ObjectId;
 import com.jami.App;
 import com.jami.Database.Config.ConfigRecord;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.ReplaceOptions;
 
 public class ConfigRepo {
-  private static final MongoDatabase database = App.getMongoClient().getDatabase("TRASHBOT");
-  private static final MongoCollection<ConfigRecord> configs = database.getCollection("CONFIGS", ConfigRecord.class);
+  private static final MongoCollection<ConfigRecord> configs = App.getDatabase().getCollection("CONFIGS",
+      ConfigRecord.class);
 
   public static ConfigRecord getById(String id) {
     return configs.find(eq("_id", new ObjectId(id))).first();

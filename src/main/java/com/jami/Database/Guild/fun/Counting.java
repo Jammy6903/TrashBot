@@ -7,13 +7,10 @@ import org.bson.codecs.pojo.annotations.BsonProperty;
 public class Counting {
 
   @BsonProperty("currentNumber")
-  private long currentNumber;
+  private long currentNumber = 0;
 
   @BsonProperty("highestNumber")
-  private long highestNumber;
-
-  @BsonProperty("highestUserId")
-  private long highestUserId;
+  private long highestNumber = 0;
 
   @BsonExtraElements
   private Document legacyValues;
@@ -34,20 +31,10 @@ public class Counting {
   // highestNumber
 
   public void setHighestNumber(long number) {
-    this.currentNumber = number;
+    this.highestNumber = number;
   }
 
   public long getHighestNumber() {
     return highestNumber;
-  }
-
-  // highestUserId;
-
-  public void setHighestUserId(long id) {
-    this.highestUserId = id;
-  }
-
-  public long getHighestUserId() {
-    return highestUserId;
   }
 }

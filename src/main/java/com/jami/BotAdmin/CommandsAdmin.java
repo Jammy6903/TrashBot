@@ -126,7 +126,7 @@ public class CommandsAdmin {
     if (args.size() == 1) {
       return "**Command Usage:** a!set-config <configName>";
     }
-    App.getProps().setProperty("CURRENT_getGlobalConfig()", args.get(1));
+    App.getProps().setProperty("CURRENT_CONFIG", args.get(1));
     App.saveProps();
     App.setGlobalConfig(ConfigRepo.getByName(args.get(1)));
     return "Config set to " + args.get(1);

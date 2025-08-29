@@ -16,6 +16,7 @@ import com.jami.Interaction.Fun.Levelling.CommandsLevelling;
 import com.jami.Interaction.Fun.Levelling.Levelling;
 import com.jami.Interaction.Fun.WordCount.CommandsWordCount;
 import com.jami.Interaction.Fun.WordCount.WordCount;
+import com.jami.Interaction.Fun.counting.Counting;
 import com.jami.Interaction.Utilities.FeatureRequests.commandsFeatureRequests;
 import com.jami.Interaction.Utilities.GuildLogging.Logging;
 import com.jami.Interaction.Utilities.Info.CommandsInfo;
@@ -95,8 +96,12 @@ public class EventListeners {
       Logging.cacheMessage(event);
     }
 
-    if (guildSettings.getCountingSettings().getChannelId() != 0L) {
+    System.out.println(guildSettings.getCountingSettings().getChannelId());
 
+    // Counting
+    if (checkDisabled(disabledFeaturesLists, Feature.COUNTING)
+        && guildSettings.getCountingSettings().getChannelId() == c.getIdLong()) {
+      Counting.newCount(event, guildRecord);
     }
 
   }

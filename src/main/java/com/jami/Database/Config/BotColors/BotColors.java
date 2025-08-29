@@ -7,28 +7,21 @@ import org.bson.codecs.pojo.annotations.BsonProperty;
 public class BotColors {
 
   @BsonProperty("botPrimaryColor")
-  private String botPrimaryColor;
+  private String botPrimaryColor = "#61eaff";
 
   @BsonProperty("botSecondaryColor")
-  private String botSecondaryColor;
+  private String botSecondaryColor = "#9061ff";
 
   @BsonProperty("botWarnColor")
-  private String botWarnColor;
+  private String botWarnColor = "#ffe761";
 
   @BsonProperty("botErrorColor")
-  private String botErrorColor;
+  private String botErrorColor = "#ff6171";
 
   @BsonExtraElements
   private Document legacyValues;
 
   public BotColors() {
-  }
-
-  public BotColors(boolean d) {
-    this.botPrimaryColor = "#61eaff";
-    this.botSecondaryColor = "#9061ff";
-    this.botWarnColor = "#ffe761";
-    this.botErrorColor = "#ff6171";
   }
 
   public void setPrimary(String color) {

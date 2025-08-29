@@ -93,6 +93,10 @@ public class FeatureRequestRecord {
     return userId;
   }
 
+  public void setUserId(long userId) {
+    this.userId = userId;
+  }
+
   // Upvotes
 
   public void setUpvotes(long v) {
@@ -114,8 +118,13 @@ public class FeatureRequestRecord {
   }
 
   // DateCreated
+
   public long getDateCreated() {
     return dateCreated;
+  }
+
+  public void setDateCreated(long dateCreated) {
+    this.dateCreated = dateCreated;
   }
 
 }

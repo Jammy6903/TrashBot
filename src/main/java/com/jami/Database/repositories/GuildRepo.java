@@ -27,7 +27,7 @@ import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.model.Indexes;
 
 public class GuildRepo {
-  private static final MongoDatabase database = App.getMongoClient().getDatabase("TRASHBOT");
+  private static final MongoDatabase database = App.getDatabase();
   private static final MongoCollection<GuildRecord> guilds = database.getCollection("GUILDS", GuildRecord.class);
   private static final MongoCollection<GuildUserRecord> guildUsers = database.getCollection("GUILD_USERS",
       GuildUserRecord.class);
@@ -63,6 +63,15 @@ public class GuildRepo {
         setOnInsert("guildSettings", new GuildSettings()),
         setOnInsert("brackets", new ArrayList<>())),
         RETURN_UPSERT);
+  }
+
+  // COUNTING
+  public static void setCount(long id, long newValue) {
+    guilds.updateOne(eq("_id", id), set("counting.currentNumber", newValue));
+  }
+
+  public static void setHighestCount(long id, long newValue) {
+    guilds.updateOne(eq("_id", id), set("counting.highestNumber", newValue));
   }
 
   public static void save(GuildRecord record) {

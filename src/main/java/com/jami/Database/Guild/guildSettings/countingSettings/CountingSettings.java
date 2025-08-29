@@ -7,10 +7,10 @@ import org.bson.codecs.pojo.annotations.BsonProperty;
 public class CountingSettings {
 
   @BsonProperty("channelId")
-  private long channelId;
+  private Long channelId;
 
   @BsonProperty("allowMultiPost")
-  private boolean allowMultiPost;
+  private boolean allowMultiPost = false;
 
   @BsonExtraElements
   private Document legacyValues;
@@ -20,11 +20,11 @@ public class CountingSettings {
 
   // channelId
 
-  public void setChannelId(long id) {
+  public void setChannelId(Long id) {
     this.channelId = id;
   }
 
-  public long getChannelId() {
+  public Long getChannelId() {
     return channelId;
   }
 
@@ -34,7 +34,7 @@ public class CountingSettings {
     this.allowMultiPost = b;
   }
 
-  public boolean getALlowMultiPost() {
+  public boolean isAllowMultiPost() {
     return allowMultiPost;
   }
 }

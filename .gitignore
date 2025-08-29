@@ -17,6 +17,8 @@ assets/
 .mvn/
 .git/
 
+/src/test/
+
 .project
 .classpath
 

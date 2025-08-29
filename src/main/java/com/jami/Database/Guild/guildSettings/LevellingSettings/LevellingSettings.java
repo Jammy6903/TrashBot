@@ -12,19 +12,19 @@ import com.jami.Database.Guild.guildSettings.LevellingSettings.LevellingRole.Lev
 public class LevellingSettings {
 
   @BsonProperty("expIncrement")
-  private int expIncrement;
+  private int expIncrement = 3;
 
   @BsonProperty("expVariation")
-  private int expVariation;
+  private int expVariation = 1;
 
   @BsonProperty("expCooldown")
-  private int expCooldown;
+  private int expCooldown = 60;
 
   @BsonProperty("levelBase")
-  private long levelBase;
+  private long levelBase = 200;
 
   @BsonProperty("levelGrowth")
-  private double levelGrowth;
+  private double levelGrowth = 1.5;
 
   @BsonProperty("levellingRoles")
   private List<LevellingRole> levellingRoles = new ArrayList<>();
@@ -102,6 +102,10 @@ public class LevellingSettings {
     return levellingRoles;
   }
 
+  public void setLevellingRoles(List<LevellingRole> levellingRoles) {
+    this.levellingRoles = levellingRoles;
+  }
+
   // DisabledChannels
 
   public void addDisabledChannel(long channelId) {
@@ -114,5 +118,9 @@ public class LevellingSettings {
 
   public List<Long> getDisabledChannels() {
     return disabledChannels;
+  }
+
+  public void setDisabledChannels(List<Long> disabledChannels) {
+    this.disabledChannels = disabledChannels;
   }
 }

@@ -7,32 +7,24 @@ import org.bson.codecs.pojo.annotations.BsonProperty;
 public class LevellingConfig {
 
   @BsonProperty("expIncrement")
-  private int expIncrement;
+  private int expIncrement = 3;
 
   @BsonProperty("expVariation")
-  private int expVariation;
+  private int expVariation = 1;
 
   @BsonProperty("expCooldown")
-  private int expCooldown;
+  private int expCooldown = 60;
 
   @BsonProperty("levelBase")
-  private long levelBase;
+  private long levelBase = 200;
 
   @BsonProperty("levelGrowth")
-  private double levelGrowth;
+  private double levelGrowth = 1.5;
 
   @BsonExtraElements
   private Document legacyValues;
 
   public LevellingConfig() {
-  }
-
-  public LevellingConfig(boolean d) {
-    this.expIncrement = 3;
-    this.expVariation = 1;
-    this.expCooldown = 60;
-    this.levelBase = 200;
-    this.levelGrowth = 1.5;
   }
 
   // Exp

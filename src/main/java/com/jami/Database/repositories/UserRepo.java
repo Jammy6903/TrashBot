@@ -8,7 +8,6 @@ import com.jami.App;
 import com.jami.Database.User.UserRecord;
 import com.jami.Database.User.UserSettings;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.FindOneAndUpdateOptions;
 import com.mongodb.client.model.Indexes;
 import com.mongodb.client.model.ReplaceOptions;
@@ -17,8 +16,7 @@ import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.model.Updates;
 
 public class UserRepo {
-  private static final MongoDatabase database = App.getMongoClient().getDatabase("TRASHBOT");
-  private static final MongoCollection<UserRecord> users = database.getCollection("USERS", UserRecord.class);
+  private static final MongoCollection<UserRecord> users = App.getDatabase().getCollection("USERS", UserRecord.class);
 
   private static final UpdateOptions UPSERT = new UpdateOptions().upsert(true);
   private static final ReplaceOptions REPLACE_UPSERT = new ReplaceOptions().upsert(true);

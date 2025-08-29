@@ -46,10 +46,18 @@ public class GuildSettings {
     return levellingSettings;
   }
 
+  public void setLevellingSettings(LevellingSettings levellingSettings) {
+    this.levellingSettings = levellingSettings;
+  }
+
   // CountingSettings
 
   public CountingSettings getCountingSettings() {
     return countingSettings;
+  }
+
+  public void setCountingSettings(CountingSettings countingSettings) {
+    this.countingSettings = countingSettings;
   }
 
   // LoggingChannel
@@ -64,6 +72,10 @@ public class GuildSettings {
 
   public List<LoggingChannel> getLoggingChannels() {
     return loggingChannels;
+  }
+
+  public void setLoggingChannels(List<LoggingChannel> loggingChannels) {
+    this.loggingChannels = loggingChannels;
   }
 
   public LoggingChannel getLoggingChannelByChannelId(long id) {
@@ -91,6 +103,10 @@ public class GuildSettings {
     return welcomeMessageSettings;
   }
 
+  public void setWelcomeMessageSettings(WelcomeMessageSettings welcomeMessageSettings) {
+    this.welcomeMessageSettings = welcomeMessageSettings;
+  }
+
   // DisabledFeatures
 
   public void addDisabledFeature(Feature feature) {
@@ -105,6 +121,10 @@ public class GuildSettings {
     return disabledFeatures;
   }
 
+  public void setDisabledFeatures(List<Feature> disabledFeatures) {
+    this.disabledFeatures = disabledFeatures;
+  }
+
   // WordsDisabledChannels
 
   public void addWordsDisabledChannel(long channelId) {
@@ -117,5 +137,9 @@ public class GuildSettings {
 
   public List<Long> getWordsDisabledChannels() {
     return wordsDisabledChannels;
+  }
+
+  public void setWordsDisabledChannels(List<Long> wordsDisabledChannels) {
+    this.wordsDisabledChannels = wordsDisabledChannels;
   }
 }

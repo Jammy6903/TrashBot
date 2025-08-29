@@ -9,13 +9,13 @@ import com.jami.Database.Enumerators.WelcomeMessageType;
 public class WelcomeMessageSettings {
 
   @BsonProperty("messageType")
-  private WelcomeMessageType messageType;
+  private WelcomeMessageType messageType = WelcomeMessageType.TEXT;
 
   @BsonProperty("welcomeMessage")
-  private String welcomeMessage;
+  private String welcomeMessage = "Welcome $userMention$!";
 
   @BsonProperty("welcomeChannelId")
-  private long welcomeChannelId;
+  private Long welcomeChannelId;
 
   @BsonExtraElements
   private Document legacyValues;
@@ -45,11 +45,11 @@ public class WelcomeMessageSettings {
 
   // WelcomeChannel
 
-  public void setWelcomeChannelId(long id) {
+  public void setWelcomeChannelId(Long id) {
     this.welcomeChannelId = id;
   }
 
-  public long getWelcomeChannelId() {
+  public Long getWelcomeChannelId() {
     return welcomeChannelId;
   }
 
