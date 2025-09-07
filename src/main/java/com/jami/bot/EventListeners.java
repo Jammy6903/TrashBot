@@ -1,17 +1,19 @@
-package com.jami.JDA;
+package com.jami.bot;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import com.jami.App;
-import com.jami.BotAdmin.CommandsAdmin;
+import com.jami.BotAdmin.Admin;
+import com.jami.Database.Config.ConfigRecord;
 import com.jami.Database.Enumerators.Feature;
 import com.jami.Database.Guild.GuildRecord;
 import com.jami.Database.Guild.guildSettings.GuildSettings;
 import com.jami.Database.User.UserRecord;
 import com.jami.Database.User.UserSettings;
-import com.jami.Database.repositories.GuildRepo;
-import com.jami.Database.repositories.UserRepo;
+import com.jami.Database.infrastructure.mongo.Mongo;
+import com.jami.Database.infrastructure.mongo.MongoGuildRepo;
+import com.jami.Database.infrastructure.mongo.MongoUserRepo;
 import com.jami.Interaction.Fun.Levelling.CommandsLevelling;
 import com.jami.Interaction.Fun.Levelling.Levelling;
 import com.jami.Interaction.Fun.WordCount.CommandsWordCount;
@@ -65,54 +67,55 @@ public class EventListeners {
       return;
     }
 
-    if (m.startsWith("a!") && App.getGlobalConfig().getAdminIds().contains(u.getIdLong())) {
-      CommandsAdmin.adminCommands(event, null);
+    ConfigRecord globalConfig = Mongo.getGlobalConfig();
+
+    if (m.startsWith("a!") && globalConfig.getAdminIds().contains(u.getIdLong())) {
+      Admin.adminCommands(event, null);
       return;
     }
 
-    UserRecord userRecord = UserRepo.getById(u.getIdLong());
+    UserRecord userRecord = Mongo.getUserRepo().getById(u.getIdLong());
     UserSettings userSettings = userRecord.getSettings();
-    GuildRecord guildRecord = GuildRepo.getById(g.getIdLong());
+    GuildRecord guildRecord = Mongo.getGuildRepo().getById(g.getIdLong());
     GuildSettings guildSettings = guildRecord.getSettings();
 
     List<List<Feature>> disabledFeaturesLists = new ArrayList<>();
-    disabledFeaturesLists.add(App.getGlobalConfig().getDisabledFeatures());
+    disabledFeaturesLists.add(globalConfig.getDisabledFeatures());
     disabledFeaturesLists.add(userSettings.getDisabledFeatures());
     disabledFeaturesLists.add(guildSettings.getDisabledFeatures());
 
     // Levelling
-    if (checkDisabled(disabledFeaturesLists, Feature.LEVELLING)) {
+    if (!isDisabled(disabledFeaturesLists, Feature.LEVELLING)) {
       Levelling.incrementExps(event, userRecord, guildSettings.getLevellingSettings());
     }
 
     // WordCount
-    if (checkDisabled(disabledFeaturesLists, Feature.WORDS)
-        && !guildSettings.getWordsDisabledChannels().contains(c.getIdLong())) {
+    boolean channelDisabled = guildSettings.getWordsDisabledChannels().contains(c.getIdLong());
+    if (!isDisabled(disabledFeaturesLists, Feature.WORDS) && !channelDisabled) {
       WordCount.incrementWords(m, g.getIdLong());
     }
 
     // Message Logging
-    if (checkDisabled(disabledFeaturesLists, Feature.LOGGING)) {
+    if (!isDisabled(disabledFeaturesLists, Feature.LOGGING)) {
       Logging.cacheMessage(event);
     }
 
     System.out.println(guildSettings.getCountingSettings().getChannelId());
 
     // Counting
-    if (checkDisabled(disabledFeaturesLists, Feature.COUNTING)
-        && guildSettings.getCountingSettings().getChannelId() == c.getIdLong()) {
+    if (!isDisabled(disabledFeaturesLists, Feature.COUNTING) &&  guildSettings.getCountingSettings().channelMatches(c.getIdLong())) {
       Counting.newCount(event, guildRecord);
     }
 
   }
 
-  private boolean checkDisabled(List<List<Feature>> lists, Feature feature) {
+  private boolean isDisabled(List<List<Feature>> lists, Feature feature) {
     for (List<Feature> list : lists) {
       if (list.contains(feature)) {
-        return false;
+        return true;
       }
     }
-    return true;
+    return false;
   }
 
 }

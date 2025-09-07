@@ -3,7 +3,7 @@ package com.jami.Interaction.Utilities.FeatureRequests;
 import java.util.concurrent.TimeUnit;
 
 import com.jami.App;
-import com.jami.Database.repositories.FeatureRequestRepo;
+import com.jami.Database.infrastructure.mongo.MongoFeatureRequestRepo;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
@@ -40,7 +40,7 @@ public class commandsFeatureRequests {
                                         String d = e.getValue("description").getAsString();
                                         String un = e.getUser().getName();
                                         long ui = e.getUser().getIdLong();
-                                        String reqId = FeatureRequestRepo.createRequest(
+                                        String reqId = MongoFeatureRequestRepo.createRequest(
                                                         t, d, un, ui);
                                         EmbedBuilder embed = new EmbedBuilder()
                                                         .setTitle(t)

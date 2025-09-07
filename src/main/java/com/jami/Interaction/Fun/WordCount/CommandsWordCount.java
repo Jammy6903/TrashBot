@@ -11,9 +11,9 @@ import com.jami.Database.Config.ConfigRecord;
 import com.jami.Database.Fun.WordRecord;
 import com.jami.Database.Guild.GuildRecord;
 import com.jami.Database.Guild.GuildWordRecord;
-import com.jami.Database.repositories.GuildRepo;
-import com.jami.Database.repositories.WordRepo;
-import com.jami.JDA.Wiktionary;
+import com.jami.Database.infrastructure.mongo.MongoGuildRepo;
+import com.jami.Database.infrastructure.mongo.MongoWordRepo;
+import com.jami.bot.Wiktionary;
 
 import de.tudarmstadt.ukp.jwktl.JWKTL;
 import de.tudarmstadt.ukp.jwktl.api.IWiktionaryEdition;
@@ -55,11 +55,11 @@ public class CommandsWordCount {
     EmbedBuilder embed;
 
     if (global) {
-      embed = globalWordInfo(WordRepo.getByWord(word), getDefinitions(word));
+      embed = globalWordInfo(MongoWordRepo.getByWord(word), getDefinitions(word));
     } else {
       long guildId = event.getGuild().getIdLong();
-      GuildRecord guildRecord = GuildRepo.getById(guildId);
-      GuildWordRecord wordRecord = GuildRepo.getGuildWordByWord(guildId, word);
+      GuildRecord guildRecord = MongoGuildRepo.getById(guildId);
+      GuildWordRecord wordRecord = MongoGuildRepo.getGuildWordByWord(guildId, word);
       String guildName = event.getGuild().getName();
       embed = guildWordInfo(guildRecord, guildName, wordRecord, getDefinitions(word));
     }
@@ -146,12 +146,12 @@ public class CommandsWordCount {
     EmbedBuilder embed;
 
     if (global) {
-      embed = generateGlobalLeaderboard(WordRepo.getWords(10, page, order, reverse));
+      embed = generateGlobalLeaderboard(MongoWordRepo.getWords(10, page, order, reverse));
     } else {
       long guildId = event.getGuild().getIdLong();
-      GuildRecord guildRecord = GuildRepo.getById(guildId);
+      GuildRecord guildRecord = MongoGuildRepo.getById(guildId);
       String guildName = event.getGuild().getName();
-      embed = generateGuildLeaderboard(guildRecord, guildName, GuildRepo.getWords(guildId, 10, page, order, reverse));
+      embed = generateGuildLeaderboard(guildRecord, guildName, MongoGuildRepo.getWords(guildId, 10, page, order, reverse));
     }
 
     event.replyEmbeds(embed.build()).queue();

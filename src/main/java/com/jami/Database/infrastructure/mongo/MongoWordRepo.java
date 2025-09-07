@@ -1,4 +1,4 @@
-package com.jami.Database.repositories;
+package com.jami.Database.infrastructure.mongo;
 
 import static com.mongodb.client.model.Filters.eq;
 
@@ -8,13 +8,11 @@ import java.util.Set;
 
 import org.bson.types.ObjectId;
 
-import com.jami.App;
 import com.jami.Database.Fun.WordRecord;
+import com.jami.Database.repository.WordRepo;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.FindOneAndUpdateOptions;
-import com.mongodb.client.model.IndexOptions;
-import com.mongodb.client.model.Indexes;
 import com.mongodb.client.model.ReplaceOptions;
 import com.mongodb.client.model.ReturnDocument;
 import com.mongodb.client.model.UpdateOptions;
@@ -23,24 +21,26 @@ import com.mongodb.client.model.Updates;
 import static com.mongodb.client.model.Updates.*;
 import static com.mongodb.client.model.Sorts.*;
 
-public class WordRepo {
-  private static final MongoCollection<WordRecord> words = App.getDatabase().getCollection("WORDS", WordRecord.class);
+public class MongoWordRepo implements WordRepo {
 
   private static final UpdateOptions UPSERT = new UpdateOptions().upsert(true);
   private static final ReplaceOptions REPLACE_UPSERT = new ReplaceOptions().upsert(true);
   private static final FindOneAndUpdateOptions RETURN_UPSERT = new FindOneAndUpdateOptions().upsert(true)
       .returnDocument(ReturnDocument.AFTER);
 
-  public static void ensureIndexes() {
-    words.createIndex(Indexes.ascending("word"), new IndexOptions().unique(true));
-    words.createIndex(Indexes.descending("word"));
+  private MongoCollection<WordRecord> words;
+
+  public MongoWordRepo() {
+    this.words = Mongo.getDatabase().getCollection("WORDS", WordRecord.class);
   }
 
-  public static WordRecord getById(String id) {
+  @Override
+  public WordRecord getById(String id) {
     return words.find(eq("_id", new ObjectId(id))).first();
   }
 
-  public static WordRecord getByWord(String word) {
+  @Override
+  public WordRecord getByWord(String word) {
     return words.findOneAndUpdate(eq("word", word),
         combine(setOnInsert("firstUse", System.currentTimeMillis()),
             setOnInsert("_id", new ObjectId()),
@@ -48,7 +48,8 @@ public class WordRepo {
         RETURN_UPSERT);
   }
 
-  public static List<WordRecord> getWords(int amount, int page, String order, boolean reverseOrder) {
+  @Override
+  public List<WordRecord> getWords(int amount, int page, String order, boolean reverseOrder) {
     Set<String> allowed = Set.of("word", "count", "firstUse");
     String key = allowed.contains(order) ? order : "count";
 
@@ -68,13 +69,15 @@ public class WordRepo {
     }
   }
 
-  public static void incrementWord(String word) {
+  @Override
+  public void incrementWord(String word) {
     words.updateOne(eq("word", word),
         Updates.combine(Updates.inc("count", 1), Updates.setOnInsert("firstUse", System.currentTimeMillis())),
         UPSERT);
   }
 
-  public static void save(WordRecord record) {
+  @Override
+  public void save(WordRecord record) {
     words.replaceOne(eq("_id", record.getId()), record, REPLACE_UPSERT);
   }
 

@@ -31,7 +31,7 @@ import com.jami.Database.Enumerators.LogType;
 import com.jami.Database.Guild.GuildRecord;
 import com.jami.Database.Guild.guildSettings.GuildSettings;
 import com.jami.Database.Guild.guildSettings.LoggingChannel.LoggingChannel;
-import com.jami.Database.repositories.GuildRepo;
+import com.jami.Database.infrastructure.mongo.MongoGuildRepo;
 
 public class Logging {
 
@@ -40,7 +40,7 @@ public class Logging {
       .build();
 
   public void sendLogEntry(LogType type, Guild guild, MessageEmbed content) {
-    GuildRecord g = GuildRepo.getById(guild.getIdLong());
+    GuildRecord g = MongoGuildRepo.getById(guild.getIdLong());
     GuildSettings gs = g.getSettings();
     if (gs.getDisabledFeatures().contains(Feature.LOGGING)
         || App.getGlobalConfig().getDisabledFeatures().contains(Feature.LOGGING)) {
@@ -185,7 +185,7 @@ public class Logging {
 
     ByteArrayInputStream inputStream = new ByteArrayInputStream(file.getBytes(StandardCharsets.UTF_8));
 
-    GuildRecord guildRecord = GuildRepo.getById(event.getGuild().getIdLong());
+    GuildRecord guildRecord = MongoGuildRepo.getById(event.getGuild().getIdLong());
     List<LoggingChannel> channels = guildRecord.getSettings().getLoggingChannelsByLogType(LogType.MESSAGE_DELETED);
 
     if (channels.size() == 0) {

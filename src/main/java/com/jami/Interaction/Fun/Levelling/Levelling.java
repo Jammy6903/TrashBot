@@ -7,8 +7,8 @@ import com.jami.Database.Config.LevellingConfig.LevellingConfig;
 import com.jami.Database.Guild.GuildUserRecord;
 import com.jami.Database.Guild.guildSettings.LevellingSettings.LevellingSettings;
 import com.jami.Database.User.UserRecord;
-import com.jami.Database.repositories.GuildRepo;
-import com.jami.Database.repositories.UserRepo;
+import com.jami.Database.infrastructure.mongo.MongoGuildRepo;
+import com.jami.Database.infrastructure.mongo.MongoUserRepo;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -19,7 +19,7 @@ public class Levelling {
     long guildId = event.getGuild().getIdLong();
     long userId = event.getAuthor().getIdLong();
     LevellingConfig globalLevellingSettings = App.getGlobalConfig().getLevellingConfig();
-    GuildUserRecord guildUserRecord = GuildRepo.getUserById(guildId, userId);
+    GuildUserRecord guildUserRecord = MongoGuildRepo.getUserById(guildId, userId);
 
     global(globalLevellingSettings, userRecord, userId);
 
@@ -37,10 +37,10 @@ public class Levelling {
     }
 
     int inc = variate(config.getExpIncrement(), config.getExpVariation());
-    UserRepo.incrementExp(userId, inc);
+    MongoUserRepo.incrementExp(userId, inc);
     if (user.getUserExp() + inc >= getRequiredExp(user.getUserLevel(), config.getLevelBase(),
         config.getLevelGrowth())) {
-      UserRepo.incrementLevel(userId);
+      MongoUserRepo.incrementLevel(userId);
     }
   }
 
@@ -50,9 +50,9 @@ public class Levelling {
     }
 
     int inc = variate(settings.getExpIncrement(), settings.getExpVariation());
-    GuildRepo.incrementExp(guildId, userId, inc);
+    MongoGuildRepo.incrementExp(guildId, userId, inc);
     if (user.getExp() + inc >= getRequiredExp(user.getLevel(), settings.getLevelBase(), settings.getLevelGrowth())) {
-      GuildRepo.incrementLevel(guildId, userId);
+      MongoGuildRepo.incrementLevel(guildId, userId);
       return true;
     }
     return false;

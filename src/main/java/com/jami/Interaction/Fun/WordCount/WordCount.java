@@ -4,15 +4,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
-import com.jami.Database.repositories.GuildRepo;
-import com.jami.Database.repositories.WordRepo;
+import com.jami.Database.infrastructure.mongo.MongoGuildRepo;
+import com.jami.Database.infrastructure.mongo.MongoWordRepo;
+
 
 public class WordCount {
   public static void incrementWords(String message, long guildId) {
     ArrayList<String> words = getWords(message);
     for (String word : words) {
-      WordRepo.incrementWord(word);
-      GuildRepo.incrementWord(guildId, word);
+      MongoWordRepo.incrementWord(word);
+      MongoGuildRepo.incrementWord(guildId, word);
     }
   }
 

@@ -9,6 +9,9 @@ public class Counting {
   @BsonProperty("currentNumber")
   private long currentNumber = 0;
 
+  @BsonProperty("currentNumberUser")
+  private Long currentNumberUser;
+
   @BsonProperty("highestNumber")
   private long highestNumber = 0;
 
@@ -26,6 +29,16 @@ public class Counting {
 
   public long getCurrentNumber() {
     return currentNumber;
+  }
+
+  // currentNumberUser
+
+  public void setCurrentNumberUser(Long userId) {
+    this.currentNumberUser = userId;
+  }
+
+  public Long getCurrentNumberUser() {
+    return currentNumberUser;
   }
 
   // highestNumber

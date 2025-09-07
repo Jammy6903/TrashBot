@@ -8,7 +8,7 @@ import com.jami.Database.Guild.GuildRecord;
 import com.jami.Database.Guild.GuildUserRecord;
 import com.jami.Database.Guild.guildSettings.GuildSettings;
 import com.jami.Database.Guild.guildSettings.LevellingSettings.LevellingSettings;
-import com.jami.Database.repositories.GuildRepo;
+import com.jami.Database.infrastructure.mongo.MongoGuildRepo;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.User;
@@ -20,7 +20,7 @@ public class CommandsLevelling {
   public static void levellingCommands(SlashCommandInteractionEvent event) {
     long guildId = event.getGuild().getIdLong();
 
-    GuildRecord guild = GuildRepo.getById(guildId);
+    GuildRecord guild = MongoGuildRepo.getById(guildId);
     GuildSettings guildSettings = guild.getSettings();
     LevellingSettings levellingSettings = guildSettings.getLevellingSettings();
 
@@ -30,7 +30,7 @@ public class CommandsLevelling {
         if (event.getOption("user") != null) {
           userId = event.getOption("user").getAsUser().getIdLong();
         }
-        GuildUserRecord guildUser = GuildRepo.getUserById(guildId, userId);
+        GuildUserRecord guildUser = MongoGuildRepo.getUserById(guildId, userId);
         event.replyEmbeds(generateLevelCard(event.getGuild().getMemberById(userId).getUser(),
             guildUser.getLevel(), guildUser.getExp(), Levelling.getRequiredExp(guildUser.getLevel(),
                 levellingSettings.getLevelBase(), levellingSettings.getLevelGrowth()))

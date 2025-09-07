@@ -28,6 +28,10 @@ public class CountingSettings {
     return channelId;
   }
 
+  public boolean channelMatches(Long id) {
+    return channelId != null && channelId.equals(id);
+  }
+
   // allowMultiPost
 
   public void setAllowMultiPost(boolean b) {

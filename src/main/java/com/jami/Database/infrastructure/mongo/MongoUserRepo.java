@@ -1,34 +1,33 @@
-package com.jami.Database.repositories;
+package com.jami.Database.infrastructure.mongo;
 
 import static com.mongodb.client.model.Updates.*;
 
 import static com.mongodb.client.model.Filters.eq;
 
-import com.jami.App;
 import com.jami.Database.User.UserRecord;
 import com.jami.Database.User.UserSettings;
+import com.jami.Database.repository.UserRepo;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.FindOneAndUpdateOptions;
-import com.mongodb.client.model.Indexes;
 import com.mongodb.client.model.ReplaceOptions;
 import com.mongodb.client.model.ReturnDocument;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.model.Updates;
 
-public class UserRepo {
-  private static final MongoCollection<UserRecord> users = App.getDatabase().getCollection("USERS", UserRecord.class);
-
+public class MongoUserRepo implements UserRepo {
   private static final UpdateOptions UPSERT = new UpdateOptions().upsert(true);
   private static final ReplaceOptions REPLACE_UPSERT = new ReplaceOptions().upsert(true);
   private static final FindOneAndUpdateOptions RETURN_UPSERT = new FindOneAndUpdateOptions().upsert(true)
       .returnDocument(ReturnDocument.AFTER);
 
-  public static void ensureIndexes() {
-    users.createIndex(Indexes.ascending("userExp"));
-    users.createIndex(Indexes.descending("userExp"));
+  private MongoCollection<UserRecord> users;
+
+  public MongoUserRepo() {
+    this.users = Mongo.getDatabase().getCollection("USERS", UserRecord.class);
   }
 
-  public static UserRecord getById(long userId) {
+  @Override
+  public UserRecord getById(long userId) {
     return users.findOneAndUpdate(eq("_id", userId),
         combine(
             setOnInsert("userExp", 0L),
@@ -39,11 +38,13 @@ public class UserRepo {
         RETURN_UPSERT);
   }
 
-  public static void updateLastMessage(long id) {
+  @Override
+  public void updateLastMessage(long id) {
     users.updateOne(eq("_id", id), set("userLastMessage", System.currentTimeMillis()));
   }
 
-  public static void incrementExp(long id, int exp) {
+  @Override
+  public void incrementExp(long id, int exp) {
     users.updateOne(eq("_id", id),
         combine(
             inc("userExp", exp),
@@ -54,11 +55,13 @@ public class UserRepo {
         UPSERT);
   }
 
-  public static void incrementLevel(long id) {
+  @Override
+  public void incrementLevel(long id) {
     users.updateOne(eq("_id", id), Updates.inc("userLevel", 1));
   }
 
-  public static void save(UserRecord record) {
+  @Override
+  public void save(UserRecord record) {
     users.replaceOne(eq("_id", record.getUserId()), record, REPLACE_UPSERT);
   }
 }

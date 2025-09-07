@@ -10,15 +10,17 @@ import com.jami.Database.Config.BotColors.BotColors;
 import com.jami.Database.Config.LevellingConfig.LevellingConfig;
 import com.jami.Database.Enumerators.Command;
 import com.jami.Database.Enumerators.Feature;
-import com.jami.Database.repositories.ConfigRepo;
-import com.jami.JDA.Wiktionary;
+import com.jami.Database.infrastructure.mongo.Mongo;
+import com.jami.Database.infrastructure.mongo.MongoConfigRepo;
+import com.jami.bot.Wiktionary;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
-public class CommandsAdmin {
-  private static ConfigRecord globalConfig = App.getGlobalConfig();
+public class Admin {
+
+  private static ConfigRecord globalConfig = Mongo.getGlobalConfig();
 
   public static void adminCommands(MessageReceivedEvent event, String command) {
     List<String> args;
@@ -118,7 +120,7 @@ public class CommandsAdmin {
     if (args.size() == 1) {
       return "**Command Usage:** a!create-config <configName>";
     }
-    ConfigRepo.create(args.get(1));
+    MongoConfigRepo.create(args.get(1));
     return String.format("Config \"%s\" created.", args.get(1));
   }
 
@@ -128,7 +130,7 @@ public class CommandsAdmin {
     }
     App.getProps().setProperty("CURRENT_CONFIG", args.get(1));
     App.saveProps();
-    App.setGlobalConfig(ConfigRepo.getByName(args.get(1)));
+    App.setGlobalConfig(MongoConfigRepo.getByName(args.get(1)));
     return "Config set to " + args.get(1);
   }
 
@@ -136,12 +138,12 @@ public class CommandsAdmin {
     if (args.size() == 1) {
       return "**Command Usage:** a!load-config <configName>";
     }
-    App.setGlobalConfig(ConfigRepo.getByName(args.get(1)));
+    App.setGlobalConfig(MongoConfigRepo.getByName(args.get(1)));
     return "Config " + args.get(1) + " loaded";
   }
 
   private static String saveConfig() {
-    ConfigRepo.save(globalConfig);
+    MongoConfigRepo.save(globalConfig);
     return "Config " + globalConfig.getConfigName() + " saved";
   }
 

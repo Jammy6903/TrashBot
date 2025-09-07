@@ -1,4 +1,4 @@
-package com.jami.JDA;
+package com.jami.bot;
 
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.interactions.InteractionContextType;
